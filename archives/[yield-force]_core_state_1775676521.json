@@ -1,0 +1,20 @@
+{
+  "governor_state": {
+    "document_title": "project",
+    "parts": [
+      {
+        "title": "Core Architecture",
+        "chapters": [
+          {
+            "title": "Overview",
+            "content": "$E=mc^2$"
+          }
+        ]
+      }
+    ]
+  },
+  "governor_meta": {
+    "todo_list": [],
+    "next_objectives": []
+  }
+}

@@ -6,14 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Context Hub</title>
     <link rel="icon" href="./yf-avatar.png">
+    
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* ARCHITECTURAL HOTFIX: Hide KaTeX accessibility text exposed by Tailwind */
+        .katex-mathml { display: none !important; }
     </style>
 </head>
 
@@ -114,7 +123,16 @@
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Core Architecture JSON</h3>
                 <button onclick="commit('core')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save State</button>
             </div>
-            <textarea id="core-editor" oninput="renderPreview()" class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
+            
+            <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg mb-2 text-center">
+                <p class="text-xs text-indigo-300 font-bold mb-2">JSON Editing is Deprecated.</p>
+                <p class="text-[10px] text-indigo-400">Please use the Markdown Editor in the main window to edit your Blueprint.</p>
+            </div>
+
+            <details class="group">
+                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none">Advanced: View Raw JSON Data</summary>
+                <textarea id="core-editor" oninput="renderPreviewFromJSON()" class="mt-2 w-full h-[300px] bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
+            </details>
         </div>
 
         <div id="tab-content-tenant" class="hidden flex-1 flex-col space-y-2">
@@ -192,11 +210,23 @@
         </div>
     </div>
 
-    <main class="h-[calc(100vh-57px)] overflow-y-auto bg-white custom-scrollbar flex">
-        <div class="w-full max-w-5xl p-12 md:p-16 mx-auto">
-            <div id="markdown-container" class="prose prose-slate max-w-none">
+    <main class="h-[calc(100vh-57px)] overflow-y-auto bg-slate-50 custom-scrollbar flex relative">
+        
+        <div class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
+            
+            <div class="absolute top-8 right-8 z-30 transition-opacity duration-300">
+                <button id="md-toggle-btn" onclick="toggleMarkdownMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <span id="md-toggle-text">Edit Blueprint</span>
+                </button>
+            </div>
+
+            <div id="markdown-container" class="prose prose-slate max-w-none block mt-6">
                 <div class="animate-pulse text-slate-400">Select workspace and load state...</div>
             </div>
+
+            <textarea id="markdown-editor" class="hidden w-full h-[calc(100vh-200px)] mt-6 bg-slate-50 text-slate-800 font-mono text-sm p-8 rounded-xl border-2 border-indigo-100 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none" placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
+            
         </div>
     </main>
 
@@ -282,89 +312,26 @@
     </div>
 
     <div id="ops-manual-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto">
-            <h3 class="text-white font-black text-2xl uppercase tracking-widest text-indigo-400 mb-6 border-b border-slate-800 pb-4">Hub Operations Manual</h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-300 prose-sm">
-                
-                <div class="space-y-6">
-                    <h4 class="text-indigo-400 uppercase tracking-wider text-sm font-bold border-b border-slate-700 pb-2">Part I: Core Features</h4>
-                    
-                    <div>
-                        <strong class="text-white">What is the Context Hub?</strong>
-                        <p class="mt-1">The Hub is an "air-gapped" memory manager for Large Language Models (LLMs). Instead of relying on an AI's volatile chat history, the Hub stores your project's rigid architectural rules, JSON blueprints, and code structures locally, allowing you to inject perfect context into any AI window at any time.</p>
-                    </div>
-
-                    <div>
-                        <strong class="text-white">The State Engine (JSON)</strong>
-                        <p class="mt-1">The <code>Blueprint</code> and <code>Envs</code> tabs hold your project's JSON schemas. This represents the absolute truth of your application's architecture. It is saved in isolated Hub Workspaces on your local machine.</p>
-                    </div>
-
-                    <div>
-                        <strong class="text-white">The ADR Ledger</strong>
-                        <p class="mt-1">Architecture Decision Records (ADRs) are the laws the AI must follow (e.g., "Always use Tailwind, never use raw CSS"). They are saved in the <code>ADRs</code> tab and automatically injected into every Handover Payload so the AI never disobeys your rules.</p>
-                    </div>
-
-                    <div>
-                        <strong class="text-white">The SudoLang Payload</strong>
-                        <p class="mt-1">Clicking <span class="bg-slate-800 text-[10px] px-2 py-1 rounded text-white">Copy SudoLang Payload</span> triggers the Hub's compiler. It grabs your JSON, your ADRs, your prompt rules, your local codebase tree, and your objectives, and perfectly packages them into a single clipboard prompt ready to initialize the AI.</p>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <h4 class="text-indigo-400 uppercase tracking-wider text-sm font-bold border-b border-slate-700 pb-2">Part II: Key Procedures</h4>
-                    
-                    <div>
-                        <strong class="text-white text-xs uppercase tracking-wider text-emerald-400">1. Creating & Switching Workspaces</strong>
-                        <p class="mt-1">The box in the top-left is a dynamic workspace generator.</p>
-                        <ul class="list-disc pl-4 space-y-1 mt-1 text-[11px]">
-                            <li><strong>To Create:</strong> Type a new project name (e.g., <code>omega-protocol</code>) and hit <strong>Load / Create</strong>. The Hub instantly builds an isolated memory folder for it.</li>
-                            <li><strong>To Switch:</strong> Just type an existing workspace name and hit Load.</li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <strong class="text-white text-xs uppercase tracking-wider text-emerald-400">2. Linking Source Code</strong>
-                        <p class="mt-1">To allow the AI to "see" your real code during Handover:</p>
-                        <ul class="list-disc pl-4 space-y-1 mt-1 text-[11px]">
-                            <li>Click the <strong>⚙️ Tools</strong> menu -> <strong>🔗 Link Source Code</strong>.</li>
-                            <li><strong>Pro Tip:</strong> Drag and drop your real project folder directly from your OS into the input box to auto-fill the path.</li>
-                            <li>Click Generate. The Hub will now auto-scan this folder tree whenever you generate a Handover payload.</li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <strong class="text-white text-xs uppercase tracking-wider text-emerald-400">3. The Context Cycle (Executing & Saving)</strong>
-                        <p class="mt-1">The primary workflow for developing with the AI:</p>
-                        <ol class="list-decimal pl-4 space-y-1 mt-1 text-[11px]">
-                            <li><strong>Compile:</strong> Click <span class="bg-slate-800 text-[9px] px-1 rounded text-white">Copy SudoLang Payload</span> and paste it into a fresh AI chat window.</li>
-                            <li><strong>Govern:</strong> When an architectural decision is made during the chat, click <span class="bg-indigo-900 text-indigo-200 text-[9px] px-1 rounded">+ Quick ADR</span> to log it immediately. (You can paste multiple ADRs from the AI into the Smart Import box to step through and save them).</li>
-                            <li><strong>Wrap-Up:</strong> At the end of the session, type <code>/WRAPUP</code> in the AI chat. Paste the AI's changelog/objectives into the <em>Session</em> tab, paste the updated JSON into the <em>Blueprint</em> tab, and hit <strong>Save State</strong>.</li>
-                        </ol>
-                    </div>
-
-                    <div>
-                        <strong class="text-white text-xs uppercase tracking-wider text-emerald-400">4. Linting SudoLang Rules</strong>
-                        <p class="mt-1">Ensure your SudoLang system rules remain pure and declarative:</p>
-                        <ul class="list-disc pl-4 space-y-1 mt-1 text-[11px]">
-                            <li>Open the <strong>Prompts</strong> tab. Click <span class="bg-indigo-600 text-white px-1 rounded text-[9px]">✨ Lint Code</span> to copy your rules wrapped in a Master Linter Prompt.</li>
-                            <li>Paste into an AI. Copy the rewritten result back into the Hub.</li>
-                        </ul>
-                    </div>
-
-                </div>
+        <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4 shrink-0">
+                <h3 class="text-white font-black text-2xl uppercase tracking-widest text-indigo-400">Hub Operations Manual</h3>
+                <button onclick="toggleOpsManual()" class="text-slate-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-
-            <button onclick="toggleOpsManual()" class="mt-10 w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-lg transition border border-slate-600">
-                Close Manual
-            </button>
+            <div id="ops-manual-content" class="prose prose-invert prose-sm max-w-none text-slate-300 overflow-y-auto custom-scrollbar pr-4 pb-4">
+                <div class="animate-pulse text-slate-500">Loading manual...</div>
+            </div>
+            <button onclick="toggleOpsManual()" class="mt-6 shrink-0 w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-lg transition border border-slate-600">Close Manual</button>
         </div>
     </div>
 
     <div id="toast-container"></div>
 
     <script>
+        // GLOBALS
         const markdownContainer = document.getElementById('markdown-container');
+        const markdownEditor = document.getElementById('markdown-editor');
         const stateDrawer = document.getElementById('state-drawer');
         const coreEditor = document.getElementById('core-editor');
         const tenantEditor = document.getElementById('tenant-editor');
@@ -374,6 +341,7 @@
         let currentEditId = null;
         let adrCache = [];
         let ACTIVE_PROJECT = 'yield-force';
+        let isEditMode = false;
         
         // Bulk ADR Variables
         let bulkAdrQueue = [];
@@ -388,47 +356,189 @@
         }
 
         // --- MENU & MODAL CONTROLS ---
-        function toggleDrawer() { stateDrawer.classList.toggle('translate-x-full'); }
+        function toggleDrawer() { 
+            stateDrawer.classList.toggle('translate-x-full');
+        }
         
         function toggleDrawerWidth() {
             const btn = document.getElementById('drawer-width-btn');
-            const clearBtn = document.getElementById('clear-prompt-btn'); // Link the clear button
+            const clearBtn = document.getElementById('clear-prompt-btn'); 
             
             const expandIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>`;
             const collapseIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9L4 4m5 5V5m0 4H5m10 6l5 5m-5-5v5m0-5h5M9 15l-5 5m5-5v5m0-5H5m10-6l5-5m-5 5V5m0 4h5"></path></svg>`;
             
             if (stateDrawer.classList.contains('md:w-[450px]')) {
                 stateDrawer.classList.replace('md:w-[450px]', 'md:w-[800px]');
-                btn.innerHTML = collapseIcon;
-                btn.title = "Collapse Drawer";
-                if(clearBtn) clearBtn.classList.remove('hidden'); // Show clear button
+                if(btn) btn.innerHTML = collapseIcon;
+                if(btn) btn.title = "Collapse Drawer";
+                if(clearBtn) clearBtn.classList.remove('hidden'); 
             } else {
                 stateDrawer.classList.replace('md:w-[800px]', 'md:w-[450px]');
-                btn.innerHTML = expandIcon;
-                btn.title = "Expand Drawer";
-                if(clearBtn) clearBtn.classList.add('hidden'); // Hide clear button
+                if(btn) btn.innerHTML = expandIcon;
+                if(btn) btn.title = "Expand Drawer";
+                if(clearBtn) clearBtn.classList.add('hidden'); 
             }
         }
 
-        function toggleOpsManual() { document.getElementById('ops-manual-modal').classList.toggle('hidden'); }
+        async function toggleOpsManual() { 
+            const m = document.getElementById('ops-manual-modal');
+            m.classList.toggle('hidden');
+            
+            if (!m.classList.contains('hidden')) {
+                const container = document.getElementById('ops-manual-content');
+                try {
+                    container.innerHTML = '<div class="animate-pulse text-slate-500">Loading manual...</div>';
+                    const res = await fetch('/api/ops-manual');
+                    const data = await res.json();
+                    
+                    const parsedMarkdown = typeof marked.parse === 'function' ? marked.parse(data.content) : marked(data.content);
+                    container.innerHTML = parsedMarkdown;
+                    
+                    if (window.renderMathInElement) {
+                        renderMathInElement(container, {
+                            delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false} ],
+                            throwOnError : false
+                        });
+                    }
+                } catch (e) {
+                    container.innerHTML = '<p class="text-red-400">Failed to load OPS_MANUAL.md</p>';
+                }
+            }
+        }
+
         function toggleToolsMenu() { document.getElementById('tools-dropdown').classList.toggle('hidden'); }
         
-        window.addEventListener('click', function(e) {
-            if (!document.getElementById('tools-menu-container').contains(e.target)) {
-                document.getElementById('tools-dropdown').classList.add('hidden');
-            }
+        window.addEventListener('click', function(e) { 
+            const container = document.getElementById('tools-menu-container');
+            const dropdown = document.getElementById('tools-dropdown');
+            if (container && dropdown && !container.contains(e.target)) { 
+                dropdown.classList.add('hidden'); 
+            } 
         });
 
-        // STATEFUL LINK MODAL LOGIC
+        // --- MARKDOWN CANVAS LOGIC (V3: STRICT ZERO-GHOSTING) ---
+        function generateMarkdownFromJson(state) {
+            try {
+                const gov = state?.governor_state || {};
+                let mdString = "";
+                
+                if (gov.document_title) mdString += "# " + gov.document_title + "\n\n";
+                if (gov.root_content) mdString += gov.root_content.trim() + "\n\n";
+
+                const partsList = gov.parts || [gov.part_I, gov.part_II, gov.part_III].filter(Boolean);
+
+                partsList.forEach(part => {
+                    if (part.title) mdString += "## " + part.title + "\n\n";
+                    if (part.description) mdString += part.description.trim() + "\n\n";
+                    if (part.chapters) {
+                        part.chapters.forEach(ch => {
+                            if (ch.title) mdString += "### " + ch.title + "\n\n";
+                            if (ch.content) mdString += ch.content.trim() + "\n\n";
+                        });
+                    }
+                });
+                return mdString.trim() || "Start typing your Markdown blueprint here...";
+            } catch(e) { return "# Blueprint parsing error"; }
+        }
+
+        function generateJsonFromMarkdown(md) {
+            const lines = md.split('\n');
+            let state = { governor_state: { document_title: "", root_content: "", parts: [] } };
+            let currentPart = null;
+            let currentChapter = null;
+
+            lines.forEach(line => {
+                if (line.startsWith('# ')) {
+                    state.governor_state.document_title = line.substring(2).trim();
+                } else if (line.startsWith('## ')) {
+                    currentPart = { title: line.substring(3).trim(), description: "", chapters: [] };
+                    state.governor_state.parts.push(currentPart);
+                    currentChapter = null;
+                } else if (line.startsWith('### ')) {
+                    currentChapter = { title: line.substring(4).trim(), content: "" };
+                    if (!currentPart) {
+                        // Invisible container part
+                        currentPart = { title: "", description: "", chapters: [] };
+                        state.governor_state.parts.push(currentPart);
+                    }
+                    currentPart.chapters.push(currentChapter);
+                } else {
+                    if (currentChapter) {
+                        currentChapter.content += line + "\n";
+                    } else if (currentPart) {
+                        currentPart.description += line + "\n";
+                    } else {
+                        state.governor_state.root_content += line + "\n";
+                    }
+                }
+            });
+
+            state.governor_state.root_content = state.governor_state.root_content.trim();
+            state.governor_state.parts.forEach(p => {
+                if(p.description) p.description = p.description.trim();
+                p.chapters.forEach(c => { c.content = c.content.trim(); });
+            });
+
+            return state;
+        }
+
+        function renderPreviewFromJSON() {
+            try {
+                if(!coreEditor || !markdownContainer) return;
+                const state = JSON.parse(coreEditor.value); 
+                const mdString = generateMarkdownFromJson(state);
+                
+                const parsedMarkdown = typeof marked.parse === 'function' ? marked.parse(mdString) : marked(mdString);
+                markdownContainer.innerHTML = parsedMarkdown;
+                
+                if (window.renderMathInElement) {
+                    renderMathInElement(markdownContainer, {
+                        delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false} ],
+                        throwOnError : false
+                    });
+                }
+            } catch (e) { console.log("JSON Parse Error during render."); }
+        }
+
+        async function toggleMarkdownMode() {
+            const btnText = document.getElementById('md-toggle-text');
+            const btnIcon = document.querySelector('#md-toggle-btn svg');
+            
+            if (isEditMode) {
+                try {
+                    const newJson = generateJsonFromMarkdown(markdownEditor.value);
+                    coreEditor.value = JSON.stringify(newJson, null, 2);
+                    await commit('core', true); 
+                    renderPreviewFromJSON();
+                    
+                    markdownEditor.classList.add('hidden');
+                    markdownContainer.classList.remove('hidden');
+                    if(btnText) btnText.innerText = "Edit Blueprint";
+                    if(btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
+                    isEditMode = false;
+                } catch(e) { showToast("Error saving markdown", true); }
+            } else {
+                try {
+                    const state = JSON.parse(coreEditor.value);
+                    markdownEditor.value = generateMarkdownFromJson(state);
+                    markdownContainer.classList.add('hidden');
+                    markdownEditor.classList.remove('hidden');
+                    markdownEditor.focus();
+                    if(btnText) btnText.innerText = "Save & Preview";
+                    if(btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+                    isEditMode = true;
+                } catch(e) { showToast("Error parsing existing JSON", true); }
+            }
+        }
+
+        // --- STATEFUL LINK MODAL LOGIC ---
         async function toggleLinkModal() { 
             const m = document.getElementById('link-codebase-modal'); 
             m.classList.toggle('hidden');
-            
             if(!m.classList.contains('hidden')) {
                 try {
                     const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`);
                     const data = await res.json();
-                    
                     if(data.linkedPath) {
                         document.getElementById('link-unlinked-view').classList.add('hidden');
                         document.getElementById('link-linked-view').classList.remove('hidden');
@@ -447,29 +557,21 @@
             const pathInput = document.getElementById('link-path-input').value.trim();
             if(!pathInput) return showToast("Path required", true);
             try {
-                const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: pathInput })
-                });
-                if(res.ok) {
-                    toggleLinkModal();
-                    document.getElementById('link-path-input').value = "";
-                    showToast("Codebase Successfully Linked!");
-                } else { showToast("Failed to link codebase", true); }
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: pathInput }) });
+                if(res.ok) { toggleLinkModal(); document.getElementById('link-path-input').value = ""; showToast("Codebase Successfully Linked!"); } 
+                else { showToast("Failed to link codebase", true); }
             } catch(err) { showToast("Server Error", true); }
         }
 
         async function unlinkCodebase() {
             try {
                 const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`, { method: 'DELETE' });
-                if(res.ok) {
-                    showToast("Codebase unlinked.");
-                    toggleLinkModal(); 
-                } else {
-                    showToast("Failed to unlink", true);
-                }
+                if(res.ok) { showToast("Codebase unlinked."); toggleLinkModal(); } 
+                else { showToast("Failed to unlink", true); }
             } catch(e) { showToast("Server Error", true); }
         }
 
+        // --- BULK REVIEW STEPPER LOGIC ---
         function toggleQuickAdrModal() { 
             const m = document.getElementById('quick-adr-modal'); 
             m.classList.toggle('hidden');
@@ -484,7 +586,6 @@
             }
         }
 
-        // --- BULK REVIEW STEPPER LOGIC ---
         function handleSmartPaste(e) {
             const val = e.target.value;
             if(!val.includes('Title:') || !val.includes('Friction:')) return;
@@ -503,11 +604,8 @@
                 bulkAdrTotal = bulkAdrQueue.length;
                 e.target.value = ''; 
                 
-                if (bulkAdrTotal > 1) {
-                    showToast(`Queued ${bulkAdrTotal} ADRs for review.`);
-                } else {
-                    showToast("Smart Paste Applied! Review and Commit.");
-                }
+                if (bulkAdrTotal > 1) showToast(`Queued ${bulkAdrTotal} ADRs for review.`);
+                else showToast("Smart Paste Applied! Review and Commit.");
                 loadNextBulkAdr();
             }
         }
@@ -544,33 +642,13 @@
 
         async function submitQuickAdr(e) {
             e.preventDefault();
-            const payload = {
-                scope: document.getElementById('quick-adr-scope').value, 
-                status: document.getElementById('quick-adr-status').value, 
-                title: document.getElementById('quick-adr-title').value,
-                friction: document.getElementById('quick-adr-friction').value, 
-                ruling: document.getElementById('quick-adr-ruling').value, 
-                boundary: document.getElementById('quick-adr-boundary').value
-            };
-            
+            const payload = { scope: document.getElementById('quick-adr-scope').value, status: document.getElementById('quick-adr-status').value, title: document.getElementById('quick-adr-title').value, friction: document.getElementById('quick-adr-friction').value, ruling: document.getElementById('quick-adr-ruling').value, boundary: document.getElementById('quick-adr-boundary').value };
             if (!payload.title || !payload.friction || !payload.ruling) return showToast("Please fill required fields", true);
-            
             try {
-                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
-                });
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (res.ok) { 
-                    if (bulkAdrQueue.length > 0) {
-                        bulkAdrQueue.shift(); 
-                        loadNextBulkAdr();    
-                    } else {
-                        document.getElementById('quick-adr-form').reset(); 
-                        toggleQuickAdrModal(); 
-                        showToast("ADR Saved & Added to Ledger"); 
-                        fetchAdrs(); 
-                    }
+                    if (bulkAdrQueue.length > 0) { bulkAdrQueue.shift(); loadNextBulkAdr(); } 
+                    else { document.getElementById('quick-adr-form').reset(); toggleQuickAdrModal(); showToast("ADR Saved & Added to Ledger"); fetchAdrs(); }
                 }
             } catch (err) { showToast("Save Failed", true); }
         }
@@ -596,17 +674,20 @@
             showToast(`Loading: ${ACTIVE_PROJECT}...`);
             try {
                 const coreRes = await fetch(`/api/${ACTIVE_PROJECT}/state`); const coreData = await coreRes.json();
-                coreEditor.value = Object.keys(coreData).length === 0 ? '{\n  "governor_state": {\n    "document_title": "New Project Blueprint"\n  }\n}' : JSON.stringify(coreData, null, 2);
+                if(coreEditor) coreEditor.value = Object.keys(coreData).length === 0 ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}' : JSON.stringify(coreData, null, 2);
                 
                 const promptRes = await fetch(`/api/${ACTIVE_PROJECT}/prompts`); const promptData = await promptRes.json();
-                promptEditor.value = promptData.raw_sudolang ? promptData.raw_sudolang : (Object.keys(promptData).length === 0 ? "" : JSON.stringify(promptData, null, 2));
+                if(promptEditor) promptEditor.value = promptData.raw_sudolang ? promptData.raw_sudolang : (Object.keys(promptData).length === 0 ? "" : JSON.stringify(promptData, null, 2));
 
                 if(coreData.governor_meta) {
                     document.getElementById('todo-editor').value = (coreData.governor_meta.todo_list || []).join('\n');
                     document.getElementById('objectives-editor').value = (coreData.governor_meta.next_objectives || []).join('\n');
-                } else { document.getElementById('todo-editor').value = ""; document.getElementById('objectives-editor').value = ""; }
+                } else { 
+                    document.getElementById('todo-editor').value = ""; 
+                    document.getElementById('objectives-editor').value = ""; 
+                }
 
-                switchTab('session'); renderPreview(); fetchAdrs();
+                switchTab('session'); renderPreviewFromJSON(); fetchAdrs();
             } catch (err) { showToast("Initialization Failed", true); }
         }
 
@@ -620,7 +701,7 @@
             } catch (err) { showToast("Error loading instance", true); }
         }
 
-        async function commit(type) {
+        async function commit(type, isSilent = false) {
             let endpoint = '', payload = {};
             try {
                 if (type === 'core') {
@@ -637,11 +718,13 @@
                     endpoint = `/api/${ACTIVE_PROJECT}/update-tenant-state/${tid}`; payload = JSON.parse(tenantEditor.value);
                 }
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (res.ok) { if (type === 'core') renderPreview(); showToast("Saved Successfully"); } else showToast("Error saving state", true);
-            } catch (e) { showToast("Syntax Error: Validate JSON", true); }
+                if (res.ok) { 
+                    if (type === 'core' && !isEditMode) renderPreviewFromJSON(); 
+                    if(!isSilent) showToast("Saved Successfully"); 
+                } else { if(!isSilent) showToast("Error saving state", true); }
+            } catch (e) { if(!isSilent) showToast("Syntax Error: Validate JSON", true); }
         }
 
-        // UPDATED FETCH ADRS FOR BETTER READABILITY (WHY / WHAT)
         async function fetchAdrs() {
             const list = document.getElementById('adr-list');
             try {
@@ -652,11 +735,7 @@
                     list.innerHTML += `
                         <div class="p-3 rounded-lg border text-xs space-y-2 shrink-0 ${isArc ? 'bg-black border-slate-800 opacity-60' : 'bg-slate-800/50 border-slate-700'}">
                             <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="font-mono text-indigo-400 font-bold">${adr.id}</span>
-                                    <span class="bg-black px-1 rounded text-slate-500 border border-slate-800 ml-1">${adr.scope}</span>
-                                    ${isArc ? '<span class="text-red-400 ml-1 font-bold">[ARCHIVED]</span>' : ''}
-                                </div>
+                                <div><span class="font-mono text-indigo-400 font-bold">${adr.id}</span><span class="bg-black px-1 rounded text-slate-500 border border-slate-800 ml-1">${adr.scope}</span>${isArc ? '<span class="text-red-400 ml-1 font-bold">[ARCHIVED]</span>' : ''}</div>
                                 <button onclick="editAdr('${adr.id}')" class="text-indigo-400 hover:underline">Edit</button>
                             </div>
                             <h4 class="font-bold text-white uppercase">${adr.title || 'Untitled'}</h4>
@@ -685,25 +764,14 @@
         }
 
         function clearPromptEditor() {
-            if(confirm("Are you sure you want to clear all SudoLang rules? This action cannot be undone unless you have a backup.")) {
-                document.getElementById('prompt-editor').value = '';
-            }
+            if(confirm("Are you sure you want to clear all SudoLang rules? This action cannot be undone unless you have a backup.")) document.getElementById('prompt-editor').value = '';
         }
 
-        // --- PRE-FLIGHT SUDOLANG LINTER LOGIC ---
         function copyLinterPrompt() {
             const currentCode = document.getElementById('prompt-editor').value.trim();
             if (!currentCode) return showToast("Nothing to lint! Add some SudoLang first.", true);
-
             const linterPrompt = `# IdiomaticSudoLinter\n\nRole: Expert SudoLang Purist and Code Evaluator\n\nInterface IdiomaticSudoLinter {\n  State {\n    targetCode: ""\n    purityScore: 0 // 0 to 100\n    violations: []\n    commendations: []\n    rewrittenCode: ""\n  }\n\n  Constraints {\n    Strictly enforce the SudoLang style guide.\n    Code MUST be declarative. Actively reject imperative, step-by-step programming.\n    Code MUST rely on LLM inference. Flag overly explicit or redundant instructions.\n    Code MUST favor composition, state, and constraints over inheritance.\n    Evaluate the \`purityScore\` based strictly on adherence to these principles.\n    EXEMPTION: Do NOT alter, penalize, or remove strict output formatting instructions (e.g., "OutputFormat", "NO JSON"). These are required API boundaries for downstream Regex parsers.\n  }\n\n  AntiPatterns {\n    ("class", "new", "extends", "inherit", "this") => Error: "-10 pts. Not idiomatic. Use Interfaces, State, and Composition."\n    ("for ", "while ", "forEach", "loop") => Error: "-15 pts. Imperative iteration detected. Use declarative constraints or pipeline operators (|>)."\n    ("step 1", "first do", "then do") => Warning: "-5 pts. Too imperative. Describe the desired end-state, do not micromanage the LLM."\n    ("if", "else if") => Warning: "Consider using pattern matching or constraints instead of branching logic."\n  }\n\n  RequiredPatterns {\n    Preamble: "Line 1 MUST be \`#[Program Name]\`. (-5 pts if missing)"\n    Structure: "Idiomatic code usually utilizes \`Interface\`, \`State\`, and \`Constraints\`. (+10 pts if present)"\n    Commands: "Commands should be defined using the \`/command\` syntax. (+5 pts if present)"\n  }\n\n  FormatReport() {\n    Output the \`rewrittenCode\` immediately in a SudoLang code block.\n    Print a visual ASCII art meter representing the \`purityScore\`.\n    List \`violations\` with specific explanations of why they violate SudoLang philosophy.\n    List \`commendations\` praising good use of inference and declarative constraints.\n  }\n\n  /lint [code] {\n    Analyze the provided code against Constraints, AntiPatterns, and RequiredPatterns.\n    Calculate purityScore.\n    Generate a perfectly idiomatic \`rewrittenCode\`.\n    FormatReport().\n  }\n}\n\n*** OPERATOR ACTION REQUIRED ***\nAcknowledge the IdiomaticSudoLinter interface above. Then, immediately execute the \`/lint\` command on the following code:\n\n/lint\n\`\`\`sudolang\n${currentCode}\n\`\`\``;
-
-            const t = document.createElement('textarea');
-            t.value = linterPrompt;
-            document.body.appendChild(t);
-            t.select();
-            document.execCommand('copy');
-            t.remove();
-            showToast("Linter Prompt Copied! Paste into AI.");
+            const t = document.createElement('textarea'); t.value = linterPrompt; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("Linter Prompt Copied! Paste into AI.");
         }
 
         async function copyHandoverPrompt() {
@@ -716,19 +784,17 @@
                 try { tenD = JSON.parse(tenantEditor.value); } catch(e){}
                 try { const pJson = JSON.parse(promptEditor.value); prmD = pJson.raw_sudolang ? pJson.raw_sudolang : JSON.stringify(pJson, null, 2); } catch(e){ prmD = promptEditor.value; }
                 let adrsText = ""; adrCache.filter(a => a.status !== '[ARCHIVED]').forEach(a => { adrsText += `\n    ${a.id}: ${a.title}\n    - Ruling: ${a.ruling}\n    - Boundary: ${a.boundary}\n`; });
-                let cliOut = "None"; try { const cr = await fetch(`/api/${ACTIVE_PROJECT}/run-context`, { method: 'POST' }); if(cr.ok) { const cd = await cr.json(); cliOut = `\n${cd.output}\n`; } } catch(e) {}
+                
+                let cliOut = "None"; 
+                try { const cr = await fetch(`/api/${ACTIVE_PROJECT}/run-context`, { method: 'POST' }); if(cr.ok) { const cd = await cr.json(); cliOut = `\n${cd.output}\n`; } } catch(e) {}
 
-                const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]\n#initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")\n\nSystemState {\n  Workspace: "${ACTIVE_PROJECT}"\n  Phase: "Active Execution"\n  SessionObjectives: [\n${objectivesList}\n  ]\n  SessionChangelog: """\n${changelog}\n  """\n  ActiveADRs: """${adrsText || "None"}  """\n  CodebaseContext: """${cliOut}  """\n  MachineStateJSON: """\n${JSON.stringify({ core: coreD, environment: tenD }, null, 2)}\n  """\n}\n\n// --- CORE SYSTEM RULES & MACROS ---\n${prmD}\n\n// --- INITIALIZATION DIRECTIVE ---\nOperatorActionRequired: "Parse the SystemState and Core Rules above. Acknowledge receipt by confirming your Role and the SessionObjectives, then await my command."`;
+                let opsManualText = "None";
+                try { const opsRes = await fetch('/api/ops-manual'); if(opsRes.ok) { const opsData = await opsRes.json(); opsManualText = opsData.content; } } catch(e) {}
+
+                const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]\n#initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")\n\nSystemState {\n  Workspace: "${ACTIVE_PROJECT}"\n  Phase: "Active Execution"\n  SessionObjectives: [\n${objectivesList}\n  ]\n  SessionChangelog: """\n${changelog}\n  """\n  ActiveADRs: """${adrsText || "None"}  """\n  CodebaseContext: """${cliOut}  """\n  OpsManual: """\n${opsManualText}\n  """\n  MachineStateJSON: """\n${JSON.stringify({ core: coreD, environment: tenD }, null, 2)}\n  """\n}\n\n// --- CORE SYSTEM RULES & MACROS ---\n${prmD}\n\n// --- INITIALIZATION DIRECTIVE ---\nOperatorActionRequired: "Parse the SystemState and Core Rules above. Acknowledge receipt by confirming your Role and the SessionObjectives, then await my command."`;
+                
                 const t = document.createElement('textarea'); t.value = sudoPayload; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("SudoLang Copied to Clipboard!");
             } catch (err) { showToast("Failed to compile payload", true); } finally { setTimeout(() => { btn.innerText = orig; }, 2000); }
-        }
-
-        function renderPreview() {
-            try {
-                const state = JSON.parse(coreEditor.value); let mdString = "# " + (state.governor_state?.document_title || ACTIVE_PROJECT.toUpperCase()) + "\n\n";
-                ['part_I', 'part_II', 'part_III'].forEach(pk => { const part = state.governor_state?.[pk]; if (part && part.chapters) { mdString += "## " + (part.title || pk) + "\n\n"; part.chapters.forEach(ch => { mdString += "### Chapter " + ch.chapter_number + ": " + ch.title + "\n\n" + (ch.content || "") + "\n\n"; }); } });
-                markdownContainer.innerHTML = marked.parse(mdString);
-            } catch (e) {}
         }
 
         window.onload = initWorkspace;

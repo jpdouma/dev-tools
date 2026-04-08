@@ -1,0 +1,21 @@
+{
+  "governor_state": {
+    "document_title": "Project Blueprint",
+    "root_content": "",
+    "parts": [
+      {
+        "title": "Architecture Modules",
+        "chapters": [
+          {
+            "title": "Overview",
+            "content": "$E=mc^2$"
+          }
+        ]
+      }
+    ]
+  },
+  "governor_meta": {
+    "todo_list": [],
+    "next_objectives": []
+  }
+}

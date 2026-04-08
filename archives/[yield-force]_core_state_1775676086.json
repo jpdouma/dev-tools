@@ -1,0 +1,20 @@
+{
+  "governor_state": {
+    "document_title": "New Project Blueprint",
+    "parts": [
+      {
+        "title": "Core Architecture",
+        "chapters": [
+          {
+            "title": "Overview",
+            "content": "###text"
+          }
+        ]
+      }
+    ]
+  },
+  "governor_meta": {
+    "todo_list": [],
+    "next_objectives": []
+  }
+}

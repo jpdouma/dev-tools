@@ -33,3 +33,23 @@ the Smart Import box to review and commit them one-by-one.
 3. **Commit:** Type `/WRAPUP` in the chat. Paste the AI's 
 changelog/objectives into the *Session* tab, paste the JSON into the 
 *Blueprint* tab, and hit **Save State**.
+
+## 5. Rich Media & Math (Images & LaTeX)
+The Hub natively supports local image rendering and complex 
+mathematical formulas in both your Blueprints and this Manual.
+
+**To Embed Images:**
+The Hub acts as a local web server. 
+1. Create an `assets` folder in the same root directory as your 
+`server.js` and `index.html`.
+2. Place your image inside it (e.g., `diagram.png`).
+3. Use standard Markdown anywhere to render it: 
+   `![My Architecture Diagram](./assets/diagram.png)`
+
+**To Render Math (KaTeX):**
+The Hub automatically sweeps your documents for LaTeX formulas and 
+renders them.
+* For inline math, wrap your equation in single dollar signs: 
+`$E=mc^2$`
+* For display/block math, wrap it in double dollar signs: `$$a^2 + b^2 
+= c^2$$`
