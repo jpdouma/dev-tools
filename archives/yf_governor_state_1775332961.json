@@ -1,0 +1,136 @@
+{
+  "governor_meta": {
+    "system": "Yield Force Engine",
+    "last_updated": "2026-04-04",
+    "document_title": "YIELD FORCE: RESULTS ENABLED",
+    "current_phase": "Zone 4: Client Mockup (OEM Dashboard)",
+    "current_state": [
+      "Backend fortified with ajv strict schema validation and dynamic tenant routing.",
+      "Documentation UI finalized with tenant dropdowns, empty-state handling, and clear buttons.",
+      "Codebase export shell script institutionalized as export_context.sh.",
+      "Blueprint JSON schema migrated to comprehensively reflect the 17-chapter structure.",
+      "Server updated with high-fidelity Markdown compiler utility."
+    ],
+    "next_objectives": [
+      "Initialize Zone 3 SQL Foundation (PostgreSQL/JSONB)",
+      "Develop Onboarding Cohort (Architect/Analyst agents)",
+      "Establish Zone 5 Governance Portal bypass feed",
+      "Prototype Operational Squad (Sentinel/Liaison agents)"
+    ]
+  },
+  "reference_vault": {
+    "status": "ACTIVE",
+    "path": "./reference_vault/",
+    "purpose": "Immutable RAG Knowledge Base for Build-Time Agents",
+    "core_artifacts": [
+      "m_grpo_deep_research_2026.md"
+    ]
+  },
+  "blueprint": {
+    "part_I": {
+      "title": "THE CONCEPTUAL BLUEPRINT (DNA)",
+      "chapters": [
+        {
+          "chapter_number": 1,
+          "title": "The M-GRPO Revolution",
+          "content": "The Yield Force engine is powered by Multi-Agent Group Relative Policy Optimization (M-GRPO). This ensures that every sub-agent in the operational squad remains aligned with the Sovereign's intent while maintaining extreme processing velocity.",
+          "media_path": "./YF-multi-agent-blueprint.jpeg",
+          "key_breakthroughs": [
+            "Hierarchical Credit Assignment: Precision reward distribution across agent squads.",
+            "Trajectory-Alignment Scheme: Preserving system stability during agent swaps.",
+            "Decoupled Pipelines: Independent evolution of governance and execution layers."
+          ]
+        },
+        {
+          "chapter_number": 2,
+          "title": "The 5-Zone Pipeline",
+          "content": "Our infrastructure is partitioned into five distinct logical zones to ensure security, compliance, and deterministic outcomes.",
+          "zones": {
+            "zone_1": "The Explore Cluster (Outbound Discovery)",
+            "zone_2": "The Processing Unit (Inbound & Governance)",
+            "zone_3": "The Agnostic Central Datastore (Source of Truth)",
+            "zone_4": "Outcomes & OEM Dashboard (Delivery)",
+            "zone_5": "Strategic Governance Portal (Control)"
+          }
+        },
+        {
+          "chapter_number": 3,
+          "title": "The Mathematical Anchor",
+          "content": "Every action within the fortress is governed by the core reward function. This ensures that accuracy is the primary objective, while format compliance maintains the structural integrity of the machine-to-machine communication.",
+          "equation": "Reward = 0.9 * Accuracy + 0.1 * Format_Reward"
+        },
+        {
+          "chapter_number": 17,
+          "title": "Multi-Tenant Commercial Logic",
+          "content": "Handles commercial extraction and billing logic independent of operational execution.",
+          "sections": [
+            "17.1 The Commercial Injection: Ingests billing_type during Phase 0.",
+            "17.2 The Metadata-Only Push: Asymmetric Sync to Agency Hub.",
+            "17.3 The Kicker Bridge: Triggers billing events upon 'Verified' ledger status."
+          ]
+        }
+      ]
+    },
+    "part_II": {
+      "title": "THE TECHNICAL IMPLEMENTATION",
+      "chapters": [
+        {
+          "chapter_number": 7,
+          "title": "Zone 3 Data Architecture (The SQL Foundation)",
+          "content": "Zone 3 is the immutable Source of Truth. The Universal Agnostic Schema is designed for Normalization-via-JSONB.",
+          "sections": [
+            "7.2 The Outcomes Ledger: Stores final verified results.",
+            "7.4 The Enthusiast Ledger: Logs granular data that builds brand advocacy.",
+            "7.5 Row Level Security (RLS): Enforces digital sovereignty at the database layer."
+          ]
+        },
+        {
+          "chapter_number": 10,
+          "title": "The Onboarding Cohort (The Factory Deep-Dive)",
+          "content": "Build-time agents responsible for 'Digital Excavation.' They translate human intent into the SOUL configuration package.",
+          "agents": [
+            "The Architect: Designs the data schema and safety templates.",
+            "The Tech-Analyst: Maps API endpoints.",
+            "The Compliance-Guardian: Configures the audit triggers.",
+            "The Summarizer: Distills requirements into the System Prompt."
+          ]
+        },
+        {
+          "chapter_number": 11,
+          "title": "The Operational Squad (The Workforce Deep-Dive)",
+          "content": "Persistent, execution-focused agents that live permanently within the 5-Zone Blueprint, synchronized to the M-GRPO reward function.",
+          "agents": [
+            "Trend Hunter & Outreach Scout: Scans Geo-Fences for signals.",
+            "The Liaison: Handles lead nurturing and qualification.",
+            "The Sentinel: Enforces the 0.9/0.1 reward function on every action.",
+            "The Bridge (Native Closer): Writes the final verified transaction to the Datastore."
+          ]
+        }
+      ]
+    },
+    "part_III": {
+      "title": "THE OPERATIONAL MANUAL",
+      "chapters": [
+        {
+          "chapter_number": 13,
+          "title": "The Zone 5 Strategic Governance Portal",
+          "content": "The only window into the engine that truly matters for the executive, powered by a Direct Data Feed Bypass.",
+          "sections": [
+            "Processed Intelligence View: High-level Yield snapshots, sentiment trends, and ROI metrics.",
+            "Raw Terminal View: Real-time, second-by-second 'Thought Stream' of the Liaison and Sentinel."
+          ]
+        },
+        {
+          "chapter_number": 15,
+          "title": "Strategic Recalibration (The Sliders)",
+          "content": "Modify the M-GRPO reward functions in real-time without writing code. You are mathematically re-weighting the Sentinel's audit criteria.",
+          "sliders": [
+            "Aggression: Increases outreach frequency and conversion speed.",
+            "Clinical/Authority: Maximizes Accuracy and factual density.",
+            "Transparency: Increases the verbosity of the Raw Terminal View logs."
+          ]
+        }
+      ]
+    }
+  }
+}
