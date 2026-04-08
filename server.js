@@ -2,311 +2,212 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 const Ajv = require('ajv');
 const ajv = new Ajv();
 
 const app = express();
 const PORT = 4000;
 
-// TARGET PROJECT CONFIGURATION
-// This points the dashboard exactly to your core engine repository
-const TARGET_PROJECT_DIR = path.join(__dirname, '..', 'yield-force'); 
-
-// Target Data Files (Live in the core engine)
-const STATE_FILE = path.join(TARGET_PROJECT_DIR, 
-'yf_governor_state.json');
-const BLUEPRINT_FILE = path.join(TARGET_PROJECT_DIR, 'Yield Force 
-Blueprint-2.md');
-
-// Tooling Local Files (Live in the dev-tools repo)
+// UNIVERSAL WORKSPACE CONFIGURATION
+const WORKSPACES_DIR = path.join(__dirname, 'workspaces');
 const ARCHIVE_DIR = path.join(__dirname, 'archives');
-const ADR_FILE = path.join(__dirname, 'session_adrs.json');
 
-// Initialize ADR storage if not exists
-if (!fs.existsSync(ADR_FILE)) {
-  fs.writeFileSync(ADR_FILE, JSON.stringify([], null, 2), 'utf8');
+if (!fs.existsSync(WORKSPACES_DIR)) fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
+if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR, { recursive: true });
+
+function sanitizeProjectName(project) {
+  if (!project || project.includes('..') || project.includes('/') || project.includes('\\')) {
+    throw new Error("Invalid project name");
+  }
+  return project;
 }
 
-// SCHEMAS
-const coreSchema = {
-  type: "object",
-  properties: {
-    governor_state: { type: "object" },
-    media_mapping: { type: "object" }
-  },
-  required: ["governor_state"],
-  additionalProperties: true
-};
+function getProjectPath(project) {
+  const safeProject = sanitizeProjectName(project);
+  const projectPath = path.join(WORKSPACES_DIR, safeProject);
+  
+  if (!fs.existsSync(projectPath)) {
+    fs.mkdirSync(projectPath, { recursive: true });
+    fs.mkdirSync(path.join(projectPath, 'instances'), { recursive: true });
+  }
+  
+  const adrFile = path.join(projectPath, 'adrs.json');
+  const promptFile = path.join(projectPath, 'system_prompts.json');
+  const scriptFile = path.join(projectPath, '.context_script.sh');
+  
+  if (!fs.existsSync(adrFile)) fs.writeFileSync(adrFile, JSON.stringify([], null, 2), 'utf8');
+  if (!fs.existsSync(promptFile)) fs.writeFileSync(promptFile, JSON.stringify({}, null, 2), 'utf8');
+  if (!fs.existsSync(scriptFile)) fs.writeFileSync(scriptFile, '#!/bin/bash\necho "Codebase not linked. Click Link Source Code in Hub UI."', 'utf8');
 
-const tenantSchema = {
-  type: "object",
-  properties: {
-    tenants: { type: "array" }
-  },
-  required: ["tenants"],
-  additionalProperties: true
-};
+  return projectPath;
+}
 
+const coreSchema = { type: "object", properties: { governor_state: { type: "object" } }, additionalProperties: true };
+const tenantSchema = { type: "object", properties: { tenants: { type: "array" } }, additionalProperties: true };
 const validateCore = ajv.compile(coreSchema);
 const validateTenant = ajv.compile(tenantSchema);
-
-if (!fs.existsSync(ARCHIVE_DIR)) {
-  fs.mkdirSync(ARCHIVE_DIR);
-}
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
 
-function archiveFile(filePath) {
+function archiveFile(filePath, projectName) {
   if (fs.existsSync(filePath)) {
     const timestamp = Math.floor(Date.now() / 1000);
     const ext = path.extname(filePath);
     const base = path.basename(filePath, ext);
-    const archivePath = path.join(ARCHIVE_DIR, 
-`${base}_${timestamp}${ext}`);
-    fs.copyFileSync(filePath, archivePath);
+    fs.copyFileSync(filePath, path.join(ARCHIVE_DIR, `[${projectName}]_${base}_${timestamp}${ext}`));
   }
 }
 
-/**
- * RIGID 100% FIDELITY COMPILER
- */
-function compileBlueprintToMarkdown(governor_state, media_mapping) {
-  let md = "# " + (governor_state.document_title || "YIELD FORCE: 
-SOVEREIGN ARCHITECTURE BLUEPRINT") + "\n\n";
+// ==========================================
+// DYNAMIC UNIVERSAL ROUTES
+// ==========================================
 
-  const partKeys = ['part_I', 'part_II', 'part_III'];
-  partKeys.forEach(partKey => {
-    const part = governor_state[partKey];
-    if (part) {
-      md += `## ${part.title || partKey}\n\n`;
-
-      if (part.chapters && Array.isArray(part.chapters)) {
-        part.chapters.forEach(chapter => {
-          md += `### Chapter ${chapter.chapter_number}: 
-${chapter.title}\n\n`;
-          let content = chapter.content || "";
-
-          content = content.replace(/\[placeholder (.*?)\]/g, (match, 
-key) => 
-            media_mapping && media_mapping[key] ? 
-`![${key}](./assets/${media_mapping[key]})` : match
-          );
-
-          content = content.replace(/```[\s\S]*?```/g, match => 
-            match.split('\n').map(line => line.replace(/^\s+/, 
-'')).join('\n')
-          );
-
-          md += `${content}\n\n`;
-        });
-      }
+// DOCS-AS-CODE ROUTE (NEW)
+app.get('/api/ops-manual', (req, res) => {
+  try {
+    const manualPath = path.join(__dirname, 'OPS_MANUAL.md');
+    if (!fs.existsSync(manualPath)) {
+        return res.json({ content: "# Operations Manual\n\n`OPS_MANUAL.md` not found. Please create one in the root directory alongside `server.js`." });
     }
-  });
-
-  fs.writeFileSync(BLUEPRINT_FILE, md, 'utf8');
-  return md;
-}
-
-// ADR ROUTES
-app.get('/api/adrs', (req, res) => {
-  fs.readFile(ADR_FILE, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    res.json(JSON.parse(data));
-  });
+    const content = fs.readFileSync(manualPath, 'utf8');
+    res.json({ content });
+  } catch(err) { res.status(400).json({ error: err.message }); }
 });
 
-app.post('/api/adrs', (req, res) => {
-  fs.readFile(ADR_FILE, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    const adrs = JSON.parse(data);
-    
-    const nextIdNum = adrs.length + 1;
-    const adrId = `ADR-${nextIdNum.toString().padStart(3, '0')}`;
-    
-    const newAdr = {
-      id: adrId,
-      ...req.body,
-      timestamp: new Date().toISOString()
-    };
-    
-    adrs.push(newAdr);
-    fs.writeFile(ADR_FILE, JSON.stringify(adrs, null, 2), 'utf8', 
-(writeErr) => {
-      if (writeErr) return res.status(500).json({ error: 'Write Error' 
-});
-      res.status(200).json(newAdr);
+// 1. CLI CONTEXT EXECUTOR
+app.post('/api/:project/run-context', (req, res) => {
+  try {
+    const projectPath = getProjectPath(req.params.project);
+    const scriptPath = path.join(projectPath, '.context_script.sh');
+
+    if (!fs.existsSync(scriptPath)) return res.status(404).json({ error: 'Context script not found' });
+
+    exec(`bash "${scriptPath}"`, { cwd: projectPath }, (error, stdout, stderr) => {
+      if (error) return res.status(500).json({ error: error.message, stderr });
+      res.json({ output: stdout });
     });
-  });
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-app.put('/api/adrs/:id', (req, res) => {
-  fs.readFile(ADR_FILE, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    let adrs = JSON.parse(data);
-    const index = adrs.findIndex(a => a.id === req.params.id);
-    
-    if (index === -1) return res.status(404).json({ error: 'ADR not 
-found' });
-    
-    // Maintain ID and Timestamp if not provided in body
-    const updatedAdr = {
-      ...adrs[index],
-      ...req.body,
-      id: req.params.id // Ensure ID remains consistent
-    };
-    
-    adrs[index] = updatedAdr;
-    fs.writeFile(ADR_FILE, JSON.stringify(adrs, null, 2), 'utf8', 
-(writeErr) => {
-      if (writeErr) return res.status(500).json({ error: 'Write Error' 
-});
-      res.status(200).json(updatedAdr);
-    });
-  });
-});
-
-// EXPORT HANDOVER ROUTE
-app.get('/api/export-handover', (req, res) => {
-  if (!fs.existsSync(BLUEPRINT_FILE)) {
-    return res.status(404).json({ error: 'Blueprint Markdown not found' 
-});
-  }
-
-  const blueprint = fs.readFileSync(BLUEPRINT_FILE, 'utf8');
-  const adrData = JSON.parse(fs.readFileSync(ADR_FILE, 'utf8'));
-  
-  // Filter for Active ADRs
-  const activeAdrs = adrData.filter(adr => adr.status === '[ACTIVE]');
-  
-  let exportPayload = blueprint + "\n\n---\n\n# ACTIVE ARCHITECTURE 
-DECISION RECORDS (ADR)\n\n";
-  
-  if (activeAdrs.length > 0) {
-    activeAdrs.forEach(adr => {
-      exportPayload += `## ${adr.id}: ${adr.title || 'Untitled'}\n`;
-      exportPayload += `- **Scope**: ${adr.scope || 'N/A'}\n`;
-      exportPayload += `- **Friction**: ${adr.friction || 'N/A'}\n`;
-      exportPayload += `- **Ruling**: ${adr.ruling || 'N/A'}\n`;
-      exportPayload += `- **Boundary**: ${adr.boundary || 'N/A'}\n\n`;
-    });
-  } else {
-    exportPayload += "_No active ADRs found._\n\n";
-  }
-
-  // House Rules Injection
-  exportPayload += "---\n\n# MANDATORY LLM HOUSE RULES\n";
-  exportPayload += "1. ADR Protocol: After every technical 
-brainstorming loop, you MUST ask the PM if they want an 'ADR 
-Breakdown'. If requested, you must output the Title (omitting the 
-ADR-XXX number). Then, you MUST output the text for Friction, Ruling, 
-and Boundary inside three SEPARATE plain text blocks (markdown code 
-blocks) so the user can easily copy and paste them into their UI fields 
-one by one.\n";
-  exportPayload += "2. Constraint Adherence: You must never suggest 
-code or architecture that violates the Boundaries listed in the Active 
-ADRs.\n";
-
-  res.json({ content: exportPayload });
-});
-
-// BLUEPRINT ROUTE
-app.get('/api/blueprint', (req, res) => {
-  if (!fs.existsSync(BLUEPRINT_FILE)) {
-    return res.status(404).json({ error: 'Blueprint Markdown not found' 
-});
-  }
-  fs.readFile(BLUEPRINT_FILE, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    res.json({ content: data });
-  });
-});
-
-// CORE GOVERNOR STATE ROUTES
-app.get('/api/state', (req, res) => {
-  if (!fs.existsSync(STATE_FILE)) return res.json({});
-  fs.readFile(STATE_FILE, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    res.json(JSON.parse(data));
-  });
-});
-
-app.post('/api/update-state', (req, res) => {
-  const valid = validateCore(req.body);
-  if (!valid) {
-    return res.status(400).json(validateCore.errors);
-  }
-
-  archiveFile(STATE_FILE);
-  fs.writeFile(STATE_FILE, JSON.stringify(req.body, null, 2), 'utf8', 
-(err) => {
-    if (err) return res.status(500).json({ error: 'Write Error' });
-
-    if (req.body.governor_state) {
-      const newMarkdown = 
-compileBlueprintToMarkdown(req.body.governor_state, 
-req.body.media_mapping);
-      fs.writeFile(BLUEPRINT_FILE, newMarkdown, 'utf8', (mdErr) => {
-        if (mdErr) console.error("Markdown compilation failed:", 
-mdErr);
-      });
+// 1.5 AUTO-LINK CODEBASE ENGINE (STATEFUL)
+app.get('/api/:project/link-codebase', (req, res) => {
+  try {
+    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
+    let linkedPath = null;
+    if (fs.existsSync(scriptPath)) {
+        const content = fs.readFileSync(scriptPath, 'utf8');
+        const match = content.match(/TARGET="(.*?)"/);
+        if (match && match[1]) linkedPath = match[1];
     }
-
-    res.json({ message: 'Governor State Updated & Blueprint Compiled 
-with 100% Fidelity' });
-  });
+    res.json({ linkedPath });
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// DYNAMIC TENANT ROUTING
-app.get('/api/tenant-state/:tenantId', (req, res) => {
-  const tenantFile = path.join(TARGET_PROJECT_DIR, 
-`${req.params.tenantId}_domain_dictionary.json`);
-  if (!fs.existsSync(tenantFile)) return res.json({});
-  fs.readFile(tenantFile, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Read Error' });
-    res.json(JSON.parse(data));
-  });
+app.post('/api/:project/link-codebase', (req, res) => {
+  try {
+    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
+    const targetPath = req.body.path.trim();
+    if (!targetPath) return res.status(400).json({ error: 'Path is required' });
+
+    const scriptContent = `#!/bin/bash\n# AUTO-GENERATED BY UNIVERSAL CONTEXT HUB\nTARGET="${targetPath}"\n\nif [ -d "$TARGET" ]; then\n    echo "--- DIRECTORY STRUCTURE ($TARGET) ---"\n    ls -la "$TARGET" | head -n 30\n    echo ""\n    echo "[Note: To add specific files to this payload, edit workspaces/${req.params.project}/.context_script.sh]"\nelse\n    echo "ERROR: Codebase path not found or invalid: $TARGET"\nfi\n`;
+    fs.writeFileSync(scriptPath, scriptContent, 'utf8');
+    res.json({ message: 'Codebase linked and script generated successfully.' });
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-app.post('/api/update-tenant-state/:tenantId', (req, res) => {
-  const valid = validateTenant(req.body);
-  if (!valid) {
-    return res.status(400).json(validateTenant.errors);
-  }
-
-  const tenantFile = path.join(TARGET_PROJECT_DIR, 
-`${req.params.tenantId}_domain_dictionary.json`);
-  archiveFile(tenantFile);
-  fs.writeFile(tenantFile, JSON.stringify(req.body, null, 2), 'utf8', 
-(err) => {
-    if (err) return res.status(500).json({ error: 'Write Error' });
-    res.json({ message: `Tenant Registry [${req.params.tenantId}] 
-Updated & Archived` });
-  });
+app.delete('/api/:project/link-codebase', (req, res) => {
+  try {
+    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
+    fs.writeFileSync(scriptPath, '#!/bin/bash\necho "Codebase not linked. Click Link Source Code in Hub UI."', 'utf8');
+    res.json({ message: 'Unlinked successfully' });
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// EMERGENCY RESTORE ROUTE
-app.post('/api/restore-latest', (req, res) => {
-  const files = fs.readdirSync(ARCHIVE_DIR);
-
-  const getLatest = (prefix) => files
-    .filter(f => f.startsWith(prefix))
-    .sort((a, b) => b.localeCompare(a))[0];
-
-  const latestState = getLatest('yf_governor_state');
-  const latestEcu = getLatest('ecu_domain_dictionary');
-
-  if (latestState) fs.copyFileSync(path.join(ARCHIVE_DIR, latestState), 
-STATE_FILE);
-  if (latestEcu) {
-    const defaultEcuFile = path.join(TARGET_PROJECT_DIR, 
-'ecu_medical_domain_dictionary.json');
-    fs.copyFileSync(path.join(ARCHIVE_DIR, latestEcu), defaultEcuFile);
-  }
-
-  res.json({ message: 'Emergency Restore Successful' });
+// 2. PROMPT SETTINGS
+app.get('/api/:project/prompts', (req, res) => {
+  try {
+    const promptFile = path.join(getProjectPath(req.params.project), 'system_prompts.json');
+    fs.readFile(promptFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
+  } catch(err) { res.status(400).json({ error: err.message }); }
 });
 
-app.listen(PORT, () => console.log(`Documentation Server running at 
-http://localhost:${PORT}`));
+app.post('/api/:project/prompts', (req, res) => {
+  try {
+    const promptFile = path.join(getProjectPath(req.params.project), 'system_prompts.json');
+    fs.writeFile(promptFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+// 3. ADR ROUTES
+app.get('/api/:project/adrs', (req, res) => {
+  try {
+    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
+    fs.readFile(adrFile, 'utf8', (err, data) => res.json(err ? [] : JSON.parse(data)));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+app.post('/api/:project/adrs', (req, res) => {
+  try {
+    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
+    fs.readFile(adrFile, 'utf8', (err, data) => {
+      const adrs = err ? [] : JSON.parse(data);
+      const newAdr = { id: `ADR-${(adrs.length + 1).toString().padStart(3, '0')}`, ...req.body, timestamp: new Date().toISOString() };
+      adrs.push(newAdr);
+      fs.writeFile(adrFile, JSON.stringify(adrs, null, 2), 'utf8', () => res.status(200).json(newAdr));
+    });
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+app.put('/api/:project/adrs/:id', (req, res) => {
+  try {
+    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
+    fs.readFile(adrFile, 'utf8', (err, data) => {
+      let adrs = JSON.parse(data);
+      const index = adrs.findIndex(a => a.id === req.params.id);
+      if (index === -1) return res.status(404).json({ error: 'Not found' });
+      adrs[index] = { ...adrs[index], ...req.body, id: req.params.id };
+      fs.writeFile(adrFile, JSON.stringify(adrs, null, 2), 'utf8', () => res.status(200).json(adrs[index]));
+    });
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+// 4. CORE STATE
+app.get('/api/:project/state', (req, res) => {
+  try {
+    const stateFile = path.join(getProjectPath(req.params.project), 'core_state.json');
+    if (!fs.existsSync(stateFile)) return res.json({});
+    fs.readFile(stateFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+app.post('/api/:project/update-state', (req, res) => {
+  try {
+    const project = sanitizeProjectName(req.params.project);
+    const stateFile = path.join(getProjectPath(project), 'core_state.json');
+    archiveFile(stateFile, project);
+    fs.writeFile(stateFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+// 5. INSTANCE STATE
+app.get('/api/:project/tenant-state/:tenantId', (req, res) => {
+  try {
+    const tenantFile = path.join(getProjectPath(req.params.project), 'instances', `${req.params.tenantId}.json`);
+    if (!fs.existsSync(tenantFile)) return res.json({});
+    fs.readFile(tenantFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+app.post('/api/:project/update-tenant-state/:tenantId', (req, res) => {
+  try {
+    const project = sanitizeProjectName(req.params.project);
+    const tenantFile = path.join(getProjectPath(project), 'instances', `${req.params.tenantId}.json`);
+    archiveFile(tenantFile, project);
+    fs.writeFile(tenantFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
+  } catch(err) { res.status(400).json({ error: err.message }); }
+});
+
+app.listen(PORT, () => console.log(`Universal Context Hub Server running at http://localhost:${PORT}`));
