@@ -260,10 +260,6 @@
             "content": "The Orchestrator closes the loop by feeding the highest-reward trajectories back into the M-GRPO Engine for policy updates, ensuring the engine \"learns\" from every successful outcome."
           },
           {
-            "title": "Chapter 9.5: Phase -1 Commercial Gateway",
-            "content": "Before onboarding begins, the Sales Support Agent interfaces with the client to define boundaries. It explicitly pushes back against out-of-scope requests to protect the agnostic Zone 3 schema. It strictly outputs the SLA and Quote. Technical instantiation is reserved for Phase 0."
-          },
-          {
             "title": "The Onboarding Cohort (The Factory Deep-Dive)",
             "content": ""
           }
@@ -450,10 +446,9 @@
       "- add green light that the repo is added."
     ],
     "next_objectives": [
-      "1. Phase -1 Commercial Gateway: Build the Sales Support Agent to ingest requirements and output quotes before onboarding.",
-      "2. Zone 3 Schema Normalization: Eradicate ecu_schema.sql and map domain variables to JSONB.",
-      "3. Phase 0 Factory: Build compiler to ingest domain_dictionary.json and output SAFE_MODE.json.",
-      "4. UI Translation Layer: Strip hardcoded strings from Zone 5 React components using TenantProvider."
+      "1. Ingest the current state and clean up legacy files in yield-force.",
+      "3. Define a road map to work on the core features.",
+      "4. Breakdown the next few sessions."
     ]
   }
 }

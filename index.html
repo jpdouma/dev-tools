@@ -68,7 +68,7 @@
                 <span>+ Quick ADR</span>
             </button>
             <button id="copy-handover-btn" onclick="copyHandoverPrompt()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-sm font-bold transition border border-slate-700 shadow-sm flex items-center space-x-2">
-                <span>Copy Prompt</span>
+                <span>Copy SudoLang Payload</span>
             </button>
             <button onclick="toggleDrawer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-md shadow-indigo-100">
                 Context & State
@@ -104,6 +104,7 @@
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center mb-1">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Local Scratchpad <span class="text-slate-500 text-[8px]">(Not Sent)</span></h3>
+                    <button onclick="clearEditor('todo-editor')" class="text-[9px] text-slate-500 hover:text-amber-400 uppercase font-bold transition">Clear</button>
                 </div>
                 <textarea id="todo-editor" class="resize-y min-h-[100px] w-full bg-black text-amber-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar" placeholder="- Reminders for myself..."></textarea>
             </div>
@@ -113,13 +114,19 @@
                     <button onclick="commit('core')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-[9px] font-bold uppercase transition">Save Session</button>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[9px] font-black uppercase text-slate-500">Changelog</label>
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black uppercase text-slate-500">Changelog</label>
+                        <button onclick="clearEditor('changelog-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
+                    </div>
                     <textarea id="changelog-editor" class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="- Built the XYZ module..."></textarea>
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center">
                         <label class="text-[9px] font-black uppercase text-slate-500">Next Objectives</label>
-                        <span class="text-[8px] text-red-400 font-bold" id="context-load-warning"></span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[8px] text-red-400 font-bold" id="context-load-warning"></span>
+                            <button onclick="clearEditor('objectives-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
+                        </div>
                     </div>
                     <textarea id="objectives-editor" oninput="checkContextLoad()" class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="1. Refactor logic..."></textarea>
                 </div>
@@ -148,7 +155,10 @@
         <div id="tab-content-tenant" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-teal-400">Environment JSON</h3>
-                <button onclick="commit('tenant')" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save Env</button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearEditor('tenant-editor')" class="text-[9px] text-slate-500 hover:text-teal-400 uppercase font-bold transition">Clear</button>
+                    <button onclick="commit('tenant')" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save Env</button>
+                </div>
             </div>
             <div class="flex space-x-2 shrink-0">
                 <input type="text" id="tenant-selector" placeholder="Instance ID (e.g. ecu_medical)" class="flex-1 bg-black text-teal-300 border border-slate-800 text-xs p-2 rounded outline-none focus:ring-1 focus:ring-teal-500">
@@ -260,10 +270,10 @@
             
             <div id="link-unlinked-view" class="hidden">
                 <div class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg mb-4">
-                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> Browsers block drag-and-drop paths for security. On Mac, select your folder in Finder and press <strong>Cmd + Option + C</strong> to copy the absolute path.</p>
+                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> You do not need to type the path. Drag and drop your project folder from your OS file explorer directly into the box below to auto-fill the absolute path.</p>
                 </div>
                 <form onsubmit="submitLinkCodebase(event)" class="space-y-3">
-                    <input id="link-path-input" type="text" class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500" placeholder="Paste absolute path (e.g. /Users/name/dev/yield-force)...">
+                    <input id="link-path-input" type="text" class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500" placeholder="Drag & Drop folder here...">
                     <button type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded text-xs font-bold uppercase transition mt-2">Generate Link Script</button>
                 </form>
             </div>
@@ -368,6 +378,22 @@
         // Bulk ADR Variables
         let bulkAdrQueue = [];
         let bulkAdrTotal = 0;
+
+        function clearEditor(id) {
+            if(confirm("Clear this field?")) {
+                document.getElementById(id).value = "";
+                if (id === 'objectives-editor') checkContextLoad();
+            }
+        }
+
+        async function deleteAdr(id) {
+            if(!confirm("Delete this ADR? This cannot be undone.")) return;
+            try {
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs/${id}`, { method: 'DELETE' });
+                if(res.ok) { showToast("ADR Deleted"); fetchAdrs(); }
+                else showToast("Delete Failed", true);
+            } catch(e) { showToast("Server Error", true); }
+        }
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
@@ -765,7 +791,10 @@
                         <div class="p-3 rounded-lg border text-xs space-y-2 shrink-0 ${isArc ? 'bg-black border-slate-800 opacity-60' : 'bg-slate-800/50 border-slate-700'}">
                             <div class="flex justify-between items-start">
                                 <div><span class="font-mono text-indigo-400 font-bold">${adr.id}</span><span class="bg-black px-1 rounded text-slate-500 border border-slate-800 ml-1">${adr.scope}</span>${isArc ? '<span class="text-red-400 ml-1 font-bold">[ARCHIVED]</span>' : ''}</div>
-                                <button onclick="editAdr('${adr.id}')" class="text-indigo-400 hover:underline">Edit</button>
+                                <div>
+                                    <button onclick="editAdr('${adr.id}')" class="text-indigo-400 hover:underline mr-2">Edit</button>
+                                    <button onclick="deleteAdr('${adr.id}')" class="text-red-400 hover:underline">Delete</button>
+                                </div>
                             </div>
                             <h4 class="font-bold text-white uppercase">${adr.title || 'Untitled'}</h4>
                             <div class="space-y-1 mt-1">
@@ -892,15 +921,6 @@ ${currentCode}
                     } 
                 } catch(e) {}
 
-                let opsManualText = "None";
-                try { 
-                    const opsRes = await fetch('/api/ops-manual'); 
-                    if(opsRes.ok) { 
-                        const opsData = await opsRes.json(); 
-                        opsManualText = opsData.content; 
-                    } 
-                } catch(e) {}
-
                 const stateJsonString = JSON.stringify({ core: coreD, environment: tenD }, null, 2);
 
                 const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
@@ -917,9 +937,6 @@ ${changelog}
   """
   ActiveADRs: """${sanitizeForPrompt(adrsText)}  """
   CodebaseContext: """${sanitizeForPrompt(cliOut)}  """
-  OpsManual: """
-${sanitizeForPrompt(opsManualText)}
-  """
   MachineStateJSON: """
 ${sanitizeForPrompt(stateJsonString)}
   """
@@ -928,8 +945,23 @@ ${sanitizeForPrompt(stateJsonString)}
 // --- CORE SYSTEM RULES & MACROS ---
 ${prmD}
 
+// --- CORE COMMAND INJECTION ---
+Interface StateMutation {
+  Commands {
+    /UPDATE_BLUEPRINT {
+      Read: SystemState.SessionChangelog
+      Read: SystemState.ActiveADRs
+      Read: SystemState.MachineStateJSON.core
+      Task: Analyze the recent changelogs and ADRs for architectural updates.
+      Action: Mutate the \`core.governor_state\` JSON object to integrate these updates into the project blueprint. Add new chapters or modify existing ones where necessary.
+      Constraint: DO NOT output Markdown. DO NOT output partial JSON.
+      Output: Yield a strict, complete, valid JSON block representing the updated \`core_state.json\` structure.
+    }
+  }
+}
+
 // --- INITIALIZATION DIRECTIVE ---
-OperatorActionRequired: "Parse the SystemState and Core Rules above. Acknowledge receipt by confirming your Role and the SessionObjectives, then await my command."`;
+OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role, then await my command. If I issue /UPDATE_BLUEPRINT, output ONLY valid JSON."`;
                 
                 const t = document.createElement('textarea'); t.value = sudoPayload; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); 
                 showToast("Payload Compiled and Copied.");

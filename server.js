@@ -2,212 +2,219 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
 const Ajv = require('ajv');
+const { exec } = require('child_process');
 const ajv = new Ajv();
 
 const app = express();
 const PORT = 4000;
 
-// UNIVERSAL WORKSPACE CONFIGURATION
+// Global Workspace Configuration
 const WORKSPACES_DIR = path.join(__dirname, 'workspaces');
-const ARCHIVE_DIR = path.join(__dirname, 'archives');
-
-if (!fs.existsSync(WORKSPACES_DIR)) fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
-if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR, { recursive: true });
-
-function sanitizeProjectName(project) {
-  if (!project || project.includes('..') || project.includes('/') || project.includes('\\')) {
-    throw new Error("Invalid project name");
-  }
-  return project;
+if (!fs.existsSync(WORKSPACES_DIR)) {
+  fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
 }
 
-function getProjectPath(project) {
-  const safeProject = sanitizeProjectName(project);
-  const projectPath = path.join(WORKSPACES_DIR, safeProject);
-  
-  if (!fs.existsSync(projectPath)) {
-    fs.mkdirSync(projectPath, { recursive: true });
-    fs.mkdirSync(path.join(projectPath, 'instances'), { recursive: true });
+// Helper: Directory Traversal Protection
+function getProjectDir(project) {
+  if (!project || typeof project !== 'string' || project.includes('..') || project.includes('/') || project.includes('\\')) {
+    throw new Error('Invalid project name');
   }
-  
-  const adrFile = path.join(projectPath, 'adrs.json');
-  const promptFile = path.join(projectPath, 'system_prompts.json');
-  const scriptFile = path.join(projectPath, '.context_script.sh');
-  
-  if (!fs.existsSync(adrFile)) fs.writeFileSync(adrFile, JSON.stringify([], null, 2), 'utf8');
-  if (!fs.existsSync(promptFile)) fs.writeFileSync(promptFile, JSON.stringify({}, null, 2), 'utf8');
-  if (!fs.existsSync(scriptFile)) fs.writeFileSync(scriptFile, '#!/bin/bash\necho "Codebase not linked. Click Link Source Code in Hub UI."', 'utf8');
-
-  return projectPath;
+  const projectDir = path.join(WORKSPACES_DIR, project);
+  if (!fs.existsSync(projectDir)) {
+    fs.mkdirSync(projectDir, { recursive: true });
+    fs.mkdirSync(path.join(projectDir, 'archives'), { recursive: true });
+  }
+  return projectDir;
 }
 
-const coreSchema = { type: "object", properties: { governor_state: { type: "object" } }, additionalProperties: true };
-const tenantSchema = { type: "object", properties: { tenants: { type: "array" } }, additionalProperties: true };
-const validateCore = ajv.compile(coreSchema);
-const validateTenant = ajv.compile(tenantSchema);
+// Helper: Get Project File Paths
+function getProjectFiles(project) {
+  const projectDir = getProjectDir(project);
+  return {
+    state: path.join(projectDir, 'core_state.json'),
+    blueprint: path.join(projectDir, 'blueprint.md'),
+    adrs: path.join(projectDir, 'adrs.json'),
+    archiveDir: path.join(projectDir, 'archives'),
+    prompts: path.join(projectDir, 'system_prompts.json'),
+    link: path.join(projectDir, 'codebase_link.json')
+  };
+}
+
+// Helper: Archive File
+function archiveFile(filePath, archiveDir) {
+  if (fs.existsSync(filePath)) {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const fileName = path.basename(filePath);
+    const project = path.basename(path.dirname(filePath));
+    const archivePath = path.join(archiveDir, `[${project}]_${fileName.replace('.json', '')}_${timestamp}.json`);
+    fs.copyFileSync(filePath, archivePath);
+  }
+}
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
 
-function archiveFile(filePath, projectName) {
-  if (fs.existsSync(filePath)) {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const ext = path.extname(filePath);
-    const base = path.basename(filePath, ext);
-    fs.copyFileSync(filePath, path.join(ARCHIVE_DIR, `[${projectName}]_${base}_${timestamp}${ext}`));
-  }
-}
-
-// ==========================================
-// DYNAMIC UNIVERSAL ROUTES
-// ==========================================
-
-// DOCS-AS-CODE ROUTE (NEW)
+// DEV TOOL MANUAL ROUTE
 app.get('/api/ops-manual', (req, res) => {
-  try {
-    const manualPath = path.join(__dirname, 'OPS_MANUAL.md');
-    if (!fs.existsSync(manualPath)) {
-        return res.json({ content: "# Operations Manual\n\n`OPS_MANUAL.md` not found. Please create one in the root directory alongside `server.js`." });
-    }
-    const content = fs.readFileSync(manualPath, 'utf8');
-    res.json({ content });
-  } catch(err) { res.status(400).json({ error: err.message }); }
+  const manualPath = path.join(__dirname, 'OPS_MANUAL.md');
+  if (fs.existsSync(manualPath)) {
+    res.json({ content: fs.readFileSync(manualPath, 'utf8') });
+  } else {
+    res.status(404).json({ error: 'Manual not found' });
+  }
 });
 
-// 1. CLI CONTEXT EXECUTOR
-app.post('/api/:project/run-context', (req, res) => {
-  try {
-    const projectPath = getProjectPath(req.params.project);
-    const scriptPath = path.join(projectPath, '.context_script.sh');
-
-    if (!fs.existsSync(scriptPath)) return res.status(404).json({ error: 'Context script not found' });
-
-    exec(`bash "${scriptPath}"`, { cwd: projectPath }, (error, stdout, stderr) => {
-      if (error) return res.status(500).json({ error: error.message, stderr });
-      res.json({ output: stdout });
-    });
-  } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-// 1.5 AUTO-LINK CODEBASE ENGINE (STATEFUL)
-app.get('/api/:project/link-codebase', (req, res) => {
-  try {
-    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
-    let linkedPath = null;
-    if (fs.existsSync(scriptPath)) {
-        const content = fs.readFileSync(scriptPath, 'utf8');
-        const match = content.match(/TARGET="(.*?)"/);
-        if (match && match[1]) linkedPath = match[1];
-    }
-    res.json({ linkedPath });
-  } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-app.post('/api/:project/link-codebase', (req, res) => {
-  try {
-    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
-    const targetPath = req.body.path.trim();
-    if (!targetPath) return res.status(400).json({ error: 'Path is required' });
-
-    const scriptContent = `#!/bin/bash\n# AUTO-GENERATED BY UNIVERSAL CONTEXT HUB\nTARGET="${targetPath}"\n\nif [ -d "$TARGET" ]; then\n    echo "--- DIRECTORY STRUCTURE ($TARGET) ---"\n    ls -la "$TARGET" | head -n 30\n    echo ""\n    echo "[Note: To add specific files to this payload, edit workspaces/${req.params.project}/.context_script.sh]"\nelse\n    echo "ERROR: Codebase path not found or invalid: $TARGET"\nfi\n`;
-    fs.writeFileSync(scriptPath, scriptContent, 'utf8');
-    res.json({ message: 'Codebase linked and script generated successfully.' });
-  } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-app.delete('/api/:project/link-codebase', (req, res) => {
-  try {
-    const scriptPath = path.join(getProjectPath(req.params.project), '.context_script.sh');
-    fs.writeFileSync(scriptPath, '#!/bin/bash\necho "Codebase not linked. Click Link Source Code in Hub UI."', 'utf8');
-    res.json({ message: 'Unlinked successfully' });
-  } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-// 2. PROMPT SETTINGS
-app.get('/api/:project/prompts', (req, res) => {
-  try {
-    const promptFile = path.join(getProjectPath(req.params.project), 'system_prompts.json');
-    fs.readFile(promptFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
-  } catch(err) { res.status(400).json({ error: err.message }); }
-});
-
-app.post('/api/:project/prompts', (req, res) => {
-  try {
-    const promptFile = path.join(getProjectPath(req.params.project), 'system_prompts.json');
-    fs.writeFile(promptFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
-  } catch(err) { res.status(400).json({ error: err.message }); }
-});
-
-// 3. ADR ROUTES
-app.get('/api/:project/adrs', (req, res) => {
-  try {
-    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
-    fs.readFile(adrFile, 'utf8', (err, data) => res.json(err ? [] : JSON.parse(data)));
-  } catch(err) { res.status(400).json({ error: err.message }); }
-});
-
-app.post('/api/:project/adrs', (req, res) => {
-  try {
-    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
-    fs.readFile(adrFile, 'utf8', (err, data) => {
-      const adrs = err ? [] : JSON.parse(data);
-      const newAdr = { id: `ADR-${(adrs.length + 1).toString().padStart(3, '0')}`, ...req.body, timestamp: new Date().toISOString() };
-      adrs.push(newAdr);
-      fs.writeFile(adrFile, JSON.stringify(adrs, null, 2), 'utf8', () => res.status(200).json(newAdr));
-    });
-  } catch(err) { res.status(400).json({ error: err.message }); }
-});
-
-app.put('/api/:project/adrs/:id', (req, res) => {
-  try {
-    const adrFile = path.join(getProjectPath(req.params.project), 'adrs.json');
-    fs.readFile(adrFile, 'utf8', (err, data) => {
-      let adrs = JSON.parse(data);
-      const index = adrs.findIndex(a => a.id === req.params.id);
-      if (index === -1) return res.status(404).json({ error: 'Not found' });
-      adrs[index] = { ...adrs[index], ...req.body, id: req.params.id };
-      fs.writeFile(adrFile, JSON.stringify(adrs, null, 2), 'utf8', () => res.status(200).json(adrs[index]));
-    });
-  } catch(err) { res.status(400).json({ error: err.message }); }
-});
-
-// 4. CORE STATE
 app.get('/api/:project/state', (req, res) => {
-  try {
-    const stateFile = path.join(getProjectPath(req.params.project), 'core_state.json');
-    if (!fs.existsSync(stateFile)) return res.json({});
-    fs.readFile(stateFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
-  } catch(err) { res.status(400).json({ error: err.message }); }
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.state)) {
+    res.json(JSON.parse(fs.readFileSync(files.state, 'utf8')));
+  } else {
+    res.json({});
+  }
 });
 
 app.post('/api/:project/update-state', (req, res) => {
-  try {
-    const project = sanitizeProjectName(req.params.project);
-    const stateFile = path.join(getProjectPath(project), 'core_state.json');
-    archiveFile(stateFile, project);
-    fs.writeFile(stateFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
-  } catch(err) { res.status(400).json({ error: err.message }); }
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.state, files.archiveDir);
+  fs.writeFileSync(files.state, JSON.stringify(req.body, null, 2), 'utf8');
+  res.json({ status: 'success' });
 });
 
-// 5. INSTANCE STATE
 app.get('/api/:project/tenant-state/:tenantId', (req, res) => {
-  try {
-    const tenantFile = path.join(getProjectPath(req.params.project), 'instances', `${req.params.tenantId}.json`);
-    if (!fs.existsSync(tenantFile)) return res.json({});
-    fs.readFile(tenantFile, 'utf8', (err, data) => res.json(err ? {} : JSON.parse(data)));
-  } catch(err) { res.status(400).json({ error: err.message }); }
+  const projectDir = getProjectDir(req.params.project);
+  const tenantFile = path.join(projectDir, 'instances', `${req.params.tenantId}.json`);
+  if (fs.existsSync(tenantFile)) {
+    res.json(JSON.parse(fs.readFileSync(tenantFile, 'utf8')));
+  } else {
+    res.json({});
+  }
 });
 
 app.post('/api/:project/update-tenant-state/:tenantId', (req, res) => {
-  try {
-    const project = sanitizeProjectName(req.params.project);
-    const tenantFile = path.join(getProjectPath(project), 'instances', `${req.params.tenantId}.json`);
-    archiveFile(tenantFile, project);
-    fs.writeFile(tenantFile, JSON.stringify(req.body, null, 2), 'utf8', () => res.json({ message: 'Saved' }));
-  } catch(err) { res.status(400).json({ error: err.message }); }
+  const projectDir = getProjectDir(req.params.project);
+  const instancesDir = path.join(projectDir, 'instances');
+  if (!fs.existsSync(instancesDir)) fs.mkdirSync(instancesDir, { recursive: true });
+  
+  const tenantFile = path.join(instancesDir, `${req.params.tenantId}.json`);
+  archiveFile(tenantFile, getProjectFiles(req.params.project).archiveDir);
+  fs.writeFileSync(tenantFile, JSON.stringify(req.body, null, 2), 'utf8');
+  res.json({ status: 'success' });
 });
 
-app.listen(PORT, () => console.log(`Universal Context Hub Server running at http://localhost:${PORT}`));
+app.get('/api/:project/prompts', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.prompts)) {
+    res.json(JSON.parse(fs.readFileSync(files.prompts, 'utf8')));
+  } else {
+    res.json({});
+  }
+});
+
+app.post('/api/:project/prompts', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.prompts, files.archiveDir);
+  fs.writeFileSync(files.prompts, JSON.stringify(req.body, null, 2), 'utf8');
+  res.json({ status: 'success' });
+});
+
+app.get('/api/:project/adrs', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.adrs)) {
+    res.json(JSON.parse(fs.readFileSync(files.adrs, 'utf8')));
+  } else {
+    res.json([]);
+  }
+});
+
+app.post('/api/:project/adrs', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.adrs, files.archiveDir);
+  let adrs = [];
+  if (fs.existsSync(files.adrs)) {
+    adrs = JSON.parse(fs.readFileSync(files.adrs, 'utf8'));
+  }
+  const newAdr = {
+    id: `ADR-${String(adrs.length + 1).padStart(3, '0')}`,
+    ...req.body,
+    timestamp: new Date().toISOString()
+  };
+  adrs.unshift(newAdr);
+  fs.writeFileSync(files.adrs, JSON.stringify(adrs, null, 2), 'utf8');
+  res.json(newAdr);
+});
+
+app.put('/api/:project/adrs/:id', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.adrs, files.archiveDir);
+  let adrs = JSON.parse(fs.readFileSync(files.adrs, 'utf8'));
+  const index = adrs.findIndex(a => a.id === req.params.id);
+  if (index !== -1) {
+    adrs[index] = { ...adrs[index], ...req.body, updated_at: new Date().toISOString() };
+    fs.writeFileSync(files.adrs, JSON.stringify(adrs, null, 2), 'utf8');
+    res.json(adrs[index]);
+  } else {
+    res.status(404).json({ error: 'ADR not found' });
+  }
+});
+
+app.delete('/api/:project/adrs/:id', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.adrs, files.archiveDir);
+  if (fs.existsSync(files.adrs)) {
+    let adrs = JSON.parse(fs.readFileSync(files.adrs, 'utf8'));
+    const initialLength = adrs.length;
+    adrs = adrs.filter(a => a.id !== req.params.id);
+    if (adrs.length < initialLength) {
+      fs.writeFileSync(files.adrs, JSON.stringify(adrs, null, 2), 'utf8');
+      return res.json({ status: 'success' });
+    }
+  }
+  res.status(404).json({ error: 'ADR not found' });
+});
+
+app.get('/api/:project/link-codebase', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    if (fs.existsSync(files.link)) {
+        const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
+        res.json({ linkedPath: linkData.targetPath });
+    } else {
+        res.json({ linkedPath: null });
+    }
+});
+
+app.post('/api/:project/link-codebase', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    const { path: targetPath } = req.body;
+    if (!targetPath) return res.status(400).json({ error: 'Path required' });
+    
+    fs.writeFileSync(files.link, JSON.stringify({ targetPath, linkedAt: new Date().toISOString() }, null, 2), 'utf8');
+    res.json({ status: 'success' });
+});
+
+app.delete('/api/:project/link-codebase', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    if (fs.existsSync(files.link)) {
+        fs.unlinkSync(files.link);
+    }
+    res.json({ status: 'success' });
+});
+
+app.post('/api/:project/run-context', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    if (!fs.existsSync(files.link)) return res.json({ output: "No codebase linked." });
+    
+    const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
+    const targetPath = linkData.targetPath;
+    
+    const command = `cd "${targetPath}" && git diff && git status`;
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            return res.json({ output: `Error: ${error.message}\n${stderr}` });
+        }
+        res.json({ output: stdout });
+    });
+});
+
+app.listen(PORT, () => console.log(`Universal Context Hub API running on port ${PORT}`));

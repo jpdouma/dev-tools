@@ -308,5 +308,45 @@
     "ruling": "Yield Force acts as an explicit \"Data Sanitizer.\" Webhooks to legacy CRM systems must be governed by threshold rules tied to the 5-Stage Triage Pipeline.",
     "boundary": "Low-intent entities (Stages 1 and 2) must remain sandboxed within Yield Force. Data only syncs to external databases when an entity crosses a predefined maturity threshold (e.g., Stage 3 Intent).",
     "timestamp": "2026-04-07T19:20:39.990Z"
+  },
+  {
+    "id": "ADR-032",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Phase Minus One Commercial Gateway",
+    "friction": "Sales teams receive out of scope requests and need architectural enforcement before onboarding begins.",
+    "ruling": "Yield Force will implement a pre onboarding layer driven by a Commercial Validator agent. This agent must strictly enforce architectural boundaries against client requests and only output the SLA and Quote.",
+    "boundary": "Phase Minus One agents must NEVER generate system prompts or technical configurations. Technical instantiation is strictly reserved for Phase Zero after SLA signature.",
+    "timestamp": "2026-04-09T18:29:30.818Z"
+  },
+  {
+    "id": "ADR-033",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Stage Zero Ingestion Compiler",
+    "friction": "Client requirements gathered during ingestion must translate to database rules without altering core SQL schemas.",
+    "ruling": "The Phase Zero ingestion process must programmatically output a domain dictionary payload. This payload acts as the absolute mapping layer between the agnostic Zone 3 JSONB metadata and the Zone 5 UI.",
+    "boundary": "Human operators must NEVER manually alter the Zone 3 SQL schema to accommodate ingestion requirements. All domain fluidity must be routed through the JSON compiler.",
+    "timestamp": "2026-04-09T18:29:52.502Z"
+  },
+  {
+    "id": "ADR-034",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Four Hour Context Cycle State Persistence",
+    "friction": "LLM context degradation leads to architectural errors and lost work across extended build sessions.",
+    "ruling": "All development must adhere to a strict Four Hour Context Cycle via the Universal Context Hub. Unfinished tasks must be flushed to the next objectives array in the core state file via the WRAPUP command before context window termination.",
+    "boundary": "Developers must NEVER start a new session without booting from the most recent Hub payload. Relying on conversational memory across degraded LLM windows is strictly prohibited.",
+    "timestamp": "2026-04-09T18:30:13.958Z"
+  },
+  {
+    "id": "ADR-035",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "",
+    "friction": "",
+    "ruling": "",
+    "boundary": "",
+    "timestamp": "2026-04-09T18:44:30.223Z"
   }
 ]
