@@ -260,10 +260,10 @@
             
             <div id="link-unlinked-view" class="hidden">
                 <div class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg mb-4">
-                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> You do not need to type the path. Drag and drop your project folder from your OS file explorer directly into the box below to auto-fill the absolute path.</p>
+                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> Browsers block drag-and-drop paths for security. On Mac, select your folder in Finder and press <strong>Cmd + Option + C</strong> to copy the absolute path.</p>
                 </div>
                 <form onsubmit="submitLinkCodebase(event)" class="space-y-3">
-                    <input id="link-path-input" type="text" class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500" placeholder="Drag & Drop folder here...">
+                    <input id="link-path-input" type="text" class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500" placeholder="Paste absolute path (e.g. /Users/name/dev/yield-force)...">
                     <button type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded text-xs font-bold uppercase transition mt-2">Generate Link Script</button>
                 </form>
             </div>

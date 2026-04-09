@@ -9,8 +9,8 @@ will instantly build the isolated folder structure for you.
 The Hub keeps its memory isolated from your real source code. To allow 
 the AI to "see" your code during Handover:
 1. Click the **⚙️ Tools** menu and select **🔗 Link Source Code**.
-2. Drag and drop your real project folder into the box (or type the 
-path).
+2. Paste the absolute path to your project folder into the box. 
+   *(Note: Browsers block drag-and-drop paths for security. On Mac, select your folder in Finder and press **Cmd + Option + C** to copy the absolute path).*
 3. The Hub will automatically generate the required bash script to scan 
 your directory and inject it into the AI payload!
 
@@ -33,7 +33,7 @@ the *Syntax Executor*.
 
 **Phase 1: The Boot (Minute 0)**
 1. Ensure your codebase is linked and your environment is selected.
-2. Click **Copy Prompt** in the Hub.
+2. Click **Copy Prompt** (CMD-OPTON-C) in the Hub.
 3. Paste the payload into a fresh, high-performance AI chat window to 
 establish the macro-architecture baseline.
 
