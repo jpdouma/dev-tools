@@ -24,15 +24,38 @@ in an expert Linter prompt.
 3. Paste it into your LLM chat. The AI will score your code and output 
 a perfected, idiomatic rewrite!
 
-## 4. The Context Cycle Workflow
-1. **Compile:** Enter your Workspace. Click **Copy SudoLang Payload** 
-and paste it into a fresh AI chat window.
-2. **Govern:** When a decision is made, click **+ Quick ADR** to log 
-the rule immediately. If the AI generated multiple ADRs, paste them in 
-the Smart Import box to review and commit them one-by-one.
-3. **Commit:** Type `/WRAPUP` in the chat. Paste the AI's 
-changelog/objectives into the *Session* tab, paste the JSON into the 
-*Blueprint* tab, and hit **Save State**.
+## 4. The 4-Hour Context Cycle Workflow
+Because LLMs experience context degradation after several hours of deep 
+architectural work, the Hub acts as a "Memory Cartridge" to save your 
+state. We utilize a **Bifurcated Intelligence Workflow**: the Hub/Web LLM 
+acts as the *Architect*, and your local terminal (`gemini-cli`) acts as 
+the *Syntax Executor*.
+
+**Phase 1: The Boot (Minute 0)**
+1. Ensure your codebase is linked and your environment is selected.
+2. Click **Copy Prompt** in the Hub.
+3. Paste the payload into a fresh, high-performance AI chat window to 
+establish the macro-architecture baseline.
+
+**Phase 2: The Iterative Loop (Hours 0 - 4)**
+1. **Brainstorm:** Discuss logic and architecture with the Web AI. 
+2. **Work Order:** The Web AI generates a strict prompt engineered for 
+the CLI.
+3. **Execution:** Paste the prompt into `gemini-cli` to securely edit 
+local files.
+4. **Govern:** If a major architectural decision is made during this loop, 
+log it immediately in the Hub via **+ Quick ADR**.
+
+**Phase 3: The Migration (Hour 4+)**
+When the AI's context begins to degrade, it is time to migrate:
+1. Issue the `/UPDATE_BLUEPRINT` (or `/WRAPUP`) command to the Web AI.
+2. The AI will read your final `git diff` and output a mutated JSON 
+Blueprint, a Session Changelog, and Next Objectives.
+3. Paste the JSON into the *Blueprint* tab (under Advanced), and paste 
+the text into the *Session* tab.
+4. Click **Save State**. 
+5. Close the degraded AI window. Your project state is now saved and 
+ready for a fresh boot.
 
 ## 5. Rich Media & Math (Images & LaTeX)
 The Hub natively supports local image rendering and complex 

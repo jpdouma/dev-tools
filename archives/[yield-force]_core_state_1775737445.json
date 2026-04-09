@@ -438,16 +438,7 @@
     ]
   },
   "governor_meta": {
-    "todo_list": [
-      "- Re-think onboarding -> we need to build a presentation pre-onboarding.",
-      "- We need to create a sales-support agent for our staff to ask questions in relation to our offering. That agent ingests initial client requirements. It will also create the offer.",
-      "- Add autoSearch modules by Karpathy.",
-      "- Incorporate Pomelli. "
-    ],
-    "next_objectives": [
-      "1. Ingest the current state and clean up legacy files in yield-force.",
-      "3. Define a road map to work on the core features.",
-      "4. Breakdown the next few sessions."
-    ]
+    "todo_list": [],
+    "next_objectives": []
   }
 }

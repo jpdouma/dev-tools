@@ -444,10 +444,6 @@
       "- Add autoSearch modules by Karpathy.",
       "- Incorporate Pomelli. "
     ],
-    "next_objectives": [
-      "1. Ingest the current state and clean up legacy files in yield-force.",
-      "3. Define a road map to work on the core features.",
-      "4. Breakdown the next few sessions."
-    ]
+    "next_objectives": []
   }
 }

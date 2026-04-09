@@ -68,7 +68,7 @@
                 <span>+ Quick ADR</span>
             </button>
             <button id="copy-handover-btn" onclick="copyHandoverPrompt()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-sm font-bold transition border border-slate-700 shadow-sm flex items-center space-x-2">
-                <span>Copy SudoLang Payload</span>
+                <span>Copy Prompt</span>
             </button>
             <button onclick="toggleDrawer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-md shadow-indigo-100">
                 Context & State
@@ -375,6 +375,13 @@
             toast.innerText = message;
             document.getElementById('toast-container').appendChild(toast);
             setTimeout(() => { toast.classList.add('translate-y-4', 'opacity-0'); setTimeout(() => toast.remove(), 500); }, 2000);
+        }
+
+        // HELPER: Neutralize delimiter collisions before prompt injection
+        function sanitizeForPrompt(text) {
+            if (!text) return "None";
+            // Replace triple quotes with single quotes to prevent breaking SudoLang string blocks
+            return text.replace(/"""/g, "'''");
         }
 
         // --- MENU & MODAL CONTROLS ---
@@ -791,32 +798,147 @@
 
         function copyLinterPrompt() {
             const currentCode = document.getElementById('prompt-editor').value.trim();
-            if (!currentCode) return showToast("Nothing to lint! Add some SudoLang first.", true);
-            const linterPrompt = `# IdiomaticSudoLinter\n\nRole: Expert SudoLang Purist and Code Evaluator\n\nInterface IdiomaticSudoLinter {\n  State {\n    targetCode: ""\n    purityScore: 0 // 0 to 100\n    violations: []\n    commendations: []\n    rewrittenCode: ""\n  }\n\n  Constraints {\n    Strictly enforce the SudoLang style guide.\n    Code MUST be declarative. Actively reject imperative, step-by-step programming.\n    Code MUST rely on LLM inference. Flag overly explicit or redundant instructions.\n    Code MUST favor composition, state, and constraints over inheritance.\n    Evaluate the \`purityScore\` based strictly on adherence to these principles.\n    EXEMPTION: Do NOT alter, penalize, or remove strict output formatting instructions (e.g., "OutputFormat", "NO JSON"). These are required API boundaries for downstream Regex parsers.\n  }\n\n  AntiPatterns {\n    ("class", "new", "extends", "inherit", "this") => Error: "-10 pts. Not idiomatic. Use Interfaces, State, and Composition."\n    ("for ", "while ", "forEach", "loop") => Error: "-15 pts. Imperative iteration detected. Use declarative constraints or pipeline operators (|>)."\n    ("step 1", "first do", "then do") => Warning: "-5 pts. Too imperative. Describe the desired end-state, do not micromanage the LLM."\n    ("if", "else if") => Warning: "Consider using pattern matching or constraints instead of branching logic."\n  }\n\n  RequiredPatterns {\n    Preamble: "Line 1 MUST be \`#[Program Name]\`. (-5 pts if missing)"\n    Structure: "Idiomatic code usually utilizes \`Interface\`, \`State\`, and \`Constraints\`. (+10 pts if present)"\n    Commands: "Commands should be defined using the \`/command\` syntax. (+5 pts if present)"\n  }\n\n  FormatReport() {\n    Output the \`rewrittenCode\` immediately in a SudoLang code block.\n    Print a visual ASCII art meter representing the \`purityScore\`.\n    List \`violations\` with specific explanations of why they violate SudoLang philosophy.\n    List \`commendations\` praising good use of inference and declarative constraints.\n  }\n\n  /lint [code] {\n    Analyze the provided code against Constraints, AntiPatterns, and RequiredPatterns.\n    Calculate purityScore.\n    Generate a perfectly idiomatic \`rewrittenCode\`.\n    FormatReport().\n  }\n}\n\n*** OPERATOR ACTION REQUIRED ***\nAcknowledge the IdiomaticSudoLinter interface above. Then, immediately execute the \`/lint\` command on the following code:\n\n/lint\n\`\`\`sudolang\n${currentCode}\n\`\`\``;
-            const t = document.createElement('textarea'); t.value = linterPrompt; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("Linter Prompt Copied! Paste into AI.");
+            if (!currentCode) return showToast("Nothing to lint. Editor is empty.", true);
+
+            let adrsText = "None";
+            if (typeof adrCache !== 'undefined' && adrCache.length > 0) {
+                adrsText = adrCache.filter(a => a.status !== '[ARCHIVED]')
+                    .map(a => `- ${a.id}: ${a.title}\n  Ruling: ${a.ruling}\n  Boundary: ${a.boundary}`)
+                    .join('\n');
+            }
+
+            const linterPrompt = `# Universal Context Hub: Architectural Linter
+
+Interface HubLinter {
+  State {
+    targetCode: ""
+    purityScore: 0 // 0 to 100
+    violations: []
+    commendations: []
+    rewrittenCode: ""
+  }
+
+  Context {
+    Active_ADRs: """
+${sanitizeForPrompt(adrsText)}
+    """
+  }
+
+  Constraints {
+    1. SudoLang Purity: Code MUST be declarative. Reject imperative programming. Rely on LLM inference.
+    2. Architectural Safety: Cross-reference targetCode against Active_ADRs. Instructions violating a Boundary are FATAL VIOLATIONS (-50 pts). Rewrite to comply.
+    3. Exemption: Do NOT alter strict output formatting instructions.
+  }
+
+  FormatReport() {
+    Output rewrittenCode in a SudoLang code block.
+    Print visual ASCII art meter for purityScore.
+    List violations (Syntax vs. Architectural) with explanations.
+    List commendations.
+  }
+
+  /lint [code] {
+    Analyze code against Constraints. Calculate purityScore. Generate rewrittenCode. FormatReport().
+  }
+}
+
+*** OPERATOR ACTION REQUIRED ***
+Acknowledge the HubLinter interface. Execute the /lint command on the following code:
+
+/lint
+\`\`\`sudolang
+${currentCode}
+\`\`\``;
+            
+            const t = document.createElement('textarea'); t.value = linterPrompt; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); 
+            showToast("Architectural Linter Payload Copied.");
         }
 
         async function copyHandoverPrompt() {
-            const btn = document.getElementById('copy-handover-btn'); const orig = btn.innerText; btn.innerText = 'Compiling SudoLang...';
+            const btn = document.getElementById('copy-handover-btn'); 
+            const orig = btn.innerText; 
+            btn.innerText = 'Compiling Payload...';
+            
             try {
-                const changelog = document.getElementById('changelog-editor').value || "None";
-                const objectivesList = (document.getElementById('objectives-editor').value || '').split('\n').filter(s => s.trim() !== '').map(s => `    "${s.replace(/^- /, '')}"`).join('\n') || '    "Analyze system and await command"';
+                const changelogRaw = document.getElementById('changelog-editor').value;
+                const changelog = sanitizeForPrompt(changelogRaw);
+                
+                const objRaw = document.getElementById('objectives-editor').value || '';
+                const objectivesList = objRaw.split('\n').filter(s => s.trim() !== '').map(s => `    "${sanitizeForPrompt(s).replace(/^- /, '')}"`).join('\n') || '    "Analyze system and await command"';
+                
                 let coreD = {}, tenD = {}, prmD = "";
-                try { coreD = JSON.parse(coreEditor.value); } catch(e){}
-                try { tenD = JSON.parse(tenantEditor.value); } catch(e){}
-                try { const pJson = JSON.parse(promptEditor.value); prmD = pJson.raw_sudolang ? pJson.raw_sudolang : JSON.stringify(pJson, null, 2); } catch(e){ prmD = promptEditor.value; }
-                let adrsText = ""; adrCache.filter(a => a.status !== '[ARCHIVED]').forEach(a => { adrsText += `\n    ${a.id}: ${a.title}\n    - Ruling: ${a.ruling}\n    - Boundary: ${a.boundary}\n`; });
+                
+                try { coreD = JSON.parse(coreEditor.value); } catch(e) { console.warn("Core JSON parse failed. Proceeding with empty object."); }
+                try { tenD = JSON.parse(tenantEditor.value); } catch(e) { console.warn("Tenant JSON parse failed. Proceeding with empty object."); }
+                
+                try { 
+                    const pJson = JSON.parse(promptEditor.value); 
+                    prmD = pJson.raw_sudolang ? pJson.raw_sudolang : JSON.stringify(pJson, null, 2); 
+                } catch(e) { 
+                    prmD = promptEditor.value; 
+                }
+
+                let adrsText = ""; 
+                adrCache.filter(a => a.status !== '[ARCHIVED]').forEach(a => { 
+                    adrsText += `\n    ${a.id}: ${a.title}\n    - Ruling: ${a.ruling}\n    - Boundary: ${a.boundary}\n`; 
+                });
                 
                 let cliOut = "None"; 
-                try { const cr = await fetch(`/api/${ACTIVE_PROJECT}/run-context`, { method: 'POST' }); if(cr.ok) { const cd = await cr.json(); cliOut = `\n${cd.output}\n`; } } catch(e) {}
+                try { 
+                    const cr = await fetch(`/api/${ACTIVE_PROJECT}/run-context`, { method: 'POST' }); 
+                    if(cr.ok) { 
+                        const cd = await cr.json(); 
+                        cliOut = `\n${cd.output}\n`; 
+                    } 
+                } catch(e) {}
 
                 let opsManualText = "None";
-                try { const opsRes = await fetch('/api/ops-manual'); if(opsRes.ok) { const opsData = await opsRes.json(); opsManualText = opsData.content; } } catch(e) {}
+                try { 
+                    const opsRes = await fetch('/api/ops-manual'); 
+                    if(opsRes.ok) { 
+                        const opsData = await opsRes.json(); 
+                        opsManualText = opsData.content; 
+                    } 
+                } catch(e) {}
 
-                const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]\n#initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")\n\nSystemState {\n  Workspace: "${ACTIVE_PROJECT}"\n  Phase: "Active Execution"\n  SessionObjectives: [\n${objectivesList}\n  ]\n  SessionChangelog: """\n${changelog}\n  """\n  ActiveADRs: """${adrsText || "None"}  """\n  CodebaseContext: """${cliOut}  """\n  OpsManual: """\n${opsManualText}\n  """\n  MachineStateJSON: """\n${JSON.stringify({ core: coreD, environment: tenD }, null, 2)}\n  """\n}\n\n// --- CORE SYSTEM RULES & MACROS ---\n${prmD}\n\n// --- INITIALIZATION DIRECTIVE ---\nOperatorActionRequired: "Parse the SystemState and Core Rules above. Acknowledge receipt by confirming your Role and the SessionObjectives, then await my command."`;
+                const stateJsonString = JSON.stringify({ core: coreD, environment: tenD }, null, 2);
+
+                const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
+#initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")
+
+SystemState {
+  Workspace: "${ACTIVE_PROJECT}"
+  Phase: "Active Execution"
+  SessionObjectives: [
+${objectivesList}
+  ]
+  SessionChangelog: """
+${changelog}
+  """
+  ActiveADRs: """${sanitizeForPrompt(adrsText)}  """
+  CodebaseContext: """${sanitizeForPrompt(cliOut)}  """
+  OpsManual: """
+${sanitizeForPrompt(opsManualText)}
+  """
+  MachineStateJSON: """
+${sanitizeForPrompt(stateJsonString)}
+  """
+}
+
+// --- CORE SYSTEM RULES & MACROS ---
+${prmD}
+
+// --- INITIALIZATION DIRECTIVE ---
+OperatorActionRequired: "Parse the SystemState and Core Rules above. Acknowledge receipt by confirming your Role and the SessionObjectives, then await my command."`;
                 
-                const t = document.createElement('textarea'); t.value = sudoPayload; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); showToast("SudoLang Copied to Clipboard!");
-            } catch (err) { showToast("Failed to compile payload", true); } finally { setTimeout(() => { btn.innerText = orig; }, 2000); }
+                const t = document.createElement('textarea'); t.value = sudoPayload; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); 
+                showToast("Payload Compiled and Copied.");
+            } catch (err) { 
+                showToast("Compilation failure. Review console logs.", true); 
+                console.error(err);
+            } finally { 
+                setTimeout(() => { btn.innerText = orig; }, 2000); 
+            }
         }
 
         window.onload = initWorkspace;
