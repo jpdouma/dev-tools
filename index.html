@@ -7,9 +7,11 @@
     <title>Universal Context Hub</title>
     <link rel="icon" href="./yf-avatar.png">
     
+    <!-- Tailwind & Marked.js -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- KaTeX for LaTeX Math Rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
@@ -28,11 +30,13 @@
 
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden font-sans">
 
+    <!-- HEADER: GLOBAL WORKSPACE SWITCHER -->
     <header class="bg-white border-b border-slate-200 px-8 py-3 flex justify-between items-center shadow-sm z-40 relative">
         <div class="flex items-center space-x-4">
             <img src="./yf-logo.png" alt="Hub Logo" class="h-8 w-auto" onerror="this.style.display='none'" />
             <h1 class="text-sm font-black tracking-widest text-indigo-600 uppercase">Universal Context Hub</h1>
             <div class="h-6 w-px bg-slate-300"></div>
+            <!-- Project Selector (DYNAMIC CREATOR) -->
             <div class="flex items-center space-x-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" title="Type a new name to create a workspace">Workspace:</label>
                 <input id="global-project" type="text" value="yield-force" class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400" placeholder="Type name..." onchange="initWorkspace()" />
@@ -42,6 +46,7 @@
         
         <div class="flex flex-1 items-center justify-end transition-all space-x-3">
             
+            <!-- TOOLS DROPDOWN MENU -->
             <div id="tools-menu-container" class="relative inline-block text-left">
                 <button onclick="toggleToolsMenu()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-1">
                     <span>⚙️ Tools</span>
@@ -71,6 +76,7 @@
         </div>
     </header>
 
+    <!-- RIGHT DRAWER: STATE MANAGEMENT -->
     <div id="state-drawer" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col">
         <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4 shrink-0">
             <h2 class="text-white font-black text-xs uppercase tracking-widest">Context Engine</h2>
@@ -84,6 +90,7 @@
             </div>
         </div>
 
+        <!-- TABS NAV -->
         <div class="flex border-b border-slate-700 mb-4 overflow-x-auto custom-scrollbar space-x-2 pb-1 shrink-0">
             <button id="tab-btn-session" onclick="switchTab('session')" class="px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap">Session</button>
             <button id="tab-btn-core" onclick="switchTab('core')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Blueprint</button>
@@ -92,6 +99,7 @@
             <button id="tab-btn-prompts" onclick="switchTab('prompts')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompts</button>
         </div>
 
+        <!-- TAB CONTENT: SESSION -->
         <div id="tab-content-session" class="block flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center mb-1">
@@ -118,24 +126,26 @@
             </div>
         </div>
 
-        <div id="tab-content-core" class="hidden flex-1 flex-col space-y-2">
+        <!-- TAB CONTENT: CORE BLUEPRINT -->
+        <div id="tab-content-core" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Core Architecture JSON</h3>
                 <button onclick="commit('core')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save State</button>
             </div>
             
-            <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg mb-2 text-center">
+            <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg mb-2 text-center shrink-0">
                 <p class="text-xs text-indigo-300 font-bold mb-2">JSON Editing is Deprecated.</p>
                 <p class="text-[10px] text-indigo-400">Please use the Markdown Editor in the main window to edit your Blueprint.</p>
             </div>
 
-            <details class="group">
-                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none">Advanced: View Raw JSON Data</summary>
-                <textarea id="core-editor" oninput="renderPreviewFromJSON()" class="mt-2 w-full h-[300px] bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
+            <details class="group flex-1 flex flex-col min-h-0">
+                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">Advanced: View Raw JSON Data</summary>
+                <textarea id="core-editor" oninput="renderPreviewFromJSON()" class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
             </details>
         </div>
 
-        <div id="tab-content-tenant" class="hidden flex-1 flex-col space-y-2">
+        <!-- TAB CONTENT: TENANT/ENVIRONMENTS -->
+        <div id="tab-content-tenant" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-teal-400">Environment JSON</h3>
                 <button onclick="commit('tenant')" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save Env</button>
@@ -147,7 +157,8 @@
             <textarea id="tenant-editor" class="flex-1 w-full bg-black text-teal-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-teal-500 custom-scrollbar"></textarea>
         </div>
 
-        <div id="tab-content-prompts" class="hidden flex-1 flex-col space-y-2">
+        <!-- TAB CONTENT: PROMPT SETTINGS -->
+        <div id="tab-content-prompts" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-pink-400">System Rules (SudoLang)</h3>
                 <div class="space-x-2 flex items-center">
@@ -172,7 +183,8 @@
             <textarea id="prompt-editor" class="flex-1 w-full bg-black text-pink-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-pink-500 custom-scrollbar"></textarea>
         </div>
 
-        <div id="tab-content-adr" class="hidden flex-1 flex-col space-y-4">
+        <!-- TAB CONTENT: ADRS -->
+        <div id="tab-content-adr" class="hidden flex-1 flex-col space-y-4 min-h-0">
             <form id="adr-form" onsubmit="saveAdr(event)" class="bg-slate-800/40 p-3 rounded-xl border border-slate-700 space-y-3 shrink-0">
                 <div class="flex justify-between items-center mb-1">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Edit Existing ADR</h3>
@@ -206,14 +218,18 @@
                     <textarea id="adr-boundary" class="w-full h-12 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
                 </div>
             </form>
-            <div id="adr-list" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1"></div>
+            <!-- ADR LIST (SCROLLABLE AREA) -->
+            <div id="adr-list" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1 pb-4"></div>
         </div>
     </div>
 
+    <!-- MAIN RENDER CANVAS (DUAL-PANE MARKDOWN IDE) -->
     <main class="h-[calc(100vh-57px)] overflow-y-auto bg-slate-50 custom-scrollbar flex relative">
         
+        <!-- WHITE DOCUMENT CARD (CONTAINER) -->
         <div class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
             
+            <!-- FLOATING EDIT BUTTON (SAFELY ANCHORED TO THE CARD) -->
             <div class="absolute top-8 right-8 z-30 transition-opacity duration-300">
                 <button id="md-toggle-btn" onclick="toggleMarkdownMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -221,15 +237,18 @@
                 </button>
             </div>
 
+            <!-- READ ONLY PREVIEW MODE -->
             <div id="markdown-container" class="prose prose-slate max-w-none block mt-6">
                 <div class="animate-pulse text-slate-400">Select workspace and load state...</div>
             </div>
 
+            <!-- RAW MARKDOWN EDIT MODE -->
             <textarea id="markdown-editor" class="hidden w-full h-[calc(100vh-200px)] mt-6 bg-slate-50 text-slate-800 font-mono text-sm p-8 rounded-xl border-2 border-indigo-100 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none" placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
             
         </div>
     </main>
 
+    <!-- STATEFUL LINK CODEBASE MODAL -->
     <div id="link-codebase-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-lg">
             <div class="flex justify-between items-center mb-4">
@@ -257,6 +276,7 @@
         </div>
     </div>
 
+    <!-- QUICK ADR MODAL -->
     <div id="quick-adr-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-xl">
             <div class="flex justify-between items-center mb-4">
@@ -311,6 +331,7 @@
         </div>
     </div>
 
+    <!-- OPS MANUAL MODAL -->
     <div id="ops-manual-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4 shrink-0">
@@ -326,6 +347,7 @@
         </div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
     <div id="toast-container"></div>
 
     <script>

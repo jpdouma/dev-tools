@@ -184,8 +184,16 @@
             "content": "Stores the final, verified results (e.g., Tuition Deposits or Coffee Sales).\n\n```sql\nCREATE TABLE outcomes (\n    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),\n    tenant_id UUID NOT NULL,\n    agency_id UUID,\n    external_ref_id TEXT,\n    value_captured NUMERIC(15, 2),\n    outcome_type TEXT,\n    metadata JSONB,\n    created_at TIMESTAMPTZ DEFAULT now()\n);\n```"
           },
           {
+            "title": "",
+            "content": ""
+          },
+          {
             "title": "7.3 The \"Metadata-Only\" Push Logic",
             "content": "* Local Writes: Full, unadulterated data is written to the local Zone 3 instance.  \n* Asymmetric Push: On every successful outcome, a webhook sends only anonymized metadata (outcome\\_type, value\\_captured, token\\_burn\\_velocity) to the Agency Hub.\n\n```sql\nCREATE TABLE inquiries (\n    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),\n    tenant_id UUID NOT NULL,\n    lead_source TEXT, -- E.g., 'tiktok_ad_01', 'organic_whatsapp'\n    vibe_score FLOAT CHECK (vibe_score >= 0 AND vibe_score <= 1), -- Sentiment Analysis\n    status TEXT DEFAULT 'prospecting', -- 'prospecting' -> 'transaction_ready'\n    lead_metadata JSONB, -- Stores reach, views, and TikTok market signals\n    last_interaction_at TIMESTAMPTZ\n);\n```"
+          },
+          {
+            "title": "",
+            "content": ""
           },
           {
             "title": "7.4 The Enthusiast Ledger (enthusiast\\_logs)",
@@ -364,6 +372,10 @@
           {
             "title": "13.1 The Bifurcated Interface",
             "content": "To balance executive clarity with total technical transparency, the Portal utilizes a two-mode display:\n\n| View Mode | Purpose | Target User |\n| :---- | :---- | :---- |\n| Processed Intelligence View | High-level \"Yield\" snapshots, sentiment trends, and ROI metrics. | The Strategic Executive. |\n| Raw Terminal View | Real-time, second-by-second \"Thought Stream\" of the Liaison and Sentinel. | The Auditor / Technical SME. |"
+          },
+          {
+            "title": "",
+            "content": ""
           },
           {
             "title": "A. The Processed Intelligence View",
