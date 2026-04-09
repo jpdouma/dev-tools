@@ -44,6 +44,11 @@ function getProjectFiles(project) {
 // Helper: Archive File
 function archiveFile(filePath, archiveDir) {
   if (fs.existsSync(filePath)) {
+    // ARCHITECTURAL FIX: Ensure the archive directory exists before copying
+    if (!fs.existsSync(archiveDir)) {
+      fs.mkdirSync(archiveDir, { recursive: true });
+    }
+    
     const timestamp = Math.floor(Date.now() / 1000);
     const fileName = path.basename(filePath);
     const project = path.basename(path.dirname(filePath));

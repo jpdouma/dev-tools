@@ -450,16 +450,10 @@
       "- add green light that the repo is added."
     ],
     "next_objectives": [
-      "1. Phase -1 Commercial Gateway: Build the Sales Support Agent to handle strict SLA/Quote generation.",
-      "2. Zone 3 Schema Normalization: Eradicate hardcoded ecu_schema.sql and map domain variables to agnostic JSONB payload.",
-      "3. Phase 0 Factory: Build compiler to ingest domain_dictionary.json and output SAFE_MODE.json."
-    ],
-    "session_changelog": [
-      "- Eradicated legacy `documentation` folder to enforce Hub as Single Source of Truth.",
-      "- Surgically injected \"Phase -1 Commercial Gateway\" into core_state.json via CLI meta-prompt.",
-      "- Fixed backend static routing and API paths to correctly render the Operations Manual.",
-      "- Upgraded UI/UX: Removed native browser blocking alerts on editor clears.",
-      "- Patched critical state-sync bug to prevent frontend from overwriting backend JSON updates."
+      "1. Phase -1 Commercial Gateway: Build the Sales Support Agent to ingest requirements and output quotes before onboarding.",
+      "2. Zone 3 Schema Normalization: Eradicate ecu_schema.sql and map domain variables to JSONB.",
+      "3. Phase 0 Factory: Build compiler to ingest domain_dictionary.json and output SAFE_MODE.json.",
+      "4. UI Translation Layer: Strip hardcoded strings from Zone 5 React components using TenantProvider."
     ]
   }
 }
