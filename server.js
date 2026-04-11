@@ -71,6 +71,45 @@ app.get('/api/ops-manual', (req, res) => {
   }
 });
 
+app.post('/api/ops-manual', (req, res) => {
+  const manualPath = path.join(__dirname, 'OPS_MANUAL.md');
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ error: 'Content required' });
+  fs.writeFileSync(manualPath, content, 'utf8');
+  res.json({ status: 'success' });
+});
+
+app.get('/api/:project/config', (req, res) => {
+  const registryPath = path.join(__dirname, 'tenant_registry.json');
+  if (fs.existsSync(registryPath)) {
+    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    res.json(registry[req.params.project] || {});
+  } else {
+    res.json({});
+  }
+});
+
+app.get('/api/:project/get-context', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    if (!fs.existsSync(files.link)) return res.send("No codebase linked.");
+    
+    const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
+    const targetPath = linkData.targetPath;
+    
+    // The find script: gathering content of key files from targeted directories
+    // We target common source folders like src, lib, components, etc.
+    const findScript = `find . -maxdepth 3 -not -path '*/.*' -type f \\( -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.html" -o -name "*.css" -o -name "*.ts" -o -name "*.tsx" \\) -not -name "package-lock.json" -not -path "*/node_modules/*" -exec echo "--- FILE: {} ---" \\; -exec awk '1' {} \\; -exec echo "" \\;`;
+    
+    const command = `cd "${targetPath}" && git status && git diff && ${findScript}`;
+    
+    exec(command, { maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
+        if (error) {
+            return res.status(500).send(`Error: ${error.message}\n${stderr}`);
+        }
+        res.send(stdout);
+    });
+});
+
 app.get('/api/:project/state', (req, res) => {
   const files = getProjectFiles(req.params.project);
   if (fs.existsSync(files.state)) {

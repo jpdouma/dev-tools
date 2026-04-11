@@ -1,5 +1,335 @@
 [
   {
+    "id": "ADR-068",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Four Hour Context Cycle State Persistence",
+    "friction": "Need to mitigate context degradation over long LLM development sessions.",
+    "ruling": "All development must adhere to a strict Four Hour Context Cycle via the Universal Context Hub. Unfinished tasks must be flushed to the next objectives array in the core state file via the WRAPUP command before context window termination.",
+    "boundary": "Developers must NEVER start a new session without booting from the most recent Hub payload. Relying on conversational memory across degraded LLM windows is strictly prohibited.",
+    "timestamp": "2026-04-11T06:37:11.476Z"
+  },
+  {
+    "id": "ADR-067",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Stage Zero Ingestion Compiler",
+    "friction": "Need a programmatic mapping layer between agnostic metadata and the UI.",
+    "ruling": "The Phase Zero ingestion process must programmatically output a domain dictionary payload. This payload acts as the absolute mapping layer between the agnostic Zone 3 JSONB metadata and the Zone 5 UI.",
+    "boundary": "Human operators must NEVER manually alter the Zone 3 SQL schema to accommodate ingestion requirements. All domain fluidity must be routed through the JSON compiler.",
+    "timestamp": "2026-04-11T06:37:10.328Z"
+  },
+  {
+    "id": "ADR-066",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Phase Minus One Commercial Gateway",
+    "friction": "Need to protect architectural boundaries during the pre-onboarding, sales phase.",
+    "ruling": "Yield Force will implement a pre onboarding layer driven by a Commercial Validator agent. This agent must strictly enforce architectural boundaries against client requests and only output the SLA and Quote.",
+    "boundary": "Phase Minus One agents must NEVER generate system prompts or technical configurations. Technical instantiation is strictly reserved for Phase Zero after SLA signature.",
+    "timestamp": "2026-04-11T06:37:09.374Z"
+  },
+  {
+    "id": "ADR-065",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Sovereign Governance of M-GRPO Engine",
+    "friction": "Need to restrict access to core model tuning parameters to the Strategic Governance Portal.",
+    "ruling": "Real-time tuning of the M-GRPO engine (Agent Aggression, Tone, Format weights) is restricted entirely to the Zone 5 Strategic Governance Portal.",
+    "boundary": "Zone 4 (The Agency/Operator layer) must not contain any UI elements or API hooks capable of altering the underlying M-GRPO policy.",
+    "timestamp": "2026-04-11T06:37:08.626Z"
+  },
+  {
+    "id": "ADR-064",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "UI Translation Layer Enforcement",
+    "friction": "Need to strictly enforce dynamic domain vocabulary injection on the frontend.",
+    "ruling": "The frontend must remain strictly agnostic. All domain-specific vocabulary must be dynamically injected via a global React TenantProvider.",
+    "boundary": "UI components are strictly prohibited from containing hardcoded domain strings. They must reference the active Stage 0 Tenant Registry JSON payload for all labels.",
+    "timestamp": "2026-04-11T06:37:08.471Z"
+  },
+  {
+    "id": "ADR-063",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Threshold-Based Legacy System Sanitization",
+    "friction": "Need to prevent low-intent data from syncing to legacy CRM systems.",
+    "ruling": "Yield Force will act as an explicit \"Data Sanitizer\" for external integrations. API webhooks to legacy systems (e.g., Salesforce, HubSpot, custom CMS) must be governed by threshold rules tied to the 5-Stage Triage Pipeline.",
+    "boundary": "Raw conversation logs and low-intent entities (Stages 1 and 2) must remain sandboxed within Yield Force. Data is only permitted to sync to external operational databases when an entity crosses a defined maturity threshold (e.g., reaching Stage 3 Intent, or triggering a specific HITL escalation).",
+    "timestamp": "2026-04-11T06:37:08.285Z"
+  },
+  {
+    "id": "ADR-062",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Agnostic 5-Stage Triage Pipeline",
+    "friction": "Need a universal state-machine for tracking entities across diverse tenant domains.",
+    "ruling": "The core analytics and operational state-machine must track all entities through a strict, universal 5-stage triage pipeline: 1. Ingestion, 2. Procedural Triage, 3. Intent Maturation, 4. Disposition/Resolution, and 5. Compound Activation.",
+    "boundary": "Frontend UI components must render localized vocabulary (e.g., displaying Stage 4 as \"Enrollments\" for a university or \"Case Closed\" for a court) strictly via dynamic mapping from the tenant's Stage 0 configuration file. The underlying database schema must remain strictly agnostic.",
+    "timestamp": "2026-04-11T06:37:08.118Z"
+  },
+  {
+    "id": "ADR-061",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "OKR-Conditioned Operational Prompts",
+    "friction": "Need to dynamically adjust agent behavior based on specific Campaign OKRs.",
+    "ruling": "Campaign OKRs (Objectives and Key Results)—specifically targets for Throughput, Efficiency (Cost Per Resolution), and Quality (Policy Adherence)—defined during the Stage 0 Tenant Intake must be programmatically compiled into the core system prompts of the deployed agents.",
+    "boundary": "An agent must dynamically evaluate its conversational trajectory against these mathematical bounds and must autonomously escalate or abort actions (e.g., refusing a discount, halting a low-intent interaction) if executing them would violate a defined Efficiency or Quality Key Result.",
+    "timestamp": "2026-04-11T06:37:07.952Z"
+  },
+  {
+    "id": "ADR-060",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Orphaned Thread Auto-Release",
+    "friction": "Need a mechanism to automatically release human locks on dormant conversational threads.",
+    "ruling": "Zone 5 Governance must implement SLA-driven Auto-Release Timers. If a conversational thread is locked to a human, but registers zero operator keystrokes or dispatch events for a globally configurable threshold (e.g., 15 minutes), Zone 2 must automatically revoke the human_lock and resume M-GRPO automated handling, logging the reversion in the audit trail.",
+    "boundary": "Human locks on conversational threads must be treated as highly volatile, temporary states, explicitly requiring continuous human engagement to remain active.",
+    "timestamp": "2026-04-11T06:37:07.786Z"
+  },
+  {
+    "id": "ADR-059",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Co-Training Consensus Batching",
+    "friction": "Need to sandbox operator training inputs to prevent immediate, unverified model mutations.",
+    "ruling": "\"Perfect Trajectories\" submitted via the Operator UI must not immediately mutate the core model weights. Instead, they must be routed to a Zone 3 training_consensus staging table. These trajectories will be weighted by the operator's RBAC tier and processed in batch updates, requiring Sovereign/VP review for high-impact policy shifts.",
+    "boundary": "Client-side operator inputs, even when explicitly flagged as training data, must remain sandboxed as \"proposed trajectories\" until validated by the central Governance engine.",
+    "timestamp": "2026-04-11T06:37:07.618Z"
+  },
+  {
+    "id": "ADR-058",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Deterministic Typing Locks",
+    "friction": "Need to prevent AI agents from generating messages while a human operator is typing.",
+    "ruling": "The UI must implement strict focus-based state locking. The instant a human operator focuses on the chat input area, the client must fire a PAUSE_AGENT webhook to Zone 2, instantly halting any pending NLP generation and flagging the thread as \"Locked to Human.\"",
+    "boundary": "The AI agent must never be permitted to dispatch a payload to a channel if the human_lock boolean in the Zone 3 conversational ledger is true.",
+    "timestamp": "2026-04-11T06:37:07.454Z"
+  },
+  {
+    "id": "ADR-057",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Dynamic Workflow Telemetry",
+    "friction": "Need UI status indicators to accurately reflect backend execution states.",
+    "ruling": "Workflow status indicators must be strictly bound to active state variables (e.g., awaiting_authorization vs. cycle_locked). The UI must dynamically render the accurate status text, iconography, and contextual subtitles reflecting the actual execution state of the transaction.",
+    "boundary": "Static text indicating workflow progression is strictly forbidden in the React UI layer. All status blocks must be conditionally rendered based on the live execution state of the underlying workflow.",
+    "timestamp": "2026-04-11T06:37:07.269Z"
+  },
+  {
+    "id": "ADR-056",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Deterministic UI State Locking (Idempotency)",
+    "friction": "Need to prevent double-execution of authorization events in the UI.",
+    "ruling": "All authorization interfaces must implement strict, deterministic state locking. Upon the successful execution of an authorization event, all related state mutation controls (checkboxes, buttons, text inputs) must be instantly and permanently disabled for that specific cycle or component instance.",
+    "boundary": "Client-facing UI must NEVER rely on eventual consistency to prevent double-execution. Execution states must instantly lock the DOM elements, requiring a hard reset or new cycle generation from the Zone 3 ledger to unlock.",
+    "timestamp": "2026-04-11T06:37:07.085Z"
+  },
+  {
+    "id": "ADR-055",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Universal Budget & Allocation Engine",
+    "friction": "Need a native mechanism to track campaign spend and token burn across all tenants.",
+    "ruling": "The Budget Authorization Workflow is elevated to a core, agnostic feature required for all tenant instances. The framework must natively capture Intake, Triage, and Execution. Authorized capital must be automatically routed into the Zone 3 Datastore to act as the official cost-basis telemetry for real-time ROI and Token Burn metric calculations.",
+    "boundary": "The system must never deploy a tenant instance without a configured financial authorization chain. All campaign spend and token burn must be tracked natively within the universal engine to maintain the integrity of the core Yield mathematics.",
+    "timestamp": "2026-04-11T06:37:06.900Z"
+  },
+  {
+    "id": "ADR-054",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Ubiquitous Predictive ROI Telemetry",
+    "friction": "Need to ensure financial requests in the HITL queue are justified by data.",
+    "ruling": "All financial requests originating in Zone 5 must be dynamically evaluated by the AI before dispatch. Zone 2 will query the Zone 3 outcomes ledger to calculate trailing conversion efficiency, attaching an est_roi_multiplier and confidence_level to the payload. This telemetry is mandatory and must be visible to BOTH the Operator (for request justification) and the Executive (for approval validation).",
+    "boundary": "The system must never permit a financial request to enter the HITL/Authorization queue without an attached AI-generated ROI prediction derived from the local Zone 3 immutable ledger.",
+    "timestamp": "2026-04-11T06:37:06.500Z"
+  },
+  {
+    "id": "ADR-053",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Role-Based UI Bifurcation & Omnichannel Approvals",
+    "friction": "Need to separate Operator tracking views from Executive authorization controls and support asynchronous mobile approvals.",
+    "ruling": "Zone 5 Governance must implement strict Role-Based Access Control (RBAC) UI rendering. Operators receive Intake, Tracking, and Predictive views. Executives receive Triage, Veto, and Execution views. Executive authorization must support asynchronous payload resolution via secure webhooks (e.g., WhatsApp integrations) that map directly back to the Zone 3 Datastore to synchronously update the Operator's tracking view.",
+    "boundary": "Client-facing UI components must NEVER render active state mutation controls (like final budget authorization triggers) to Operator-tier roles. Authorization state execution must be entirely decoupled from the React web UI to support external mobile triggers.",
+    "timestamp": "2026-04-11T06:37:05.798Z"
+  },
+  {
+    "id": "ADR-052",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "PHASE 0 FACTORY INITIALIZATION",
+    "friction": "Need to automate the deployment of new tenant instances.",
+    "ruling": "Build the Phase 0 Factory (Onboarding Cohort logic) to fully automate the generation of SAFE_MODE.json and the domain_dictionary.json payload. The setup pipeline must programmatically initialize new tenants based on initial onboarding inputs, establishing a zero-touch RaaS architecture.",
+    "boundary": "The system must never require a developer to manually write or edit configuration JSON files to deploy a new tenant instance. Bypassing the Phase 0 automated initialization pipeline to hand-roll tenant configurations is strictly forbidden.",
+    "timestamp": "2026-04-11T06:37:05.208Z"
+  },
+  {
+    "id": "ADR-051",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ZONE 2 PROMPT AGNOSTICISM",
+    "friction": "Need to eliminate hardcoded, domain-specific markdown files for LLM extraction logic.",
+    "ruling": "Delete all static forensic protocol markdown files. Refactor the refinery_api to dynamically assemble LLM extraction prompts at runtime. Prompt generation must be driven strictly by the active Tenant ID's Phase 0 configuration payload, establishing a truly agnostic LLM extraction layer.",
+    "boundary": "The system must never rely on hardcoded, domain-specific instructions for LLM extraction tasks. Committing client-specific prompt logic or static markdown files to the core Zone 2 codebase is strictly forbidden.",
+    "timestamp": "2026-04-11T06:37:04.587Z"
+  },
+  {
+    "id": "ADR-050",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ZONE 3 UNIVERSAL AGNOSTIC SCHEMA ENFORCEMENT",
+    "friction": "Need to prevent client-specific SQL schema migrations.",
+    "ruling": "Eradicate all tenant-specific SQL schemas. Enforce a Universal Agnostic Schema. Core relational tables must be restricted strictly to universal primitives (e.g., uuid, tenant_id, funnel_stage, global_status). All domain-specific attributes and proprietary client flags (e.g., vax_status) must be relegated exclusively to a strictly typed `metadata` JSONB column.",
+    "boundary": "The system must never require a database migration or schema alteration to onboard a new client. Direct addition of client-specific columns to core SQL tables is strictly forbidden.",
+    "timestamp": "2026-04-11T06:37:03.745Z"
+  },
+  {
+    "id": "ADR-049",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "Temporary ECU Mockup Debt & Agnostic Deferral",
+    "friction": "Need to secure the ECU Medical demo without permanently compromising the agnostic schema.",
+    "ruling": "We will accept localized \"Mockup Debt\" (hardcoded SQL columns, static frontend tenant IDs, and fixed Phase 0 API prompts) exclusively to secure the ECU Medical demo. Post-demo, Objective 5 becomes the highest priority: refactoring the chassis to pure JSONB agnosticism and dynamic domain fluid injection.",
+    "boundary": "All new React components built for the Zone 5 Governance Portal today MUST strictly consume the agnostic `OverviewDashboardPayload` TypeScript contract. No new domain-specific hardcoding is permitted in the Zone 5 UI layer.",
+    "timestamp": "2026-04-11T06:37:03.009Z"
+  },
+  {
+    "id": "ADR-048",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Logging the RaaS Correction",
+    "friction": "Need to handle AI anomalies without allowing clients to alter the core M-GRPO tuning parameters.",
+    "ruling": "Client-facing UI components must NEVER contain Zone 1 or Zone 2 LLM tuning parameters. Client control is strictly limited to Knowledge Base inputs (uploading PDFs/rules) and Budget workflows.",
+    "boundary": "AI anomalies and friction points must be surfaced to the client strictly through a \"Human-in-the-Loop (HITL) Escalation Queue\" for manual triage, rather than allowing the client to retune the engine globally.",
+    "timestamp": "2026-04-11T06:37:02.307Z"
+  },
+  {
+    "id": "ADR-047",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "UI Domain Translation Layer",
+    "friction": "Need to render domain-specific vocabulary in the React UI without hardcoding it in the engine.",
+    "ruling": "The Zone 5 React dashboard must act as a strict translation layer, referencing a domain_dictionary.json from the Tenant Registry to map agnostic engine metrics to client-specific language on the UI.",
+    "boundary": "Client-specific domain fluid must NEVER be hardcoded into the Zone 3 PostgreSQL schema or Zone 2 core Python/Node logic.",
+    "timestamp": "2026-04-11T06:37:01.538Z"
+  },
+  {
+    "id": "ADR-046",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Form Completion Billing Triggers",
+    "friction": "Need an agnostic way to recognize \"Yield\" for billing purposes.",
+    "ruling": "The Kicker Bridge (Zone 3) triggers billing events strictly based on a 'Form Completion' webhook intercepted by Zone 1, redefining \"Yield\" as the moment of student submission.",
+    "boundary": "The Agnostic Core (Zone 3) must never poll external client banks or store specific USD kicker amounts; it may only log generic outcome_type variables and fire webhooks to an external billing provider.",
+    "timestamp": "2026-04-11T06:37:00.370Z"
+  },
+  {
+    "id": "ADR-045",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Token Burn as Agnostic COGS",
+    "friction": "Need to formally define and track token burn as Cost of Goods Sold.",
+    "ruling": "The Sentinel (Zone 2) must act as a financial auditor, utilizing an agnostic token_burn_ceiling. If a tenant exceeds this threshold without proportional yield, the Sentinel throttles the Liaison agent.",
+    "boundary": "Token burn must never be treated as a hidden overhead; it must be metrically tracked in Zone 3 and exposed in the Master Billing Hook.",
+    "timestamp": "2026-04-11T06:36:59.677Z"
+  },
+  {
+    "id": "ADR-044",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "ECU Online Application Intercept",
+    "friction": "Need to track completed applications without direct API integration into the ECU backend.",
+    "ruling": "During onboarding, the Tech-Analyst will configure a parameterized URL handoff from the WhatsApp Liaison. ECU's IT will place a YF webhook on the portal's final \"Success\" page to ping the yf_lead_id back to Zone 1, closing the loop.",
+    "boundary": "Yield Force agents must never attempt to scrape, log into, or interface directly with the ECU admissions backend. The loop must be closed strictly via inbound webhook or parameterized URL tagging.",
+    "timestamp": "2026-04-11T06:36:54.585Z"
+  },
+  {
+    "id": "ADR-043",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Hierarchical Keys for Agency Fleets",
+    "friction": "Need to push metadata to the Agency Dashboard without exposing raw client PII.",
+    "ruling": "Every row in the engine must carry both tenant_id and agency_id. The master billing hook queries active status by agency_id for invoicing, and uses an Asymmetric Sync to push anonymized metadata to the Agency Zone 4 hub.",
+    "boundary": "The Zone 4 Agency Dashboard must never receive raw tenant_id PII or student data; it is strictly limited to asymmetric, metadata-level telemetry.",
+    "timestamp": "2026-04-11T06:36:52.966Z"
+  },
+  {
+    "id": "ADR-042",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Volumetric Telemetry for Tiered Billing",
+    "friction": "Need an automated, event-driven mechanism to trigger billing tier upgrades.",
+    "ruling": "Zone 3 must maintain a live rolling aggregate of COUNT(verified_outcomes) per tenant_id. The Master Billing Hook uses this live telemetry to automatically and instantly trigger tier upgrades.",
+    "boundary": "Billing tier upgrades must never rely on manual or batched end-of-month queries; they must be completely event-driven via live volumetric data.",
+    "timestamp": "2026-04-11T06:36:51.780Z"
+  },
+  {
+    "id": "ADR-041",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Kicker Bridge Abstraction (Outcome Types)",
+    "friction": "Need to decouple actual USD kicker values from the agnostic core database schema.",
+    "ruling": "Zone 3 will strictly log generic variables using the outcome_type column (e.g., tier_1, tier_2). The Kicker Bridge maps these to actual USD values purely via the external Tenant Registry JSON and fires billing webhooks.",
+    "boundary": "The core PostgreSQL database must NEVER store actual dollar amounts or client-specific outcome definitions.",
+    "timestamp": "2026-04-11T06:36:50.669Z"
+  },
+  {
+    "id": "ADR-040",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Agnostic Margin Kill-Switch",
+    "friction": "Need to prevent runaway token costs and enforce margin protection.",
+    "ruling": "The Sentinel (Zone 2) must implement an agnostic token_burn_ceiling. It will throttle the Liaison agent (forcing Safe Mode or delaying outbound discovery) if token compute exceeds the threshold without proportional yield.",
+    "boundary": "The system must never allow unbounded token generation. Margin protection must be structurally enforced by the Sentinel before any LLM API call is made.",
+    "timestamp": "2026-04-11T06:36:48.919Z"
+  },
+  {
+    "id": "ADR-039",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Commercial Payload Schema and Subscription Matrix",
+    "friction": "Need to enforce pricing rules without breaking conversational flow.",
+    "ruling": "Implement a hybrid Advisory and Override logic within the Commercial Validator. Establish hard floors such as a $1500 setup and a $750 monthly minimum that trigger immediate hitl_required state overrides if breached. Non-critical constraints will generate advisory warnings but allow quote progression. The final output must generate a structured JSON manifest compliant with the Zone 0 B2B2C Billing Registry.",
+    "boundary": "The LLM may never autonomously override the hard pricing floors. Any bespoke feature request or pricing violation strictly routes to Product Management review.",
+    "timestamp": "2026-04-11T06:36:47.601Z"
+  },
+  {
+    "id": "ADR-038",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "OpenClaw Framework Integration and Sentinel Guardrails",
+    "friction": "Need to establish integration rules and authority boundaries for the OpenClaw exoskeleton.",
+    "ruling": "Integrate the OpenClaw exoskeleton to handle Zone 1 channel adapters and baseline memory. Subordinate the OpenClaw action space to the Yield Force Sentinel middleware in Zone 2. The commercial manifest acts as the absolute constraint on OpenClaw tools. All OpenClaw telemetry is siphoned into the Zone 3 Ledger.",
+    "boundary": "OpenClaw adapters manage inputs but OpenClaw may not execute any state-changing tool without explicit authorization from the Yield Force Sentinel middleware.",
+    "timestamp": "2026-04-11T06:36:42.551Z"
+  },
+  {
+    "id": "ADR-037",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "OpenClaw Framework Integration and Sentinel Guardrails",
+    "friction": "Building custom channel webhooks and agentic loops from scratch introduces massive technical debt and delays deployment. Relying purely on an open-source framework poses unacceptable security risks for institutional clients.",
+    "ruling": "Integrate the OpenClaw exoskeleton to handle Zone 1 channel adapters and baseline memory. Subordinate the OpenClaw action space to the Yield Force Sentinel middleware in Zone 2. The commercial manifest acts as the absolute constraint on OpenClaw tools. All OpenClaw telemetry is siphoned into the Zone 3 Ledger.",
+    "boundary": "OpenClaw adapters manage inputs but OpenClaw may not execute any state-changing tool without explicit authorization from the Yield Force Sentinel middleware.",
+    "timestamp": "2026-04-10T11:05:12.727Z"
+  },
+  {
+    "id": "ADR-036",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Commercial Payload Schema and Subscription Matrix",
+    "friction": "The Phase -1 Commercial Validator needs to enforce strict pricing structures like flat fees and tiered plans and result-oriented kickers along with hard minimums and B2B2C relationships. It must do this without hallucinating impossible deals or bypassing Yield Force margins.",
+    "ruling": "Implement a hybrid Advisory and Override logic within the Commercial Validator. Establish hard floors such as a $1500 setup and a $750 monthly minimum that trigger immediate hitl_required state overrides if breached. Non-critical constraints will generate advisory warnings but allow quote progression. The final output must generate a structured JSON manifest compliant with the Zone 0 B2B2C Billing Registry.",
+    "boundary": "The LLM may never autonomously override the hard pricing floors. Any bespoke feature request or pricing violation strictly routes to Product Management review.",
+    "timestamp": "2026-04-10T11:05:08.792Z"
+  },
+  {
     "id": "ADR-001",
     "scope": "[CORE]",
     "status": "[ACTIVE]",

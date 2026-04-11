@@ -1,5 +1,11 @@
 {
+  "yield-force": {
+    "macro_project": "Yield Force Multi-Agent Sovereign Architecture",
+    "active_context": "Unified Architectural Blueprint"
+  },
   "ecu-9876-uuid-placeholder": {
+    "macro_project": "Ernest Cook University Systems",
+    "active_context": "Medical Education Pipeline",
     "tenant_id": "ecu-9876-uuid-placeholder",
     "tenant_name": "Ernest Cook University",
     "infrastructure_tier": "The Fleet (VPS)",

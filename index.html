@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Context Hub</title>
     <link rel="icon" href="./yf-avatar.png">
-    
+
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
@@ -20,8 +20,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-        
-        /* ARCHITECTURAL HOTFIX: Hide KaTeX accessibility text exposed by Tailwind */
         .katex-mathml { display: none !important; }
     </style>
 </head>
@@ -34,27 +32,22 @@
             <h1 class="text-sm font-black tracking-widest text-indigo-600 uppercase">Universal Context Hub</h1>
             <div class="h-6 w-px bg-slate-300"></div>
             <div class="flex items-center space-x-2">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" title="Type a new name to create a workspace">Workspace:</label>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Workspace:</label>
                 <input id="global-project" type="text" value="yield-force" class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400" placeholder="Type name..." onchange="initWorkspace()" />
                 <button onclick="initWorkspace()" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-indigo-200 hover:bg-indigo-100 transition">Load / Create</button>
             </div>
         </div>
-        
+
         <div class="flex flex-1 items-center justify-end transition-all space-x-3">
-            
             <div id="tools-menu-container" class="relative inline-block text-left">
                 <button onclick="toggleToolsMenu()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-1">
                     <span>⚙️ Tools</span>
                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div id="tools-dropdown" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-slate-200">
-                    <div class="py-1" role="menu" aria-orientation="vertical">
-                        <button onclick="toggleLinkModal(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-100 transition" role="menuitem">
-                            🔗 Link Source Code
-                        </button>
-                        <button onclick="toggleOpsManual(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" role="menuitem">
-                            [?] Operations Manual
-                        </button>
+                    <div class="py-1" role="menu">
+                        <button onclick="toggleLinkModal(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-100 transition">🔗 Link Source Code</button>
+                        <button onclick="toggleOpsManual(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">[?] Operations Manual</button>
                     </div>
                 </div>
             </div>
@@ -63,7 +56,7 @@
                 <span>+ Quick ADR</span>
             </button>
             <button id="copy-handover-btn" onclick="copyHandoverPrompt()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-sm font-bold transition border border-slate-700 shadow-sm flex items-center space-x-2">
-                <span>Copy SudoLang Payload</span>
+                <span>Copy Prompt</span>
             </button>
             <button onclick="toggleDrawer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-md shadow-indigo-100">
                 Context & State
@@ -93,6 +86,11 @@
         </div>
 
         <div id="tab-content-session" class="block flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
+            <div class="space-y-2 bg-indigo-950/30 p-3 rounded-lg border border-indigo-900/50">
+                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-1">Smart Wrap-Up Import (Paste JSON)</label>
+                <textarea id="smart-session-dropzone" oninput="handleSessionPaste(event)" class="w-full h-12 bg-black text-indigo-300 text-[10px] p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar" placeholder="Paste /WRAPUP JSON output here..."></textarea>
+            </div>
+
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center mb-1">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Local Scratchpad <span class="text-slate-500 text-[8px]">(Not Sent)</span></h3>
@@ -100,27 +98,28 @@
                 </div>
                 <textarea id="todo-editor" class="resize-y min-h-[100px] w-full bg-black text-amber-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar" placeholder="- Reminders for myself..."></textarea>
             </div>
+            
             <div class="space-y-4 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Session Wrap-Up</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Session Queue</h3>
                     <button onclick="commit('core')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-[9px] font-bold uppercase transition">Save Session</button>
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center">
-                        <label class="text-[9px] font-black uppercase text-slate-500">Changelog</label>
+                        <label class="text-[9px] font-black uppercase text-slate-500">Changelog (Completed)</label>
                         <button onclick="clearEditor('changelog-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
                     </div>
                     <textarea id="changelog-editor" class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="- Built the XYZ module..."></textarea>
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center">
-                        <label class="text-[9px] font-black uppercase text-slate-500">Next Objectives</label>
+                        <label class="text-[9px] font-black uppercase text-slate-500">Next Objectives (FIFO Queue)</label>
                         <div class="flex items-center space-x-2">
                             <span class="text-[8px] text-red-400 font-bold" id="context-load-warning"></span>
                             <button onclick="clearEditor('objectives-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
                         </div>
                     </div>
-                    <textarea id="objectives-editor" oninput="checkContextLoad()" class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="1. Refactor logic..."></textarea>
+                    <textarea id="objectives-editor" oninput="checkContextLoad()" class="w-full h-32 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="1. Refactor logic..."></textarea>
                 </div>
             </div>
         </div>
@@ -130,12 +129,10 @@
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Core Architecture JSON</h3>
                 <button onclick="commit('core')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save State</button>
             </div>
-            
             <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg mb-2 text-center shrink-0">
                 <p class="text-xs text-indigo-300 font-bold mb-2">JSON Editing is Deprecated.</p>
                 <p class="text-[10px] text-indigo-400">Please use the Markdown Editor in the main window to edit your Blueprint.</p>
             </div>
-
             <details class="group flex-1 flex flex-col min-h-0">
                 <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">Advanced: View Raw JSON Data</summary>
                 <textarea id="core-editor" oninput="renderPreviewFromJSON()" class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
@@ -161,21 +158,8 @@
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-pink-400">System Rules (SudoLang)</h3>
                 <div class="space-x-2 flex items-center">
-                    <div class="relative group">
-                        <button onclick="copyLinterPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm cursor-pointer">
-                            ✨ Lint Code
-                        </button>
-                        <div class="absolute right-0 top-full mt-2 w-64 bg-slate-900 text-slate-300 text-[10px] rounded-lg shadow-2xl border border-slate-700 p-3 hidden group-hover:block z-[200]">
-                            <strong class="text-indigo-400 block mb-1 text-xs uppercase tracking-wider">Linter Workflow:</strong>
-                            <ol class="list-decimal pl-4 space-y-1 mt-2">
-                                <li><strong class="text-white">Click</strong> to copy the wrapped Linter.</li>
-                                <li><strong class="text-white">Paste</strong> into a fresh AI chat window.</li>
-                                <li><strong class="text-white">Wait</strong> for the AI to score & rewrite.</li>
-                                <li><strong class="text-white">Copy</strong> the result back here & Save.</li>
-                            </ol>
-                        </div>
-                    </div>
-                    <button id="clear-prompt-btn" onclick="clearPromptEditor()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Clear</button>
+                    <button id="clear-prompt-btn" onclick="clearPromptEditor()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Clear</button>
+                    <button onclick="loadPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Load Prompt</button>
                     <button onclick="commit('prompts')" class="bg-pink-600 hover:bg-pink-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Save Rules</button>
                 </div>
             </div>
@@ -185,7 +169,9 @@
         <div id="tab-content-adr" class="hidden flex-1 flex-col space-y-4 min-h-0">
             <form id="adr-form" onsubmit="saveAdr(event)" class="bg-slate-800/40 p-3 rounded-xl border border-slate-700 space-y-3 shrink-0">
                 <div class="flex justify-between items-center mb-1">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Edit Existing ADR</h3>
+                    <div class="flex items-center">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Edit Existing ADR</h3>
+                    </div>
                     <button type="submit" id="adr-submit-btn" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition">Save Update</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -198,22 +184,21 @@
                         <option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option>
                     </select>
                 </div>
-                
                 <div>
                     <label class="text-[9px] font-black uppercase text-slate-400 block mb-1">Decision Title</label>
                     <input id="adr-title" type="text" class="w-full bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none" placeholder="e.g., Use Node.js for Backend">
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-amber-500 block mb-1">Why (Friction)</label>
-                    <textarea id="adr-friction" class="w-full h-12 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the problem we are solving?"></textarea>
+                    <textarea id="adr-friction" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the problem we are solving?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-emerald-500 block mb-1">What (Ruling)</label>
-                    <textarea id="adr-ruling" class="w-full h-12 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
+                    <textarea id="adr-ruling" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-red-400 block mb-1">What Not (Boundary)</label>
-                    <textarea id="adr-boundary" class="w-full h-12 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
+                    <textarea id="adr-boundary" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
                 </div>
             </form>
             <div id="adr-list" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1 pb-4"></div>
@@ -221,22 +206,17 @@
     </div>
 
     <main class="h-[calc(100vh-57px)] overflow-y-auto bg-slate-50 custom-scrollbar flex relative">
-        
         <div class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
-            
             <div class="absolute top-8 right-8 z-30 transition-opacity duration-300">
                 <button id="md-toggle-btn" onclick="toggleMarkdownMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     <span id="md-toggle-text">Edit Blueprint</span>
                 </button>
             </div>
-
             <div id="markdown-container" class="prose prose-slate max-w-none block mt-6">
                 <div class="animate-pulse text-slate-400">Select workspace and load state...</div>
             </div>
-
             <textarea id="markdown-editor" class="hidden w-full h-[calc(100vh-200px)] mt-6 bg-slate-50 text-slate-800 font-mono text-sm p-8 rounded-xl border-2 border-indigo-100 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none" placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
-            
         </div>
     </main>
 
@@ -244,11 +224,8 @@
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-lg">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-white font-black text-sm uppercase tracking-widest text-teal-400">🔗 Link Source Code</h3>
-                <button onclick="toggleLinkModal()" class="text-slate-400 hover:text-white transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="toggleLinkModal()" class="text-slate-400 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
-            
             <div id="link-unlinked-view" class="hidden">
                 <div class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg mb-4">
                     <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> You do not need to type the path. Drag and drop your project folder from your OS file explorer directly into the box below to auto-fill the absolute path.</p>
@@ -258,7 +235,6 @@
                     <button type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded text-xs font-bold uppercase transition mt-2">Generate Link Script</button>
                 </form>
             </div>
-
             <div id="link-linked-view" class="hidden">
                 <p class="text-xs text-slate-400 mb-2">This workspace is currently linked to the following directory:</p>
                 <div class="bg-black text-emerald-400 p-4 rounded-lg text-xs font-mono mb-6 break-all border border-emerald-900/50" id="active-link-path">/path/to/code</div>
@@ -271,51 +247,39 @@
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-white font-black text-sm uppercase tracking-widest">Log Quick Decision</h3>
-                <button onclick="toggleQuickAdrModal()" class="text-slate-400 hover:text-white transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="toggleQuickAdrModal()" class="text-slate-400 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
-            
             <div class="mb-4 p-3 bg-indigo-950/30 border border-indigo-900/50 rounded-lg">
-                <label class="text-[9px] font-black uppercase text-indigo-400 mb-1 block">Smart Auto-Import (Paste Multiple)</label>
-                <textarea id="smart-paste-adr" oninput="handleSmartPaste(event)" class="w-full h-12 bg-black text-indigo-300 text-xs p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar" placeholder="Paste full AI /ADR output here to auto-fill or bulk import..."></textarea>
+                <label class="text-[9px] font-black uppercase text-indigo-400 mb-1 block">Smart Auto-Import (Paste Multiple JSON or Text)</label>
+                <textarea id="smart-paste-adr" oninput="handleSmartPaste(event)" class="w-full h-12 bg-black text-indigo-300 text-xs p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar" placeholder="Paste full JSON array or AI /ADR text output here..."></textarea>
             </div>
-
             <div class="flex items-center space-x-4 mb-4">
                 <div class="h-px bg-slate-800 flex-1"></div>
                 <span class="text-[10px] font-bold text-slate-600 uppercase">Review & Commit</span>
+                <span id="queueCounter" class="font-bold text-indigo-400 text-[10px]"></span>
                 <div class="h-px bg-slate-800 flex-1"></div>
             </div>
-
             <form id="quick-adr-form" onsubmit="submitQuickAdr(event)" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="quick-adr-scope" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none">
-                        <option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option>
-                        <option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option>
-                    </select>
-                    <select id="quick-adr-status" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none">
-                        <option value="[ACTIVE]">[ACTIVE]</option>
-                        <option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option>
-                    </select>
+                    <select id="quick-adr-scope" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none"><option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option><option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option></select>
+                    <select id="quick-adr-status" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none"><option value="[ACTIVE]">[ACTIVE]</option><option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option></select>
                 </div>
-                
                 <div>
                     <label class="text-[9px] font-black uppercase text-slate-400 block mb-1">Decision Title</label>
                     <input id="quick-adr-title" type="text" class="w-full bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none" placeholder="Decision Title">
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-amber-500 block mb-1">Why (Friction)</label>
-                    <textarea id="quick-adr-friction" class="w-full h-12 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="Why are we making this rule?"></textarea>
+                    <textarea id="quick-adr-friction" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="Why are we making this rule?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-emerald-500 block mb-1">What (Ruling)</label>
-                    <textarea id="quick-adr-ruling" class="w-full h-12 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
+                    <textarea id="quick-adr-ruling" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-red-400 block mb-1">What Not (Boundary)</label>
-                    <textarea id="quick-adr-boundary" class="w-full h-12 bg-black text-slate-300 text-xs p-2 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
+                    <textarea id="quick-adr-boundary" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
                 </div>
-
                 <button id="quick-adr-submit-btn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-xs font-bold uppercase transition mt-2">Commit ADR to Ledger</button>
             </form>
         </div>
@@ -325,9 +289,7 @@
         <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4 shrink-0">
                 <h3 class="text-white font-black text-2xl uppercase tracking-widest text-indigo-400">Hub Operations Manual</h3>
-                <button onclick="toggleOpsManual()" class="text-slate-400 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="toggleOpsManual()" class="text-slate-400 hover:text-white transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div id="ops-manual-content" class="prose prose-invert prose-sm max-w-none text-slate-300 overflow-y-auto custom-scrollbar pr-4 pb-4">
                 <div class="animate-pulse text-slate-500">Loading manual...</div>
@@ -346,29 +308,21 @@
         const coreEditor = document.getElementById('core-editor');
         const tenantEditor = document.getElementById('tenant-editor');
         const promptEditor = document.getElementById('prompt-editor');
-        
+
         let activeTab = 'session';
         let currentEditId = null;
         let adrCache = [];
         let ACTIVE_PROJECT = 'yield-force';
+        let ACTIVE_CONFIG = {};
         let isEditMode = false;
-        
-        // Bulk ADR Variables
+
         let bulkAdrQueue = [];
-        let bulkAdrTotal = 0;
+        let totalQueued = 0; 
+        let currentQueueIndex = 0;
 
         function clearEditor(id) {
             document.getElementById(id).value = "";
             if (id === 'objectives-editor') checkContextLoad();
-        }
-
-        async function deleteAdr(id) {
-            if(!confirm("Delete this ADR? This cannot be undone.")) return;
-            try {
-                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs/${id}`, { method: 'DELETE' });
-                if(res.ok) { showToast("ADR Deleted"); fetchAdrs(); }
-                else showToast("Delete Failed", true);
-            } catch(e) { showToast("Server Error", true); }
         }
 
         function showToast(message, isError = false) {
@@ -379,85 +333,90 @@
             setTimeout(() => { toast.classList.add('translate-y-4', 'opacity-0'); setTimeout(() => toast.remove(), 500); }, 2000);
         }
 
-        // HELPER: Neutralize delimiter collisions before prompt injection
         function sanitizeForPrompt(text) {
             if (!text) return "None";
-            // Replace triple quotes with single quotes to prevent breaking SudoLang string blocks
             return text.replace(/"""/g, "'''");
         }
 
-        // --- MENU & MODAL CONTROLS ---
-        function toggleDrawer() { 
-            stateDrawer.classList.toggle('translate-x-full');
-        }
-        
+        function toggleDrawer() { stateDrawer.classList.toggle('translate-x-full'); }
+
         function toggleDrawerWidth() {
             const btn = document.getElementById('drawer-width-btn');
-            const clearBtn = document.getElementById('clear-prompt-btn'); 
-            
+            const clearBtn = document.getElementById('clear-prompt-btn');
             const expandIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>`;
             const collapseIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9L4 4m5 5V5m0 4H5m10 6l5 5m-5-5v5m0-5h5M9 15l-5 5m5-5v5m0-5H5m10-6l5-5m-5 5V5m0 4h5"></path></svg>`;
-            
+
             if (stateDrawer.classList.contains('md:w-[450px]')) {
                 stateDrawer.classList.replace('md:w-[450px]', 'md:w-[800px]');
-                if(btn) btn.innerHTML = collapseIcon;
-                if(btn) btn.title = "Collapse Drawer";
-                if(clearBtn) clearBtn.classList.remove('hidden'); 
+                if (btn) { btn.innerHTML = collapseIcon; btn.title = "Collapse Drawer"; }
+                if (clearBtn) clearBtn.classList.remove('hidden');
             } else {
                 stateDrawer.classList.replace('md:w-[800px]', 'md:w-[450px]');
-                if(btn) btn.innerHTML = expandIcon;
-                if(btn) btn.title = "Expand Drawer";
-                if(clearBtn) clearBtn.classList.add('hidden'); 
+                if (btn) { btn.innerHTML = expandIcon; btn.title = "Expand Drawer"; }
+                if (clearBtn) clearBtn.classList.add('hidden');
             }
         }
 
-        async function toggleOpsManual() { 
+        async function toggleOpsManual() {
             const m = document.getElementById('ops-manual-modal');
             m.classList.toggle('hidden');
-            
             if (!m.classList.contains('hidden')) {
                 const container = document.getElementById('ops-manual-content');
                 try {
                     container.innerHTML = '<div class="animate-pulse text-slate-500">Loading manual...</div>';
                     const res = await fetch('/api/ops-manual');
                     const data = await res.json();
-                    
                     const parsedMarkdown = typeof marked.parse === 'function' ? marked.parse(data.content) : marked(data.content);
                     container.innerHTML = parsedMarkdown;
-                    
                     if (window.renderMathInElement) {
-                        renderMathInElement(container, {
-                            delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false} ],
-                            throwOnError : false
-                        });
+                        renderMathInElement(container, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
                     }
-                } catch (e) {
-                    container.innerHTML = '<p class="text-red-400">Failed to load OPS_MANUAL.md</p>';
-                }
+                } catch (e) { container.innerHTML = '<p class="text-red-400">Failed to load OPS_MANUAL.md</p>'; }
             }
         }
 
         function toggleToolsMenu() { document.getElementById('tools-dropdown').classList.toggle('hidden'); }
-        
-        window.addEventListener('click', function(e) { 
+        window.addEventListener('click', function (e) {
             const container = document.getElementById('tools-menu-container');
             const dropdown = document.getElementById('tools-dropdown');
-            if (container && dropdown && !container.contains(e.target)) { 
-                dropdown.classList.add('hidden'); 
-            } 
+            if (container && dropdown && !container.contains(e.target)) dropdown.classList.add('hidden');
         });
 
-        // --- MARKDOWN CANVAS LOGIC (V3: STRICT ZERO-GHOSTING) ---
+        // --- SESSION DROPZONE LOGIC ---
+        function handleSessionPaste(e) {
+            const val = e.target.value.trim();
+            if (!val) return;
+            try {
+                const parsed = JSON.parse(val);
+                
+                // Append to Changelog
+                if (parsed.completed_steps && Array.isArray(parsed.completed_steps)) {
+                    const existing = document.getElementById('changelog-editor').value.trim();
+                    const newLog = parsed.completed_steps.map(s => `- ${s}`).join('\n');
+                    document.getElementById('changelog-editor').value = existing ? existing + '\n' + newLog : newLog;
+                }
+
+                // Overwrite Next Objectives (FIFO Queue Roll-over)
+                if (parsed.next_objectives && Array.isArray(parsed.next_objectives)) {
+                    document.getElementById('objectives-editor').value = parsed.next_objectives.map((s, i) => `${i+1}. ${s}`).join('\n');
+                    checkContextLoad();
+                }
+
+                e.target.value = '';
+                showToast("Session Wrap-Up Imported Successfully");
+                commit('core', true); // Auto-save state
+            } catch (err) {
+                // Ignore invalid JSON
+            }
+        }
+
         function generateMarkdownFromJson(state) {
             try {
                 const gov = state?.governor_state || {};
                 let mdString = "";
-                
                 if (gov.document_title) mdString += "# " + gov.document_title + "\n\n";
                 if (gov.root_content) mdString += gov.root_content.trim() + "\n\n";
-
                 const partsList = gov.parts || [gov.part_I, gov.part_II, gov.part_III].filter(Boolean);
-
                 partsList.forEach(part => {
                     if (part.title) mdString += "## " + part.title + "\n\n";
                     if (part.description) mdString += part.description.trim() + "\n\n";
@@ -469,7 +428,7 @@
                     }
                 });
                 return mdString.trim() || "Start typing your Markdown blueprint here...";
-            } catch(e) { return "# Blueprint parsing error"; }
+            } catch (e) { return "# Blueprint parsing error"; }
         }
 
         function generateJsonFromMarkdown(md) {
@@ -488,45 +447,34 @@
                 } else if (line.startsWith('### ')) {
                     currentChapter = { title: line.substring(4).trim(), content: "" };
                     if (!currentPart) {
-                        // Invisible container part
                         currentPart = { title: "", description: "", chapters: [] };
                         state.governor_state.parts.push(currentPart);
                     }
                     currentPart.chapters.push(currentChapter);
                 } else {
-                    if (currentChapter) {
-                        currentChapter.content += line + "\n";
-                    } else if (currentPart) {
-                        currentPart.description += line + "\n";
-                    } else {
-                        state.governor_state.root_content += line + "\n";
-                    }
+                    if (currentChapter) currentChapter.content += line + "\n";
+                    else if (currentPart) currentPart.description += line + "\n";
+                    else state.governor_state.root_content += line + "\n";
                 }
             });
 
             state.governor_state.root_content = state.governor_state.root_content.trim();
             state.governor_state.parts.forEach(p => {
-                if(p.description) p.description = p.description.trim();
+                if (p.description) p.description = p.description.trim();
                 p.chapters.forEach(c => { c.content = c.content.trim(); });
             });
-
             return state;
         }
 
         function renderPreviewFromJSON() {
             try {
-                if(!coreEditor || !markdownContainer) return;
-                const state = JSON.parse(coreEditor.value); 
+                if (!coreEditor || !markdownContainer) return;
+                const state = JSON.parse(coreEditor.value);
                 const mdString = generateMarkdownFromJson(state);
-                
                 const parsedMarkdown = typeof marked.parse === 'function' ? marked.parse(mdString) : marked(mdString);
                 markdownContainer.innerHTML = parsedMarkdown;
-                
                 if (window.renderMathInElement) {
-                    renderMathInElement(markdownContainer, {
-                        delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false} ],
-                        throwOnError : false
-                    });
+                    renderMathInElement(markdownContainer, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
                 }
             } catch (e) { console.log("JSON Parse Error during render."); }
         }
@@ -534,20 +482,19 @@
         async function toggleMarkdownMode() {
             const btnText = document.getElementById('md-toggle-text');
             const btnIcon = document.querySelector('#md-toggle-btn svg');
-            
+
             if (isEditMode) {
                 try {
                     const newJson = generateJsonFromMarkdown(markdownEditor.value);
                     coreEditor.value = JSON.stringify(newJson, null, 2);
-                    await commit('core', true); 
+                    await commit('core', true);
                     renderPreviewFromJSON();
-                    
                     markdownEditor.classList.add('hidden');
                     markdownContainer.classList.remove('hidden');
-                    if(btnText) btnText.innerText = "Edit Blueprint";
-                    if(btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
+                    if (btnText) btnText.innerText = "Edit Blueprint";
+                    if (btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
                     isEditMode = false;
-                } catch(e) { showToast("Error saving markdown", true); }
+                } catch (e) { showToast("Error saving markdown", true); }
             } else {
                 try {
                     const state = JSON.parse(coreEditor.value);
@@ -555,22 +502,21 @@
                     markdownContainer.classList.add('hidden');
                     markdownEditor.classList.remove('hidden');
                     markdownEditor.focus();
-                    if(btnText) btnText.innerText = "Save & Preview";
-                    if(btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+                    if (btnText) btnText.innerText = "Save & Preview";
+                    if (btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
                     isEditMode = true;
-                } catch(e) { showToast("Error parsing existing JSON", true); }
+                } catch (e) { showToast("Error parsing existing JSON", true); }
             }
         }
 
-        // --- STATEFUL LINK MODAL LOGIC ---
-        async function toggleLinkModal() { 
-            const m = document.getElementById('link-codebase-modal'); 
+        async function toggleLinkModal() {
+            const m = document.getElementById('link-codebase-modal');
             m.classList.toggle('hidden');
-            if(!m.classList.contains('hidden')) {
+            if (!m.classList.contains('hidden')) {
                 try {
                     const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`);
                     const data = await res.json();
-                    if(data.linkedPath) {
+                    if (data.linkedPath) {
                         document.getElementById('link-unlinked-view').classList.add('hidden');
                         document.getElementById('link-linked-view').classList.remove('hidden');
                         document.getElementById('active-link-path').innerText = data.linkedPath;
@@ -579,36 +525,35 @@
                         document.getElementById('link-unlinked-view').classList.remove('hidden');
                         document.getElementById('link-path-input').focus();
                     }
-                } catch(e) { showToast("Failed to check link status", true); }
+                } catch (e) { showToast("Failed to check link status", true); }
             }
         }
 
         async function submitLinkCodebase(e) {
             e.preventDefault();
             const pathInput = document.getElementById('link-path-input').value.trim();
-            if(!pathInput) return showToast("Path required", true);
+            if (!pathInput) return showToast("Path required", true);
             try {
                 const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: pathInput }) });
-                if(res.ok) { toggleLinkModal(); document.getElementById('link-path-input').value = ""; showToast("Codebase Successfully Linked!"); } 
+                if (res.ok) { toggleLinkModal(); document.getElementById('link-path-input').value = ""; showToast("Codebase Successfully Linked!"); }
                 else { showToast("Failed to link codebase", true); }
-            } catch(err) { showToast("Server Error", true); }
+            } catch (err) { showToast("Server Error", true); }
         }
 
         async function unlinkCodebase() {
             try {
                 const res = await fetch(`/api/${ACTIVE_PROJECT}/link-codebase`, { method: 'DELETE' });
-                if(res.ok) { showToast("Codebase unlinked."); toggleLinkModal(); } 
+                if (res.ok) { showToast("Codebase unlinked."); toggleLinkModal(); }
                 else { showToast("Failed to unlink", true); }
-            } catch(e) { showToast("Server Error", true); }
+            } catch (e) { showToast("Server Error", true); }
         }
 
-        // --- BULK REVIEW STEPPER LOGIC ---
-        function toggleQuickAdrModal() { 
-            const m = document.getElementById('quick-adr-modal'); 
+        function toggleQuickAdrModal() {
+            const m = document.getElementById('quick-adr-modal');
             m.classList.toggle('hidden');
-            if(!m.classList.contains('hidden')) {
+            if (!m.classList.contains('hidden')) {
                 document.getElementById('smart-paste-adr').focus();
-                if(bulkAdrQueue.length === 0) {
+                if (bulkAdrQueue.length === 0) {
                     document.getElementById('quick-adr-form').reset();
                     document.getElementById('quick-adr-submit-btn').innerText = "Commit ADR to Ledger";
                     document.getElementById('quick-adr-submit-btn').classList.remove('bg-amber-600');
@@ -618,10 +563,31 @@
         }
 
         function handleSmartPaste(e) {
-            const val = e.target.value;
-            if(!val.includes('Title:') || !val.includes('Friction:')) return;
+            const val = e.target.value.trim();
+            if (!val) return;
+            try {
+                let parsed = JSON.parse(val);
+                if (!Array.isArray(parsed)) parsed = [parsed];
+                bulkAdrQueue = parsed.map(adr => {
+                    return {
+                        title: adr.title || '',
+                        scope: (adr.scope && adr.scope.includes('INSTANCE')) ? '[INSTANCE_SPECIFIC]' : '[CORE_FRAMEWORK]',
+                        friction: adr.friction || '',
+                        ruling: adr.ruling || '',
+                        boundary: adr.boundary || ''
+                    };
+                });
+                totalQueued = bulkAdrQueue.length;
+                currentQueueIndex = 0;
+                e.target.value = '';
+                if (totalQueued > 1) showToast(`Queued ${totalQueued} JSON ADRs for review.`);
+                else showToast("JSON ADR Loaded! Review and Commit.");
+                loadNextBulkAdr();
+                return; 
+            } catch (err) { }
+
+            if (!val.includes('Title:') || !val.includes('Friction:')) return;
             const blocks = val.split(/---|\*\*\*/).map(b => b.trim()).filter(b => b.includes('Title:'));
-            
             if (blocks.length > 0) {
                 bulkAdrQueue = blocks.map(block => {
                     return {
@@ -632,10 +598,10 @@
                         boundary: block.match(/Boundary:\s*(.*)/is)?.[1]?.trim() || ''
                     };
                 });
-                bulkAdrTotal = bulkAdrQueue.length;
-                e.target.value = ''; 
-                
-                if (bulkAdrTotal > 1) showToast(`Queued ${bulkAdrTotal} ADRs for review.`);
+                totalQueued = bulkAdrQueue.length;
+                currentQueueIndex = 0;
+                e.target.value = '';
+                if (totalQueued > 1) showToast(`Queued ${totalQueued} ADRs for review.`);
                 else showToast("Smart Paste Applied! Review and Commit.");
                 loadNextBulkAdr();
             }
@@ -643,6 +609,9 @@
 
         function loadNextBulkAdr() {
             if (bulkAdrQueue.length > 0) {
+                currentQueueIndex++;
+                const counter = document.getElementById('queueCounter');
+                if (counter) counter.innerText = `${currentQueueIndex} / ${totalQueued}`;
                 const current = bulkAdrQueue[0];
                 document.getElementById('quick-adr-title').value = current.title;
                 document.getElementById('quick-adr-scope').value = current.scope;
@@ -650,16 +619,17 @@
                 document.getElementById('quick-adr-friction').value = current.friction;
                 document.getElementById('quick-adr-ruling').value = current.ruling;
                 document.getElementById('quick-adr-boundary').value = current.boundary;
-                
-                if (bulkAdrTotal > 1) {
-                    const currentStep = bulkAdrTotal - bulkAdrQueue.length + 1;
+                if (totalQueued > 1) {
                     const btn = document.getElementById('quick-adr-submit-btn');
-                    btn.innerText = `Commit ADR (${currentStep}/${bulkAdrTotal}) & Next`;
+                    btn.innerText = `Commit ADR (${currentQueueIndex}/${totalQueued}) & Next`;
                     btn.classList.remove('bg-indigo-600');
                     btn.classList.add('bg-amber-600');
                 }
             } else {
-                bulkAdrTotal = 0;
+                totalQueued = 0;
+                currentQueueIndex = 0;
+                const counter = document.getElementById('queueCounter');
+                if (counter) counter.innerText = '';
                 const btn = document.getElementById('quick-adr-submit-btn');
                 btn.innerText = "Commit ADR to Ledger";
                 btn.classList.remove('bg-amber-600');
@@ -677,8 +647,8 @@
             if (!payload.title || !payload.friction || !payload.ruling) return showToast("Please fill required fields", true);
             try {
                 const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (res.ok) { 
-                    if (bulkAdrQueue.length > 0) { bulkAdrQueue.shift(); loadNextBulkAdr(); } 
+                if (res.ok) {
+                    if (bulkAdrQueue.length > 0) { bulkAdrQueue.shift(); loadNextBulkAdr(); }
                     else { document.getElementById('quick-adr-form').reset(); toggleQuickAdrModal(); showToast("ADR Saved & Added to Ledger"); fetchAdrs(); }
                 }
             } catch (err) { showToast("Save Failed", true); }
@@ -701,32 +671,49 @@
 
         async function initWorkspace() {
             ACTIVE_PROJECT = document.getElementById('global-project').value.trim();
-            if(!ACTIVE_PROJECT) return showToast("Workspace name required", true);
+            if (!ACTIVE_PROJECT) return showToast("Workspace name required", true);
             showToast(`Loading: ${ACTIVE_PROJECT}...`);
             try {
-                const coreRes = await fetch(`/api/${ACTIVE_PROJECT}/state`); const coreData = await coreRes.json();
-                if(coreEditor) coreEditor.value = Object.keys(coreData).length === 0 ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}' : JSON.stringify(coreData, null, 2);
-                
-                const promptRes = await fetch(`/api/${ACTIVE_PROJECT}/prompts`); const promptData = await promptRes.json();
-                if(promptEditor) promptEditor.value = promptData.raw_sudolang ? promptData.raw_sudolang : (Object.keys(promptData).length === 0 ? "" : JSON.stringify(promptData, null, 2));
+                try {
+                    const cfgRes = await fetch(`/api/${ACTIVE_PROJECT}/config`);
+                    if (cfgRes.ok) ACTIVE_CONFIG = await cfgRes.json();
+                    else ACTIVE_CONFIG = { macro_project: "Undefined Project", active_context: "Undefined Context" };
+                } catch (cfgErr) { ACTIVE_CONFIG = { macro_project: "Undefined Project", active_context: "Undefined Context" }; }
 
-                if(coreData.governor_meta) {
+                const coreRes = await fetch(`/api/${ACTIVE_PROJECT}/state`);
+                if (!coreRes.ok) throw new Error(`State endpoint rejected request with status: ${coreRes.status}`);
+                const coreData = await coreRes.json();
+                if (coreEditor) {
+                    coreEditor.value = Object.keys(coreData).length === 0 
+                        ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}' 
+                        : JSON.stringify(coreData, null, 2);
+                }
+
+                await loadPrompt();
+
+                if (coreData.governor_meta) {
                     document.getElementById('todo-editor').value = (coreData.governor_meta.todo_list || []).join('\n');
                     document.getElementById('objectives-editor').value = (coreData.governor_meta.next_objectives || []).join('\n');
                     document.getElementById('changelog-editor').value = (coreData.governor_meta.session_changelog || []).join('\n');
-                } else { 
-                    document.getElementById('todo-editor').value = ""; 
-                    document.getElementById('objectives-editor').value = ""; 
+                } else {
+                    document.getElementById('todo-editor').value = "";
+                    document.getElementById('objectives-editor').value = "";
                     document.getElementById('changelog-editor').value = "";
                 }
 
-                switchTab('session'); renderPreviewFromJSON(); fetchAdrs();
-            } catch (err) { showToast("Initialization Failed", true); }
+                switchTab('session'); 
+                renderPreviewFromJSON(); 
+                fetchAdrs();
+                showToast(`Workspace Loaded: ${ACTIVE_PROJECT}`);
+            } catch (err) { 
+                console.error("[Hub] Critical Initialization Crash:", err);
+                showToast("Initialization Failed. Press F12 and check Console.", true); 
+            }
         }
 
         async function loadTenant() {
             const tenantId = document.getElementById('tenant-selector').value.trim();
-            if(!tenantId) return;
+            if (!tenantId) return;
             try {
                 const res = await fetch(`/api/${ACTIVE_PROJECT}/tenant-state/${tenantId}`); const data = await res.json();
                 tenantEditor.value = Object.keys(data).length === 0 ? '{\n  "tenants": []\n}' : JSON.stringify(data, null, 2);
@@ -736,40 +723,41 @@
 
         async function commit(type, isSilent = false) {
             let endpoint = '', payload = {};
-            
-            // STEP 1: Parse and Prepare Payload
             try {
                 if (type === 'core') {
-                    endpoint = `/api/${ACTIVE_PROJECT}/update-state`; 
+                    endpoint = `/api/${ACTIVE_PROJECT}/update-state`;
                     payload = JSON.parse(coreEditor.value);
+                    if (payload.governor_state && payload.governor_state.parts) {
+                        payload.governor_state.parts = payload.governor_state.parts.filter(p => !p.title.includes("Operational Manual"));
+                    }
                     payload.governor_meta = payload.governor_meta || {};
                     payload.governor_meta.todo_list = document.getElementById('todo-editor').value.split('\n').filter(s => s.trim() !== '');
                     payload.governor_meta.next_objectives = document.getElementById('objectives-editor').value.split('\n').filter(s => s.trim() !== '');
                     payload.governor_meta.session_changelog = document.getElementById('changelog-editor').value.split('\n').filter(s => s.trim() !== '');
                     coreEditor.value = JSON.stringify(payload, null, 2);
-                } else if (type === 'prompts') {
+                }
+                else if (type === 'prompts') {
                     endpoint = `/api/${ACTIVE_PROJECT}/prompts`;
-                    try { payload = JSON.parse(promptEditor.value); } catch(e) { payload = { raw_sudolang: promptEditor.value }; }
+                    try { payload = JSON.parse(promptEditor.value); } catch (e) { payload = { raw_sudolang: promptEditor.value }; }
                 } else if (type === 'tenant') {
                     const tid = document.getElementById('tenant-selector').value.trim();
                     endpoint = `/api/${ACTIVE_PROJECT}/update-tenant-state/${tid}`; payload = JSON.parse(tenantEditor.value);
                 }
             } catch (e) {
-                if(!isSilent) showToast("Syntax Error: Validate JSON", true);
-                return; // Stop execution if JSON is invalid
+                if (!isSilent) showToast("Syntax Error: Validate JSON", true);
+                return;
             }
 
-            // STEP 2: Send to Server safely
             try {
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (res.ok) { 
-                    if (type === 'core' && !isEditMode) renderPreviewFromJSON(); 
-                    if(!isSilent) showToast("Saved Successfully"); 
-                } else { 
-                    if(!isSilent) showToast(`Server Error: ${res.status}`, true); 
+                if (res.ok) {
+                    if (type === 'core' && !isEditMode) renderPreviewFromJSON();
+                    if (!isSilent) showToast("Saved Successfully");
+                } else {
+                    if (!isSilent) showToast(`Server Error: ${res.status}`, true);
                 }
-            } catch(e) {
-                if(!isSilent) showToast("Network Error: Is server running?", true);
+            } catch (e) {
+                if (!isSilent) showToast("Network Error: Is server running?", true);
             }
         }
 
@@ -796,173 +784,173 @@
                             </div>
                         </div>`;
                 });
-            } catch (e) {}
+            } catch (e) { }
         }
 
         function editAdr(id) {
             const adr = adrCache.find(a => a.id === id); if (!adr) return; currentEditId = id;
-            ['scope','status','title','friction','ruling','boundary'].forEach(k => document.getElementById(`adr-${k}`).value = adr[k] || '');
-            document.getElementById('adr-submit-btn').innerText = "Update"; document.getElementById('adr-submit-btn').className = "bg-amber-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition";
-        }
-
-        async function saveAdr(e) {
-            e.preventDefault();
-            const p = { scope: document.getElementById('adr-scope').value, status: document.getElementById('adr-status').value, title: document.getElementById('adr-title').value, friction: document.getElementById('adr-friction').value, ruling: document.getElementById('adr-ruling').value, boundary: document.getElementById('adr-boundary').value };
-            try {
-                const res = await fetch(currentEditId ? `/api/${ACTIVE_PROJECT}/adrs/${currentEditId}` : `/api/${ACTIVE_PROJECT}/adrs`, { method: currentEditId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) });
-                if (res.ok) { currentEditId = null; document.getElementById('adr-form').reset(); document.getElementById('adr-submit-btn').innerText = "Save Update"; document.getElementById('adr-submit-btn').className = "bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition"; showToast("ADR Saved"); fetchAdrs(); }
-            } catch (e) { showToast("Save Failed", true); }
+            ['scope', 'status', 'title', 'friction', 'ruling', 'boundary'].forEach(k => document.getElementById(`quick-adr-${k}`).value = adr[k] || '');
+            document.getElementById('quick-adr-submit-btn').innerText = "Update"; document.getElementById('quick-adr-submit-btn').className = "bg-amber-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition";
+            toggleQuickAdrModal();
         }
 
         function clearPromptEditor() {
-            if(confirm("Are you sure you want to clear all SudoLang rules? This action cannot be undone unless you have a backup.")) document.getElementById('prompt-editor').value = '';
+            document.getElementById('prompt-editor').value = '';
         }
 
-        function copyLinterPrompt() {
-            const currentCode = document.getElementById('prompt-editor').value.trim();
-            if (!currentCode) return showToast("Nothing to lint. Editor is empty.", true);
+        async function loadPrompt() {
+            try {
+                const promptRes = await fetch(`/api/${ACTIVE_PROJECT}/prompts`); 
+                const promptData = await promptRes.json();
+                if (promptEditor) promptEditor.value = promptData.raw_sudolang ? promptData.raw_sudolang : (Object.keys(promptData).length === 0 ? "" : JSON.stringify(promptData, null, 2));
+            } catch (err) {
+                console.warn("No custom prompt found, loading default fallback.");
+                if (promptEditor) {
+                    promptEditor.value = `// --- CORE SYSTEM RULES & MACROS ---
+#[Universal Context Hub AI]
 
-            let adrsText = "None";
-            if (typeof adrCache !== 'undefined' && adrCache.length > 0) {
-                adrsText = adrCache.filter(a => a.status !== '[ARCHIVED]')
-                    .map(a => `- ${a.id}: ${a.title}\n  Ruling: ${a.ruling}\n  Boundary: ${a.boundary}`)
-                    .join('\n');
-            }
-
-            const linterPrompt = `# Universal Context Hub: Architectural Linter
-
-Interface HubLinter {
-  State {
-    targetCode: ""
-    purityScore: 0 // 0 to 100
-    violations: []
-    commendations: []
-    rewrittenCode: ""
-  }
-
-  Context {
-    Active_ADRs: """
-${sanitizeForPrompt(adrsText)}
-    """
-  }
+Interface UniversalContextHub {
+  Role: Expert Lead AI Architect & Coding Coach
+  MacroProject: "{{INJECT_MACRO_PROJECT}}"
+  ActiveContext: "{{INJECT_ACTIVE_CONTEXT}}"
 
   Constraints {
-    1. SudoLang Purity: Code MUST be declarative. Reject imperative programming. Rely on LLM inference.
-    2. Architectural Safety: Cross-reference targetCode against Active_ADRs. Instructions violating a Boundary are FATAL VIOLATIONS (-50 pts). Rewrite to comply.
-    3. Exemption: Do NOT alter strict output formatting instructions.
+    Adhere strictly to Active ADRs; never suggest architecture or code that violates defined Boundaries.
+    Require explicit PM request before yielding final code.
+    Format all requested CLI commands and prompts exclusively in isolated plain text blocks.
+    Maintain a highly analytical, architectural tone.
+    Initialization Directive: Acknowledge role, confirm receipt of CodebaseContext, and await PM command.
   }
 
-  FormatReport() {
-    Output rewrittenCode in a SudoLang code block.
-    Print visual ASCII art meter for purityScore.
-    List violations (Syntax vs. Architectural) with explanations.
-    List commendations.
-  }
+  Commands {
+    /ADR [topic] {
+      Task: Formalize the recent architectural discussion into a single Architecture Decision Record (ADR).
+      Rules:
+        - Output ONLY a raw, valid JSON object.
+        - Do not wrap the JSON in Markdown formatting (no \`\`\`json).
+      OutputSchema: { "title": "[String]", "scope": "[Enum: CORE_FRAMEWORK | INSTANCE_SPECIFIC]", "friction": "[String]", "ruling": "[String]", "boundary": "[String]" }
+    }
 
-  /lint [code] {
-    Analyze code against Constraints. Calculate purityScore. Generate rewrittenCode. FormatReport().
+    /ADR bulk {
+      Task: Formalize all unresolved architectural discussions from this session into multiple ADRs.
+      Rules:
+        - Output ONLY a raw, valid JSON array.
+        - Do not wrap the JSON in Markdown formatting.
+      OutputSchema: [ { "title": "[String]", "scope": "[Enum]", "friction": "[String]", "ruling": "[String]", "boundary": "[String]" } ]
+    }
+
+    /cli {
+      Task: Translate the agreed-upon architecture into actionable development steps for the gemini-cli syntax writer.
+      Rules:
+        - Output ONLY a raw, valid JSON array.
+        - Do not wrap the JSON in Markdown formatting.
+      OutputSchema: [ { "step_id": "[String]", "phase": "[String]", "target": "[Enum: Backend | Frontend | Config | Database]", "target_file": "[String]", "objective": "[String]", "instructions": "[String]" } ]
+    }
+
+    /UPDATE_BLUEPRINT {
+      Read: SystemState.ProjectBlueprint & current session context.
+      Task: Write a new section or update an existing section of the Project Blueprint based on new features, ADRs, or system states.
+      Rules: 
+        - Output ONLY raw Markdown text adhering strictly to H1 (#) for Title, H2 (##) for Parts, and H3 (###) for Chapters.
+        - No conversational filler.
+        - Do NOT output JSON.
+    }
+
+    /WRAPUP {
+      State Freeze: Active.
+      Task: Generate a lean JSON diff to update the system state via the Smart Session Dropzone for the next session context window.
+      Rules: 
+        - Assess original SessionObjectives. Any unfinished objectives MUST carry over to next_objectives.
+        - Output ONLY a valid JSON object. 
+        - Do not wrap the JSON in Markdown formatting.
+      OutputSchema: {
+        "completed_steps": ["[String: Summary of tasks finished in this session]"],
+        "next_objectives": ["[String: Tasks for the next session. CRITICAL: Unresolved bugs or unfinished tasks MUST be prioritized at Index 0]"]
+      }
+    }
   }
 }
 
-*** OPERATOR ACTION REQUIRED ***
-Acknowledge the HubLinter interface. Execute the /lint command on the following code:
-
-/lint
-\`\`\`sudolang
-${currentCode}
-\`\`\``;
-            
-            const t = document.createElement('textarea'); t.value = linterPrompt; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); 
-            showToast("Architectural Linter Payload Copied.");
+OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role, confirm receipt of the Codebase Context, and await my command."`;
+                }
+            }
         }
 
         async function copyHandoverPrompt() {
-            const btn = document.getElementById('copy-handover-btn'); 
-            const orig = btn.innerText; 
+            const btn = document.getElementById('copy-handover-btn');
+            const orig = btn.innerText;
             btn.innerText = 'Compiling Payload...';
-            
+
             try {
-                const changelogRaw = document.getElementById('changelog-editor').value;
-                const changelog = sanitizeForPrompt(changelogRaw);
-                
-                const objRaw = document.getElementById('objectives-editor').value || '';
-                const objectivesList = objRaw.split('\n').filter(s => s.trim() !== '').map(s => `    "${sanitizeForPrompt(s).replace(/^- /, '')}"`).join('\n') || '    "Analyze system and await command"';
-                
-                let coreD = {}, tenD = {}, prmD = "";
-                
-                try { coreD = JSON.parse(coreEditor.value); } catch(e) { console.warn("Core JSON parse failed. Proceeding with empty object."); }
-                try { tenD = JSON.parse(tenantEditor.value); } catch(e) { console.warn("Tenant JSON parse failed. Proceeding with empty object."); }
-                
-                try { 
-                    const pJson = JSON.parse(promptEditor.value); 
-                    prmD = pJson.raw_sudolang ? pJson.raw_sudolang : JSON.stringify(pJson, null, 2); 
-                } catch(e) { 
-                    prmD = promptEditor.value; 
-                }
+                let baseTemplate = promptEditor.value;
+                if (!baseTemplate || baseTemplate.trim() === '') throw new Error("Prompt template is empty.");
 
-                let adrsText = ""; 
-                adrCache.filter(a => a.status !== '[ARCHIVED]').forEach(a => { 
-                    adrsText += `\n    ${a.id}: ${a.title}\n    - Ruling: ${a.ruling}\n    - Boundary: ${a.boundary}\n`; 
+                let coreD = {}, tenD = {};
+                try { 
+                    coreD = JSON.parse(coreEditor.value); 
+                    if (coreD.governor_state && coreD.governor_state.parts) {
+                        coreD.governor_state.parts = coreD.governor_state.parts.filter(p => !p.title.includes("Operational Manual"));
+                    }
+                } catch (e) { console.warn("Core JSON parse failed."); }
+                
+                try { tenD = JSON.parse(tenantEditor.value); } catch (e) { console.warn("Tenant JSON parse failed."); }
+
+                let adrsText = "";
+                adrCache.filter(a => a.status !== '[ARCHIVED]').forEach(a => {
+                    adrsText += `\n    ${a.id}: ${a.title}\n    - Ruling: ${a.ruling}\n    - Boundary: ${a.boundary}\n`;
                 });
-                
-                let cliOut = "None"; 
-                try { 
-                    const cr = await fetch(`/api/${ACTIVE_PROJECT}/run-context`, { method: 'POST' }); 
-                    if(cr.ok) { 
-                        const cd = await cr.json(); 
-                        cliOut = `\n${cd.output}\n`; 
-                    } 
-                } catch(e) {}
 
+                let codebaseOut = "None";
+                try {
+                    const cr = await fetch(`/api/${ACTIVE_PROJECT}/get-context`);
+                    if (cr.ok) codebaseOut = await cr.text();
+                } catch (e) { console.error("Failed to fetch codebase context"); }
+
+                const blueprintMd = generateMarkdownFromJson({ governor_state: coreD.governor_state });
+
+                coreD.governor_meta = coreD.governor_meta || {};
+                coreD.governor_meta.todo_list = document.getElementById('todo-editor').value.split('\n').filter(s => s.trim() !== '');
+                coreD.governor_meta.next_objectives = document.getElementById('objectives-editor').value.split('\n').filter(s => s.trim() !== '');
+                coreD.governor_meta.session_changelog = document.getElementById('changelog-editor').value.split('\n').filter(s => s.trim() !== '');
+                
                 const stateJsonString = JSON.stringify({ core: coreD, environment: tenD }, null, 2);
 
-                const sudoPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
+                let finalPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
 #initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")
 
 SystemState {
   Workspace: "${ACTIVE_PROJECT}"
   Phase: "Active Execution"
-  SessionObjectives: [
-${objectivesList}
-  ]
-  SessionChangelog: """
-${changelog}
-  """
-  ActiveADRs: """${sanitizeForPrompt(adrsText)}  """
-  CodebaseContext: """${sanitizeForPrompt(cliOut)}  """
   MachineStateJSON: """
 ${sanitizeForPrompt(stateJsonString)}
   """
+  CodebaseContext: """
+${sanitizeForPrompt(codebaseOut)}
+  """
+  ActiveADRs: """
+${sanitizeForPrompt(adrsText)}
+  """
+  ProjectBlueprint: """
+${sanitizeForPrompt(blueprintMd)}
+  """
 }
 
-// --- CORE SYSTEM RULES & MACROS ---
-${prmD}
+${baseTemplate.replace(/\{\{INJECT_MACRO_PROJECT\}\}/g, ACTIVE_CONFIG.macro_project || "Undefined Project")
+              .replace(/\{\{INJECT_ACTIVE_CONTEXT\}\}/g, ACTIVE_CONFIG.active_context || "Undefined Context")}`;
 
-// --- CORE COMMAND INJECTION ---
-Interface StateMutation {
-  Commands {
-    /UPDATE_BLUEPRINT {
-      Read: SystemState.SessionChangelog
-      Read: SystemState.ActiveADRs
-      Read: SystemState.MachineStateJSON.core
-      Task: Analyze the recent changelogs and ADRs for architectural updates.
-      Action: Mutate the \`core.governor_state\` JSON object to integrate these updates into the project blueprint. Add new chapters or modify existing ones where necessary.
-      Constraint: DO NOT output Markdown. DO NOT output partial JSON.
-      Output: Yield a strict, complete, valid JSON block representing the updated \`core_state.json\` structure.
-    }
-  }
-}
-
-// --- INITIALIZATION DIRECTIVE ---
-OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role, then await my command. If I issue /UPDATE_BLUEPRINT, output ONLY valid JSON."`;
+                const t = document.createElement('textarea'); 
+                t.value = finalPayload; 
+                document.body.appendChild(t); 
+                t.select(); 
+                document.execCommand('copy'); 
+                t.remove();
                 
-                const t = document.createElement('textarea'); t.value = sudoPayload; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); 
                 showToast("Payload Compiled and Copied.");
-            } catch (err) { 
-                showToast("Compilation failure. Review console logs.", true); 
+            } catch (err) {
+                showToast("Compilation failure. Check Console.", true);
                 console.error(err);
-            } finally { 
-                setTimeout(() => { btn.innerText = orig; }, 2000); 
+            } finally {
+                setTimeout(() => { btn.innerText = orig; }, 2000);
             }
         }
 
