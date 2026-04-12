@@ -16,110 +16,172 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-        .katex-mathml { display: none !important; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .katex-mathml {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden font-sans">
 
-    <header class="bg-white border-b border-slate-200 px-8 py-3 flex justify-between items-center shadow-sm z-40 relative">
+    <header
+        class="bg-white border-b border-slate-200 px-8 py-3 flex justify-between items-center shadow-sm z-40 relative">
         <div class="flex items-center space-x-4">
             <img src="./yf-logo.png" alt="Hub Logo" class="h-8 w-auto" onerror="this.style.display='none'" />
             <h1 class="text-sm font-black tracking-widest text-indigo-600 uppercase">Universal Context Hub</h1>
             <div class="h-6 w-px bg-slate-300"></div>
             <div class="flex items-center space-x-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Workspace:</label>
-                <input id="global-project" type="text" value="yield-force" class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400" placeholder="Type name..." onchange="initWorkspace()" />
-                <button onclick="initWorkspace()" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-indigo-200 hover:bg-indigo-100 transition">Load / Create</button>
+                <input id="global-project" type="text" value="yield-force"
+                    class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400"
+                    placeholder="Type name..." onchange="initWorkspace()" />
+                <button onclick="initWorkspace()"
+                    class="bg-indigo-50 text-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-indigo-200 hover:bg-indigo-100 transition">Load
+                    / Create</button>
             </div>
         </div>
 
         <div class="flex flex-1 items-center justify-end transition-all space-x-3">
             <div id="tools-menu-container" class="relative inline-block text-left">
-                <button onclick="toggleToolsMenu()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-1">
+                <button onclick="toggleToolsMenu()"
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-1">
                     <span>⚙️ Tools</span>
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </button>
-                <div id="tools-dropdown" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-slate-200">
+                <div id="tools-dropdown"
+                    class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-slate-200">
                     <div class="py-1" role="menu">
-                        <button onclick="toggleLinkModal(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-100 transition">🔗 Link Source Code</button>
-                        <button onclick="toggleOpsManual(); toggleToolsMenu();" class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">[?] Operations Manual</button>
+                        <button onclick="toggleLinkModal(); toggleToolsMenu();"
+                            class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-100 transition">🔗
+                            Link Source Code</button>
+                        <button onclick="toggleOpsManual(); toggleToolsMenu();"
+                            class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">[?]
+                            Operations Manual</button>
                     </div>
                 </div>
             </div>
 
-            <button onclick="toggleQuickAdrModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-2">
+            <button onclick="toggleQuickAdrModal()"
+                class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center space-x-2">
                 <span>+ Quick ADR</span>
             </button>
-            <button id="copy-handover-btn" onclick="copyHandoverPrompt()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-sm font-bold transition border border-slate-700 shadow-sm flex items-center space-x-2">
+            <button id="copy-handover-btn" onclick="copyHandoverPrompt()"
+                class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-1.5 rounded-lg text-sm font-bold transition border border-slate-700 shadow-sm flex items-center space-x-2">
                 <span>Copy Prompt</span>
             </button>
-            <button onclick="toggleDrawer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-md shadow-indigo-100">
+            <button onclick="toggleDrawer()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-md shadow-indigo-100">
                 Context & State
             </button>
         </div>
     </header>
 
-    <div id="state-drawer" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col">
+    <div id="state-drawer"
+        class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col">
         <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4 shrink-0">
             <h2 class="text-white font-black text-xs uppercase tracking-widest">Context Engine</h2>
             <div class="flex items-center space-x-4">
-                <button id="drawer-width-btn" onclick="toggleDrawerWidth()" class="text-slate-400 hover:text-white transition" title="Expand Drawer">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                <button id="drawer-width-btn" onclick="toggleDrawerWidth()"
+                    class="text-slate-400 hover:text-white transition" title="Expand Drawer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4">
+                        </path>
+                    </svg>
                 </button>
-                <button onclick="toggleDrawer()" class="text-slate-400 hover:text-white transition" title="Close Drawer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button onclick="toggleDrawer()" class="text-slate-400 hover:text-white transition"
+                    title="Close Drawer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
                 </button>
             </div>
         </div>
 
         <div class="flex border-b border-slate-700 mb-4 overflow-x-auto custom-scrollbar space-x-2 pb-1 shrink-0">
-            <button id="tab-btn-session" onclick="switchTab('session')" class="px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap">Session</button>
-            <button id="tab-btn-core" onclick="switchTab('core')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Blueprint</button>
-            <button id="tab-btn-tenant" onclick="switchTab('tenant')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Envs</button>
-            <button id="tab-btn-adr" onclick="switchTab('adr')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">ADRs</button>
-            <button id="tab-btn-prompts" onclick="switchTab('prompts')" class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompts</button>
+            <button id="tab-btn-session" onclick="switchTab('session')"
+                class="px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap">Session</button>
+            <button id="tab-btn-core" onclick="switchTab('core')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Blueprint</button>
+            <button id="tab-btn-tenant" onclick="switchTab('tenant')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Envs</button>
+            <button id="tab-btn-adr" onclick="switchTab('adr')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">ADRs</button>
+            <button id="tab-btn-prompts" onclick="switchTab('prompts')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompts</button>
         </div>
 
         <div id="tab-content-session" class="block flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
             <div class="space-y-2 bg-indigo-950/30 p-3 rounded-lg border border-indigo-900/50">
-                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-1">Smart Wrap-Up Import (Paste JSON)</label>
-                <textarea id="smart-session-dropzone" oninput="handleSessionPaste(event)" class="w-full h-12 bg-black text-indigo-300 text-[10px] p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar" placeholder="Paste /WRAPUP JSON output here..."></textarea>
+                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-1">Smart Wrap-Up
+                    Import (Paste JSON)</label>
+                <textarea id="smart-session-dropzone" oninput="handleSessionPaste(event)"
+                    class="w-full h-12 bg-black text-indigo-300 text-[10px] p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"
+                    placeholder="Paste /WRAPUP JSON output here..."></textarea>
             </div>
 
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center mb-1">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Local Scratchpad <span class="text-slate-500 text-[8px]">(Not Sent)</span></h3>
-                    <button onclick="clearEditor('todo-editor')" class="text-[9px] text-slate-500 hover:text-amber-400 uppercase font-bold transition">Clear</button>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Local Scratchpad <span
+                            class="text-slate-500 text-[8px]">(Not Sent)</span></h3>
+                    <button onclick="clearEditor('todo-editor')"
+                        class="text-[9px] text-slate-500 hover:text-amber-400 uppercase font-bold transition">Clear</button>
                 </div>
-                <textarea id="todo-editor" class="resize-y min-h-[100px] w-full bg-black text-amber-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar" placeholder="- Reminders for myself..."></textarea>
+                <textarea id="todo-editor"
+                    class="resize-y min-h-[100px] w-full bg-black text-amber-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar"
+                    placeholder="- Reminders for myself..."></textarea>
             </div>
-            
+
             <div class="space-y-4 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Session Queue</h3>
-                    <button onclick="commit('core')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-[9px] font-bold uppercase transition">Save Session</button>
+                    <button onclick="commit('core')"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-[9px] font-bold uppercase transition">Save
+                        Session</button>
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center">
                         <label class="text-[9px] font-black uppercase text-slate-500">Changelog (Completed)</label>
-                        <button onclick="clearEditor('changelog-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
+                        <button onclick="clearEditor('changelog-editor')"
+                            class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
                     </div>
-                    <textarea id="changelog-editor" class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="- Built the XYZ module..."></textarea>
+                    <textarea id="changelog-editor"
+                        class="w-full h-24 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar"
+                        placeholder="- Built the XYZ module..."></textarea>
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center">
-                        <label class="text-[9px] font-black uppercase text-slate-500">Next Objectives (FIFO Queue)</label>
+                        <label class="text-[9px] font-black uppercase text-slate-500">Next Objectives (FIFO
+                            Queue)</label>
                         <div class="flex items-center space-x-2">
                             <span class="text-[8px] text-red-400 font-bold" id="context-load-warning"></span>
-                            <button onclick="clearEditor('objectives-editor')" class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
+                            <button onclick="clearEditor('objectives-editor')"
+                                class="text-[8px] text-slate-600 hover:text-emerald-400 uppercase font-bold transition">Clear</button>
                         </div>
                     </div>
-                    <textarea id="objectives-editor" oninput="checkContextLoad()" class="w-full h-32 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" placeholder="1. Refactor logic..."></textarea>
+                    <textarea id="objectives-editor" oninput="checkContextLoad()"
+                        class="w-full h-32 bg-black text-emerald-300 font-sans text-xs p-2 rounded-lg border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar"
+                        placeholder="1. Refactor logic..."></textarea>
                 </div>
             </div>
         </div>
@@ -127,15 +189,21 @@
         <div id="tab-content-core" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Core Architecture JSON</h3>
-                <button onclick="commit('core')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save State</button>
+                <button onclick="commit('core')"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save
+                    State</button>
             </div>
             <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg mb-2 text-center shrink-0">
                 <p class="text-xs text-indigo-300 font-bold mb-2">JSON Editing is Deprecated.</p>
-                <p class="text-[10px] text-indigo-400">Please use the Markdown Editor in the main window to edit your Blueprint.</p>
+                <p class="text-[10px] text-indigo-400">Please use the Markdown Editor in the main window to edit your
+                    Blueprint.</p>
             </div>
             <details class="group flex-1 flex flex-col min-h-0">
-                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">Advanced: View Raw JSON Data</summary>
-                <textarea id="core-editor" oninput="renderPreviewFromJSON()" class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
+                <summary
+                    class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">
+                    Advanced: View Raw JSON Data</summary>
+                <textarea id="core-editor" oninput="renderPreviewFromJSON()"
+                    class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
             </details>
         </div>
 
@@ -143,115 +211,175 @@
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-teal-400">Environment JSON</h3>
                 <div class="flex items-center space-x-2">
-                    <button onclick="clearEditor('tenant-editor')" class="text-[9px] text-slate-500 hover:text-teal-400 uppercase font-bold transition">Clear</button>
-                    <button onclick="commit('tenant')" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save Env</button>
+                    <button onclick="clearEditor('tenant-editor')"
+                        class="text-[9px] text-slate-500 hover:text-teal-400 uppercase font-bold transition">Clear</button>
+                    <button onclick="commit('tenant')"
+                        class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save
+                        Env</button>
                 </div>
             </div>
             <div class="flex space-x-2 shrink-0">
-                <input type="text" id="tenant-selector" placeholder="Instance ID (e.g. ecu_medical)" class="flex-1 bg-black text-teal-300 border border-slate-800 text-xs p-2 rounded outline-none focus:ring-1 focus:ring-teal-500">
-                <button onclick="loadTenant()" class="bg-slate-700 text-white px-3 text-xs font-bold rounded">Load</button>
+                <input type="text" id="tenant-selector" placeholder="Instance ID (e.g. ecu_medical)"
+                    class="flex-1 bg-black text-teal-300 border border-slate-800 text-xs p-2 rounded outline-none focus:ring-1 focus:ring-teal-500">
+                <button onclick="loadTenant()"
+                    class="bg-slate-700 text-white px-3 text-xs font-bold rounded">Load</button>
             </div>
-            <textarea id="tenant-editor" class="flex-1 w-full bg-black text-teal-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-teal-500 custom-scrollbar"></textarea>
+            <textarea id="tenant-editor"
+                class="flex-1 w-full bg-black text-teal-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-teal-500 custom-scrollbar"></textarea>
         </div>
 
         <div id="tab-content-prompts" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-pink-400">System Rules (SudoLang)</h3>
                 <div class="space-x-2 flex items-center">
-                    <button id="clear-prompt-btn" onclick="clearPromptEditor()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Clear</button>
-                    <button onclick="loadPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Load Prompt</button>
-                    <button onclick="commit('prompts')" class="bg-pink-600 hover:bg-pink-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Save Rules</button>
+                    <button id="clear-prompt-btn" onclick="clearPromptEditor()"
+                        class="bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Clear</button>
+                    <button onclick="loadPrompt()"
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Load
+                        Prompt</button>
+                    <button onclick="commit('prompts')"
+                        class="bg-pink-600 hover:bg-pink-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition shadow-sm">Save
+                        Rules</button>
                 </div>
             </div>
-            <textarea id="prompt-editor" class="flex-1 w-full bg-black text-pink-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-pink-500 custom-scrollbar"></textarea>
+            <textarea id="prompt-editor"
+                class="flex-1 w-full bg-black text-pink-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-pink-500 custom-scrollbar"></textarea>
         </div>
 
         <div id="tab-content-adr" class="hidden flex-1 flex-col space-y-4 min-h-0">
-            <form id="adr-form" onsubmit="saveAdr(event)" class="bg-slate-800/40 p-3 rounded-xl border border-slate-700 space-y-3 shrink-0">
-                <div class="flex justify-between items-center mb-1">
-                    <div class="flex items-center">
-                        <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Edit Existing ADR</h3>
+            <details class="bg-slate-800/40 p-3 rounded-xl border border-slate-700 shrink-0">
+                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">Toggle Inline Editor</summary>
+                <form id="adr-form" onsubmit="saveAdr(event)" class="space-y-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="flex items-center">
+                            <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Edit Existing ADR
+                            </h3>
+                        </div>
+                        <button type="submit" id="adr-submit-btn"
+                            class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition">Save
+                            Update</button>
                     </div>
-                    <button type="submit" id="adr-submit-btn" class="bg-indigo-600 text-white px-2 py-1 rounded text-[9px] font-bold uppercase transition">Save Update</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="adr-scope" class="bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none">
-                        <option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option>
-                        <option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option>
-                    </select>
-                    <select id="adr-status" class="bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none">
-                        <option value="[ACTIVE]">[ACTIVE]</option>
-                        <option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[9px] font-black uppercase text-slate-400 block mb-1">Decision Title</label>
-                    <input id="adr-title" type="text" class="w-full bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none" placeholder="e.g., Use Node.js for Backend">
-                </div>
-                <div>
-                    <label class="text-[9px] font-black uppercase text-amber-500 block mb-1">Why (Friction)</label>
-                    <textarea id="adr-friction" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the problem we are solving?"></textarea>
-                </div>
-                <div>
-                    <label class="text-[9px] font-black uppercase text-emerald-500 block mb-1">What (Ruling)</label>
-                    <textarea id="adr-ruling" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
-                </div>
-                <div>
-                    <label class="text-[9px] font-black uppercase text-red-400 block mb-1">What Not (Boundary)</label>
-                    <textarea id="adr-boundary" class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
-                </div>
-            </form>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="adr-scope"
+                            class="bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none">
+                            <option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option>
+                            <option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option>
+                        </select>
+                        <select id="adr-status"
+                            class="bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none">
+                            <option value="[ACTIVE]">[ACTIVE]</option>
+                            <option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-slate-400 block mb-1">Decision Title</label>
+                        <input id="adr-title" type="text"
+                            class="w-full bg-black text-indigo-300 border border-slate-800 text-[10px] p-1.5 rounded outline-none"
+                            placeholder="e.g., Use Node.js for Backend">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-amber-500 block mb-1">Why (Friction)</label>
+                        <textarea id="adr-friction"
+                            class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar"
+                            placeholder="What is the problem we are solving?"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-emerald-500 block mb-1">What (Ruling)</label>
+                        <textarea id="adr-ruling"
+                            class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-slate-800 outline-none custom-scrollbar"
+                            placeholder="What is the architectural decision?"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-red-400 block mb-1">What Not (Boundary)</label>
+                        <textarea id="adr-boundary"
+                            class="w-full h-20 bg-black text-slate-300 text-[10px] p-1.5 rounded border border-red-900/30 outline-none custom-scrollbar"
+                            placeholder="What is strictly forbidden?"></textarea>
+                    </div>
+                </form>
+            </details>
             <div id="adr-list" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1 pb-4"></div>
         </div>
     </div>
 
     <main class="h-[calc(100vh-57px)] overflow-y-auto bg-slate-50 custom-scrollbar flex relative">
-        <div class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
+        <div
+            class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
             <div class="absolute top-8 right-8 z-30 transition-opacity duration-300">
-                <button id="md-toggle-btn" onclick="toggleMarkdownMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <button id="md-toggle-btn" onclick="toggleMarkdownMode()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                    </svg>
                     <span id="md-toggle-text">Edit Blueprint</span>
                 </button>
             </div>
             <div id="markdown-container" class="prose prose-slate max-w-none block mt-6">
                 <div class="animate-pulse text-slate-400">Select workspace and load state...</div>
             </div>
-            <textarea id="markdown-editor" class="hidden w-full h-[calc(100vh-200px)] mt-6 bg-slate-50 text-slate-800 font-mono text-sm p-8 rounded-xl border-2 border-indigo-100 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none" placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
+            <textarea id="markdown-editor"
+                class="hidden w-full h-[calc(100vh-200px)] mt-6 bg-slate-50 text-slate-800 font-mono text-sm p-8 rounded-xl border-2 border-indigo-100 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none"
+                placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
         </div>
     </main>
 
-    <div id="link-codebase-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
+    <div id="link-codebase-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-lg">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-white font-black text-sm uppercase tracking-widest text-teal-400">🔗 Link Source Code</h3>
-                <button onclick="toggleLinkModal()" class="text-slate-400 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <h3 class="text-white font-black text-sm uppercase tracking-widest text-teal-400">🔗 Link Source Code
+                </h3>
+                <button onclick="toggleLinkModal()" class="text-slate-400 hover:text-white transition"><svg
+                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg></button>
             </div>
             <div id="link-unlinked-view" class="hidden">
                 <div class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg mb-4">
-                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> You do not need to type the path. Drag and drop your project folder from your OS file explorer directly into the box below to auto-fill the absolute path.</p>
+                    <p class="text-xs text-slate-300"><strong>Pro Tip:</strong> You do not need to type the path. Drag
+                        and drop your project folder from your OS file explorer directly into the box below to auto-fill
+                        the absolute path.</p>
                 </div>
                 <form onsubmit="submitLinkCodebase(event)" class="space-y-3">
-                    <input id="link-path-input" type="text" class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500" placeholder="Drag & Drop folder here...">
-                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded text-xs font-bold uppercase transition mt-2">Generate Link Script</button>
+                    <input id="link-path-input" type="text"
+                        class="w-full bg-black text-teal-300 border border-slate-800 text-xs p-3 rounded outline-none focus:ring-1 focus:ring-teal-500"
+                        placeholder="Drag & Drop folder here...">
+                    <button type="submit"
+                        class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded text-xs font-bold uppercase transition mt-2">Generate
+                        Link Script</button>
                 </form>
             </div>
             <div id="link-linked-view" class="hidden">
-                <p class="text-xs text-slate-400 mb-2">This workspace is currently linked to the following directory:</p>
-                <div class="bg-black text-emerald-400 p-4 rounded-lg text-xs font-mono mb-6 break-all border border-emerald-900/50" id="active-link-path">/path/to/code</div>
-                <button onclick="unlinkCodebase()" class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-900/50 py-3 rounded text-xs font-bold uppercase transition">Unlink / Delete Path</button>
+                <p class="text-xs text-slate-400 mb-2">This workspace is currently linked to the following directory:
+                </p>
+                <div class="bg-black text-emerald-400 p-4 rounded-lg text-xs font-mono mb-6 break-all border border-emerald-900/50"
+                    id="active-link-path">/path/to/code</div>
+                <button onclick="unlinkCodebase()"
+                    class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-900/50 py-3 rounded text-xs font-bold uppercase transition">Unlink
+                    / Delete Path</button>
             </div>
         </div>
     </div>
 
-    <div id="quick-adr-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
+    <div id="quick-adr-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl w-full max-w-xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-white font-black text-sm uppercase tracking-widest">Log Quick Decision</h3>
-                <button onclick="toggleQuickAdrModal()" class="text-slate-400 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button onclick="toggleQuickAdrModal()" class="text-slate-400 hover:text-white transition"><svg
+                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg></button>
             </div>
             <div class="mb-4 p-3 bg-indigo-950/30 border border-indigo-900/50 rounded-lg">
-                <label class="text-[9px] font-black uppercase text-indigo-400 mb-1 block">Smart Auto-Import (Paste Multiple JSON or Text)</label>
-                <textarea id="smart-paste-adr" oninput="handleSmartPaste(event)" class="w-full h-12 bg-black text-indigo-300 text-xs p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar" placeholder="Paste full JSON array or AI /ADR text output here..."></textarea>
+                <label class="text-[9px] font-black uppercase text-indigo-400 mb-1 block">Smart Auto-Import (Paste
+                    Multiple JSON or Text)</label>
+                <textarea id="smart-paste-adr" oninput="handleSmartPaste(event)"
+                    class="w-full h-12 bg-black text-indigo-300 text-xs p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"
+                    placeholder="Paste full JSON array or AI /ADR text output here..."></textarea>
             </div>
             <div class="flex items-center space-x-4 mb-4">
                 <div class="h-px bg-slate-800 flex-1"></div>
@@ -261,40 +389,68 @@
             </div>
             <form id="quick-adr-form" onsubmit="submitQuickAdr(event)" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="quick-adr-scope" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none"><option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option><option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option></select>
-                    <select id="quick-adr-status" class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none"><option value="[ACTIVE]">[ACTIVE]</option><option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option></select>
+                    <select id="quick-adr-scope"
+                        class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none">
+                        <option value="[CORE_FRAMEWORK]">[CORE_FRAMEWORK]</option>
+                        <option value="[INSTANCE_SPECIFIC]">[INSTANCE_SPECIFIC]</option>
+                    </select>
+                    <select id="quick-adr-status"
+                        class="bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none">
+                        <option value="[ACTIVE]">[ACTIVE]</option>
+                        <option value="[ARCHIVED]">[ARCHIVED] (Excluded)</option>
+                    </select>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-slate-400 block mb-1">Decision Title</label>
-                    <input id="quick-adr-title" type="text" class="w-full bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none" placeholder="Decision Title">
+                    <input id="quick-adr-title" type="text"
+                        class="w-full bg-black text-indigo-300 border border-slate-800 text-xs p-2 rounded outline-none"
+                        placeholder="Decision Title">
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-amber-500 block mb-1">Why (Friction)</label>
-                    <textarea id="quick-adr-friction" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="Why are we making this rule?"></textarea>
+                    <textarea id="quick-adr-friction"
+                        class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar"
+                        placeholder="Why are we making this rule?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-emerald-500 block mb-1">What (Ruling)</label>
-                    <textarea id="quick-adr-ruling" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar" placeholder="What is the architectural decision?"></textarea>
+                    <textarea id="quick-adr-ruling"
+                        class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-slate-800 outline-none custom-scrollbar"
+                        placeholder="What is the architectural decision?"></textarea>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-red-400 block mb-1">What Not (Boundary)</label>
-                    <textarea id="quick-adr-boundary" class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-red-900/30 outline-none custom-scrollbar" placeholder="What is strictly forbidden?"></textarea>
+                    <textarea id="quick-adr-boundary"
+                        class="w-full h-20 bg-black text-slate-300 text-xs p-2 rounded border border-red-900/30 outline-none custom-scrollbar"
+                        placeholder="What is strictly forbidden?"></textarea>
                 </div>
-                <button id="quick-adr-submit-btn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-xs font-bold uppercase transition mt-2">Commit ADR to Ledger</button>
+                <button id="quick-adr-submit-btn" type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-xs font-bold uppercase transition mt-2">Commit
+                    ADR to Ledger</button>
             </form>
         </div>
     </div>
 
-    <div id="ops-manual-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto flex flex-col max-h-[90vh]">
+    <div id="ops-manual-modal"
+        class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 overflow-y-auto">
+        <div
+            class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl w-full max-w-4xl my-auto flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4 shrink-0">
-                <h3 class="text-white font-black text-2xl uppercase tracking-widest text-indigo-400">Hub Operations Manual</h3>
-                <button onclick="toggleOpsManual()" class="text-slate-400 hover:text-white transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <h3 class="text-white font-black text-2xl uppercase tracking-widest text-indigo-400">Hub Operations
+                    Manual</h3>
+                <button onclick="toggleOpsManual()" class="text-slate-400 hover:text-white transition"><svg
+                        class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg></button>
             </div>
-            <div id="ops-manual-content" class="prose prose-invert prose-sm max-w-none text-slate-300 overflow-y-auto custom-scrollbar pr-4 pb-4">
+            <div id="ops-manual-content"
+                class="prose prose-invert prose-sm max-w-none text-slate-300 overflow-y-auto custom-scrollbar pr-4 pb-4">
                 <div class="animate-pulse text-slate-500">Loading manual...</div>
             </div>
-            <button onclick="toggleOpsManual()" class="mt-6 shrink-0 w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-lg transition border border-slate-600">Close Manual</button>
+            <button onclick="toggleOpsManual()"
+                class="mt-6 shrink-0 w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-lg font-black uppercase tracking-widest shadow-lg transition border border-slate-600">Close
+                Manual</button>
         </div>
     </div>
 
@@ -317,7 +473,7 @@
         let isEditMode = false;
 
         let bulkAdrQueue = [];
-        let totalQueued = 0; 
+        let totalQueued = 0;
         let currentQueueIndex = 0;
 
         function clearEditor(id) {
@@ -388,7 +544,7 @@
             if (!val) return;
             try {
                 const parsed = JSON.parse(val);
-                
+
                 // Append to Changelog
                 if (parsed.completed_steps && Array.isArray(parsed.completed_steps)) {
                     const existing = document.getElementById('changelog-editor').value.trim();
@@ -398,7 +554,7 @@
 
                 // Overwrite Next Objectives (FIFO Queue Roll-over)
                 if (parsed.next_objectives && Array.isArray(parsed.next_objectives)) {
-                    document.getElementById('objectives-editor').value = parsed.next_objectives.map((s, i) => `${i+1}. ${s}`).join('\n');
+                    document.getElementById('objectives-editor').value = parsed.next_objectives.map((s, i) => `${i + 1}. ${s}`).join('\n');
                     checkContextLoad();
                 }
 
@@ -553,12 +709,14 @@
             m.classList.toggle('hidden');
             if (!m.classList.contains('hidden')) {
                 document.getElementById('smart-paste-adr').focus();
-                if (bulkAdrQueue.length === 0) {
+                if (bulkAdrQueue.length === 0 && currentEditId === null) {
                     document.getElementById('quick-adr-form').reset();
                     document.getElementById('quick-adr-submit-btn').innerText = "Commit ADR to Ledger";
                     document.getElementById('quick-adr-submit-btn').classList.remove('bg-amber-600');
                     document.getElementById('quick-adr-submit-btn').classList.add('bg-indigo-600');
                 }
+            } else {
+                currentEditId = null;
             }
         }
 
@@ -583,7 +741,7 @@
                 if (totalQueued > 1) showToast(`Queued ${totalQueued} JSON ADRs for review.`);
                 else showToast("JSON ADR Loaded! Review and Commit.");
                 loadNextBulkAdr();
-                return; 
+                return;
             } catch (err) { }
 
             if (!val.includes('Title:') || !val.includes('Friction:')) return;
@@ -641,15 +799,64 @@
             }
         }
 
+        async function deleteAdr(id) {
+            if (!confirm(`Are you sure you want to delete ADR ${id}?`)) return;
+            try {
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast("Record Deleted");
+                    fetchAdrs();
+                } else {
+                    showToast("Failed to delete record", true);
+                }
+            } catch (err) {
+                showToast("Network Error", true);
+            }
+        }
+
         async function submitQuickAdr(e) {
             e.preventDefault();
-            const payload = { scope: document.getElementById('quick-adr-scope').value, status: document.getElementById('quick-adr-status').value, title: document.getElementById('quick-adr-title').value, friction: document.getElementById('quick-adr-friction').value, ruling: document.getElementById('quick-adr-ruling').value, boundary: document.getElementById('quick-adr-boundary').value };
+            const payload = { 
+                scope: document.getElementById('quick-adr-scope').value, 
+                status: document.getElementById('quick-adr-status').value, 
+                title: document.getElementById('quick-adr-title').value, 
+                friction: document.getElementById('quick-adr-friction').value, 
+                ruling: document.getElementById('quick-adr-ruling').value, 
+                boundary: document.getElementById('quick-adr-boundary').value 
+            };
             if (!payload.title || !payload.friction || !payload.ruling) return showToast("Please fill required fields", true);
+            
+            const method = currentEditId ? 'PUT' : 'POST';
+            const endpoint = currentEditId ? `/api/${ACTIVE_PROJECT}/adrs/${currentEditId}` : `/api/${ACTIVE_PROJECT}/adrs`;
+
             try {
-                const res = await fetch(`/api/${ACTIVE_PROJECT}/adrs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(endpoint, { 
+                    method: method, 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
                 if (res.ok) {
-                    if (bulkAdrQueue.length > 0) { bulkAdrQueue.shift(); loadNextBulkAdr(); }
-                    else { document.getElementById('quick-adr-form').reset(); toggleQuickAdrModal(); showToast("ADR Saved & Added to Ledger"); fetchAdrs(); }
+                    if (currentEditId) {
+                        currentEditId = null;
+                        
+                        // Restore button state
+                        const btn = document.getElementById('quick-adr-submit-btn');
+                        btn.innerText = "Commit ADR to Ledger";
+                        btn.className = "w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-xs font-bold uppercase transition mt-2";
+                        
+                        document.getElementById('quick-adr-form').reset();
+                        toggleQuickAdrModal();
+                        showToast("ADR Updated Successfully");
+                        fetchAdrs();
+                    } else if (bulkAdrQueue.length > 0) { 
+                        bulkAdrQueue.shift(); 
+                        loadNextBulkAdr(); 
+                    } else { 
+                        document.getElementById('quick-adr-form').reset(); 
+                        toggleQuickAdrModal(); 
+                        showToast("ADR Saved & Added to Ledger"); 
+                        fetchAdrs(); 
+                    }
                 }
             } catch (err) { showToast("Save Failed", true); }
         }
@@ -684,8 +891,8 @@
                 if (!coreRes.ok) throw new Error(`State endpoint rejected request with status: ${coreRes.status}`);
                 const coreData = await coreRes.json();
                 if (coreEditor) {
-                    coreEditor.value = Object.keys(coreData).length === 0 
-                        ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}' 
+                    coreEditor.value = Object.keys(coreData).length === 0
+                        ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}'
                         : JSON.stringify(coreData, null, 2);
                 }
 
@@ -701,13 +908,13 @@
                     document.getElementById('changelog-editor').value = "";
                 }
 
-                switchTab('session'); 
-                renderPreviewFromJSON(); 
+                switchTab('session');
+                renderPreviewFromJSON();
                 fetchAdrs();
                 showToast(`Workspace Loaded: ${ACTIVE_PROJECT}`);
-            } catch (err) { 
+            } catch (err) {
                 console.error("[Hub] Critical Initialization Crash:", err);
-                showToast("Initialization Failed. Press F12 and check Console.", true); 
+                showToast("Initialization Failed. Press F12 and check Console.", true);
             }
         }
 
@@ -779,8 +986,8 @@
                             </div>
                             <h4 class="font-bold text-white uppercase">${adr.title || 'Untitled'}</h4>
                             <div class="space-y-1 mt-1">
-                                <p class="text-slate-400 line-clamp-2"><strong class="text-amber-500/70 uppercase text-[9px] mr-1">Why:</strong> ${adr.friction}</p>
-                                <p class="text-slate-400 line-clamp-2"><strong class="text-emerald-500/70 uppercase text-[9px] mr-1">What:</strong> ${adr.ruling}</p>
+                                <p class="text-slate-400"><strong class="text-amber-500/70 uppercase text-[9px] mr-1">Why:</strong> ${adr.friction}</p>
+                                <p class="text-slate-400"><strong class="text-emerald-500/70 uppercase text-[9px] mr-1">What:</strong> ${adr.ruling}</p>
                             </div>
                         </div>`;
                 });
@@ -800,7 +1007,7 @@
 
         async function loadPrompt() {
             try {
-                const promptRes = await fetch(`/api/${ACTIVE_PROJECT}/prompts`); 
+                const promptRes = await fetch(`/api/${ACTIVE_PROJECT}/prompts`);
                 const promptData = await promptRes.json();
                 if (promptEditor) promptEditor.value = promptData.raw_sudolang ? promptData.raw_sudolang : (Object.keys(promptData).length === 0 ? "" : JSON.stringify(promptData, null, 2));
             } catch (err) {
@@ -886,13 +1093,7 @@ OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role,
                 if (!baseTemplate || baseTemplate.trim() === '') throw new Error("Prompt template is empty.");
 
                 let coreD = {}, tenD = {};
-                try { 
-                    coreD = JSON.parse(coreEditor.value); 
-                    if (coreD.governor_state && coreD.governor_state.parts) {
-                        coreD.governor_state.parts = coreD.governor_state.parts.filter(p => !p.title.includes("Operational Manual"));
-                    }
-                } catch (e) { console.warn("Core JSON parse failed."); }
-                
+                try { coreD = JSON.parse(coreEditor.value); } catch (e) { console.warn("Core JSON parse failed."); }
                 try { tenD = JSON.parse(tenantEditor.value); } catch (e) { console.warn("Tenant JSON parse failed."); }
 
                 let adrsText = "";
@@ -906,13 +1107,20 @@ OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role,
                     if (cr.ok) codebaseOut = await cr.text();
                 } catch (e) { console.error("Failed to fetch codebase context"); }
 
+                // 1. Generate the Markdown string from the JSON FIRST
                 const blueprintMd = generateMarkdownFromJson({ governor_state: coreD.governor_state });
 
+                // 2. Eradicate the redundant blueprint from the JSON payload to prevent bloat
+                if (coreD.governor_state) {
+                    delete coreD.governor_state;
+                }
+
+                // 3. Ensure UI Session State is mapped into the payload
                 coreD.governor_meta = coreD.governor_meta || {};
                 coreD.governor_meta.todo_list = document.getElementById('todo-editor').value.split('\n').filter(s => s.trim() !== '');
                 coreD.governor_meta.next_objectives = document.getElementById('objectives-editor').value.split('\n').filter(s => s.trim() !== '');
                 coreD.governor_meta.session_changelog = document.getElementById('changelog-editor').value.split('\n').filter(s => s.trim() !== '');
-                
+
                 const stateJsonString = JSON.stringify({ core: coreD, environment: tenD }, null, 2);
 
                 let finalPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
@@ -936,15 +1144,15 @@ ${sanitizeForPrompt(blueprintMd)}
 }
 
 ${baseTemplate.replace(/\{\{INJECT_MACRO_PROJECT\}\}/g, ACTIVE_CONFIG.macro_project || "Undefined Project")
-              .replace(/\{\{INJECT_ACTIVE_CONTEXT\}\}/g, ACTIVE_CONFIG.active_context || "Undefined Context")}`;
+                        .replace(/\{\{INJECT_ACTIVE_CONTEXT\}\}/g, ACTIVE_CONFIG.active_context || "Undefined Context")}`;
 
-                const t = document.createElement('textarea'); 
-                t.value = finalPayload; 
-                document.body.appendChild(t); 
-                t.select(); 
-                document.execCommand('copy'); 
+                const t = document.createElement('textarea');
+                t.value = finalPayload;
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
                 t.remove();
-                
+
                 showToast("Payload Compiled and Copied.");
             } catch (err) {
                 showToast("Compilation failure. Check Console.", true);
@@ -957,4 +1165,5 @@ ${baseTemplate.replace(/\{\{INJECT_MACRO_PROJECT\}\}/g, ACTIVE_CONFIG.macro_proj
         window.onload = initWorkspace;
     </script>
 </body>
+
 </html>

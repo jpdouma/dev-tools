@@ -1,6 +1,6 @@
 {
   "governor_state": {
-    "document_title": "Yield Force Blueprint",
+    "document_title": "YIELD FORCE ARCHITECTURAL BLUEPRINT (v. CURRENT)",
     "root_content": "",
     "parts": [
       {
@@ -244,6 +244,72 @@
           {
             "title": "VI. CHAPTER: 17.0 Multi-Tenant Commercial Logic",
             "content": "#### 17.1 The Commercial Injection\n\nThe Onboarding Cohort must ingest the billing\\_type (Direct vs. Agency) into the tenants\\_registry during Phase 0\\.\n\n#### 17.2 The Metadata-Only Push\n\nZone 3 utilizes an Asymmetric Sync to push only anonymized metadata (Token Velocity/Yield Status) to the Agency's Zone 4 Hub.\n\n#### 17.3 The Kicker Bridge\n\nThe Bridge agent (Zone 3\\) triggers billing events only upon \"Verified\" status in the ledger, mapping outcomes to specific local/international USD values."
+          },
+          {
+            "title": "YIELD FORCE ARCHITECTURAL BLUEPRINT",
+            "content": "**Component:** Phase -1 Commercial Gateway\n**Module:** The Socratic Pitch Engine (Internal Demo Toolkit)\n**Last Updated:** April 11, 2026\n\n---\n\n#### 1. CORE NARRATIVE & POSITIONING\nThe pre-sales gateway has transitioned from a sterile \"Forensic Audit\" to a collaborative, Socratic discovery tool. The engine is designed to guide the prospect into recognizing their own pain points before introducing Yield Force as the asymmetric relief.\n* **Main Thesis:** \"The Attribution Void: What are we missing?\"\n* **Phase 1:** \"What do we actually know?\" (Verified inputs & baseline metrics)\n* **Phase 2:** \"Where is the leak?\" (Exposing the Attribution Void and wasted ad spend)\n* **Phase 3:** \"Recovery Solution\" (Asymmetric ROI projection minus baseline fees)\n\n#### 2. ARCHITECTURAL DECISION RECORDS (ADRs)\nThe following rulings have been permanently integrated into the core framework to protect the agnostic backend while empowering localized sales:\n* **ADR-070: Domain-Anchored Commercial Telemetry.** The backend (Zones 2/3) remains entirely domain-agnostic. All localized sales narratives, formulas, and \"fluid\" metrics (e.g., Tuition Value vs. E-commerce Cart Value) are isolated exclusively in the Zone 5 frontend presentation layer.\n* **ADR-071: Global Currency Localization.** To support emerging markets (e.g., Uganda/UGX), the system relies on a Global Currency Control. The underlying math state remains purely numeric. The frontend applies a dynamic, editable exchange rate multiplier and renders non-selectable inline currency prefixes (e.g., `USD` / `UGX`) inside the input fields.\n* **ADR-072: Client-Facing UI Sanitization.** The DOM must never render internal developer nomenclature. Terms like \"Zone 5\", \"ADR\", and \"Commercial Gateway\" are strictly stripped from client-facing projection modes to preserve enterprise credibility.\n\n#### 3. ENTERPRISE UX/UI STANDARDS\nThe interface has been hardened against common SaaS presentation failures:\n* **Dynamic Real Estate (Pitch Mode):** The main headers gracefully collapse upon input focus to maximize vertical screen space for the mathematical payload.\n* **Strict Relational Highlighting:** Visual math is enforced. Hovering over an output metric triggers a conditional highlight *only* on the specific inputs and outputs named in the corresponding mathematical formula.\n* **Forensic Math Precision (The CFO Trap):** UI rounding is disabled. The rendered multipliers exactly match the underlying float logic (e.g., `2.48` instead of `2.5`) to ensure manual calculations by client stakeholders match the system's output flawlessly.\n* **Input Sanitization:** Native HTML increment spinners (`appearance-none`) and forced leading zeros are suppressed. The component accepts empty strings for seamless field clearing while mathematically defaulting to `0` to prevent `NaN` cascading errors."
+          }
+        ]
+      },
+      {
+        "title": "PART 1: RECENT EXECUTIONS (STATE & UI)",
+        "description": "",
+        "chapters": [
+          {
+            "title": "The Commercial Airgap (Zone 5 Security)",
+            "content": "* Implemented strict Route Guards in `InternalLayout.jsx`.\n* Phase 0 tools (Onboarding/Ingestion) are strictly locked behind the `tenant_status === 'ONBOARDING'` or `ACTIVE` states.\n* `ProspectContext` is strictly volatile; browser hard-reloads instantly wipe the state and route to the `[NO ACTIVE SESSION]` Intake Gate."
+          },
+          {
+            "title": "The Architect Agent (Phase 0)",
+            "content": "* Excised the legacy manual `DomainSkinner` modal (Objective 6 pivoted/completed).\n* Deferred terminology mapping to the Phase 0 Architect Agent.\n* Replaced legacy UI with a split-pane Conversational Architect UI bound to a persistent `setup_tasks` array, iteratively building the `domain_dictionary.json` payload with a deferential \"Skip\" protocol."
+          },
+          {
+            "title": "Revenue Discovery Engine (ROI Calculator) Polish",
+            "content": "* **Objective 1 Completed:** Polished the Revenue Discovery Engine.\n* **Precision Math:** Closed the \"CFO Trap\" by enforcing strict integer pre-rounding on local currency line-items (e.g., UGX conversions) before final deduction. Fixed dynamic input scaling.\n* **Visual State & Socratic Logic:** Restored missing Socratic pipeline metrics (Ad Waste, Missed Pipeline). Bound terminology labels to the dynamic dictionary.\n* **UI Excision:** Purged redundant inner headers, hallucinated footers, and the unauthorized legacy modal. Zeroed out default manual inputs for a pristine starting state, and implemented `italic text-slate-400` distinct visual warning flags for unmapped dictionary terms.\n* **Version Control:** Committed Zone 5 architecture state to the repository."
+          }
+        ]
+      },
+      {
+        "title": "PART 2: ACTIVE ARCHITECTURAL DECISION RECORDS (ADRs)",
+        "description": "",
+        "chapters": [
+          {
+            "title": "ADR-086: The Commercial Airgap Protocol (Lazy Initialization)",
+            "content": "* **Ruling:** AI generation for Phase 0 (Dictionary Mapping, Base Ingestion) is forbidden until the Zone 0 invoice clears. Frontend must never dispatch Phase 0 requests for a 'PROSPECT'."
+          },
+          {
+            "title": "ADR-087: Conversational State-Machine Onboarding",
+            "content": "* **Ruling:** Phase 0 setup is driven by the 'Architect' agent acting as a strict state-machine reading/writing to a persistent `setup_tasks` array, completely replacing manual web forms."
+          },
+          {
+            "title": "ADR-088: Strict Volatile State for Pre-Sales Sessions",
+            "content": "* **Ruling:** No hydration from local/session storage is permitted for the active tenant state during Phase -1 to prevent ghost sessions and enforce security."
+          },
+          {
+            "title": "ADR-089: Phase -1 Knowledge Ingestion Quota & Sandbox Binding",
+            "content": "* **Ruling:** Pre-sales demo environments are restricted to a strict 3-document ingestion limit. Extracted context strictly binds to the `demo_protocol.md` system prompt powering the Brand Protection Sandbox."
+          },
+          {
+            "title": "ADR-090: The Universal Commercial Gateway",
+            "content": "* **Ruling:** The gateway is the Universal Sales Assistant—a central hub for RaaS knowledge, dynamic SLA/Quote generation, and Phase 0 onboarding management."
+          },
+          {
+            "title": "ADR-091: The Socratic Trajectory Player (Pitch Slides)",
+            "content": "* **Ruling:** The engine must generate dynamic, UI-rendered 'slides' combining telemetry and Socratic explanations to guide the rep's live narrative pitch."
+          }
+        ]
+      },
+      {
+        "title": "PART 3: ACTIVE OBJECTIVES & ROADMAP",
+        "description": "",
+        "chapters": [
+          {
+            "title": "Immediate Execution Queue",
+            "content": "* **Objectives 3 & 4 (ADR-089):** Wire the 3-Document Knowledge Ingestion dropzone UI to the Zone 2 backend and bind context to the Brand Protection Sandbox prompt. Define polite guardrails and context isolation behavior for the Brand Protection Sandbox agent.\n* **Objective 2 (ADR-090):** Open Q&A loop to define specifications for the Universal Commercial Gateway (Universal Sales Assistant) to implement Zone 0 pricing enforcement.\n* **Objective 5 (ADR-091):** Design and build the Socratic Trajectory Player (Pitch Slides) to guide live narrative pitches."
+          },
+          {
+            "title": "Blocked / Dependent Execution",
+            "content": "* **Objective 7:** Conduct an end-to-end rehearsal of the Phase -1 Commercial Validator pitch flow once the Sandbox, Gateway, and Trajectory Player are fully re-integrated."
           }
         ]
       }
@@ -251,13 +317,51 @@
   },
   "governor_meta": {
     "todo_list": [
-      "- Re-think onboarding -> we need to build a presentation pre-onboarding.\"",
-      "- We need to create a sales-support agent for our staff to ask questions in relation to our offering. That agent ingests initial client requirements. It will also create the offer.",
       "- Add autoSearch modules by Karpathy.\"",
       "- Incorporate Pomelli. ",
       "- Add green light that the repo is added."
     ],
-    "next_objectives": [],
-    "session_changelog": []
+    "next_objectives": [
+      "1. Objectives 3 & 4 (ADR-089): Wire the 3-Document Knowledge Ingestion dropzone UI to the Zone 2 backend and bind context to the Brand Protection Sandbox prompt.",
+      "2. Define polite guardrails and context isolation behavior for the Brand Protection Sandbox agent.",
+      "3. Objective 2 (ADR-090): Open Q&A loop to define specifications for the Universal Commercial Gateway (Universal Sales Assistant) to implement Zone 0 pricing enforcement.",
+      "4. Objective 5 (ADR-091): Design and build the Socratic Trajectory Player (Pitch Slides) to guide live narrative pitches.",
+      "5. [BLOCKED] Objective 7: Conduct an end-to-end rehearsal of the Phase -1 Commercial Validator pitch flow once Sandbox, Gateway, and Trajectory Player are fully re-integrated."
+    ],
+    "session_changelog": [
+      "* API Strictness Patch: Sanitized `output_schema.json` to strip `$schema` key, resolving Vertex AI 400 Bad Request errors.",
+      "* React Error Boundary: Implemented defensive rendering (optional chaining `?.map`) to prevent Fatal Render Errors during partial payload states.",
+      "* Asset Relocation: Migrated Phase 0 Ingestion Dropbox to `zone5_governance/src/internal_portal/IngestionDropbox.jsx`.",
+      "* Admin Architecture: Constructed `InternalLayout.jsx` wrapper for persistent navigation across internal governance tools.",
+      "* ADR Generation: Formalized core framework constraints via ADRs for OpenClaw exoskeleton integration and Zone 0 B2B2C Subscription logic.",
+      "* Showroom Deployment: Created the `/internal/toolkit` routing space and `Toolkit.jsx` gallery component.",
+      "* Demo Widgets Built: Deployed the `ROICalculator` (with Explainable AI Terminal) and `GuardrailSandbox` (with raw Sentinel log visualization) into the Toolkit.",
+      "- Built Socratic Pitch Engine UI (Phase -1 Commercial Gateway) with localized currency controls and dynamic math presentation.",
+      "- Implemented strict 1:1 relational highlighting between input metrics and tooltip formulas across all phases.",
+      "- Resolved the 'CFO Trap' by enforcing exact float precision (no rounding) on generated multipliers and revenue calculations.",
+      "- Refined enterprise UX by collapsing headers in Pitch Mode, stripping native HTML number spinners, and sanitizing input fields to remove leading zeros.",
+      "- Built Socratic Pitch Engine UI (Phase -1 Commercial Gateway) with localized currency controls and dynamic math presentation.",
+      "- Implemented strict 1:1 relational highlighting between input metrics and tooltip formulas across all phases.",
+      "- Resolved the 'CFO Trap' by enforcing exact float precision (no rounding) on generated multipliers and revenue calculations.",
+      "- Refined enterprise UX by collapsing headers in Pitch Mode, stripping native HTML number spinners, and sanitizing input fields to remove leading zeros.",
+      "- Replaced static backend mock with live Vertex AI logic in gateway_router.js for the Guardrail Sandbox.",
+      "- Refactored Guardrail Sandbox frontend to handle multi-turn chat arrays, token streaming (typewriter effect), and auto-focus for rapid follow-ups.",
+      "- Implemented Theater Mode toggle with absolute positioning to maximize vertical real estate during demo pitches.",
+      "- Fixed institutional identity hallucination by enforcing 'Earnest Cook University (ECU)' via the systemInstruction parameter in the base llm_utility.js.",
+      "- Corrected ROI Calculator UI anti-patterns by replacing dynamic state variables with clean static math text and fixing tooltip z-index/positioning.",
+      "- Generated and documented architectural decisions (ADR-081 to ADR-084).",
+      "- Implemented multi-tenant global context with strict UPSERT logic to prevent data duplication.",
+      "- Refactored ProspectIntakeForm for reactive state hydration using strict useEffect bindings.",
+      "- Resolved JSX syntax crash and fatal Vite build errors in Toolkit.jsx.",
+      "- Refined Commercial Gateway UI by stripping redundant headers, injecting high-contrast brand CSS variables, and decoupling legacy router guards (Manual Domain Skinner phase complete).",
+      "- Added strict ID confirmation modal to Knowledge Ingestion to safeguard the production ledger.",
+      "- Performed hard restart of the Node.js backend server to clear stale memory and applied ECU identity systemInstruction.",
+      "- Verified token streamer and auto-scroll anchor behave correctly during live Vertex AI latency.",
+      "- Enforced Commercial Airgap and strictly volatile ProspectContext for Phase -1 pre-sales security.",
+      "- Objective 6 Completed/Pivoted: Excised legacy Domain Skinner modal and deferred terminology mapping to Phase 0 Architect Agent.",
+      "- Objective 1 Completed: Polished Revenue Discovery Engine (ROI Calculator). Closed CFO math trap for localized currencies, fixed dynamic input scaling, and restored Socratic pipeline metrics (Ad Waste, Missed Pipeline).",
+      "- Finalized ROI Calculator UI: purged redundant headers/watermarks, zeroed default inputs, and implemented distinct visual warning flags for unmapped dictionary terms.",
+      "- Committed Zone 5 architecture state to repository."
+    ]
   }
 }

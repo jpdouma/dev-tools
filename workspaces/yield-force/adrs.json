@@ -1,5 +1,185 @@
 [
   {
+    "id": "ADR-087",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-091: The Socratic Trajectory Player (Pitch Slides)",
+    "friction": "Reps lack a structured, visual narrative track when walking a prospect through the complex ROI math and the external sandbox demo, leading to inconsistent pitch delivery.",
+    "ruling": "The platform must generate a 'Trajectory Player'—a sequence of dynamic, UI-rendered 'slides' or cards. These slides will combine the active tenant's financial telemetry with Socratic explanations to guide the rep's live narrative.",
+    "boundary": "The slide generation must be data-driven, automatically pulling variables from the `ProspectContext` and the Commercial Gateway's output to build a bespoke pitch deck within the application UI.",
+    "timestamp": "2026-04-12T15:24:30.204Z"
+  },
+  {
+    "id": "ADR-086",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-090: The Universal Commercial Gateway",
+    "friction": "Treating the Commercial Gateway as a simple pricing calculator fragments the sales workflow. Reps need a centralized intelligence hub to handle pre-sales knowledge, deal structuring, and Phase 0 onboarding transitions.",
+    "ruling": "The Commercial Gateway is redefined as the Universal Sales Assistant. It serves as the primary conversational interface for internal reps to query the RaaS Knowledge Base, generate dynamic Quotes/SLAs, and manage the Phase 0 onboarding 'To-Do' list.",
+    "boundary": "The Gateway LLM router must support dynamic intent classification (e.g., distinguishing between a question about Yield Force architecture and a command to generate a commercial manifest).",
+    "timestamp": "2026-04-12T15:24:29.618Z"
+  },
+  {
+    "id": "ADR-085",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-089: Phase -1 Knowledge Ingestion Quota & Sandbox Binding",
+    "friction": "Unrestricted document ingestion during pre-sales burns production compute. Furthermore, the Brand Protection Sandbox currently suffers from 'amnesia' and cannot enforce rules against the rep's uploaded demo documents.",
+    "ruling": "Enforce a strict 3-document ingestion limit for the Phase -1 pre-sales environment. The extracted vector/JSON context from these specific documents must be directly piped into the `demo_protocol.md` system prompt powering the Brand Protection Sandbox.",
+    "boundary": "The Sandboxed agent must operate exclusively within the context of those 3 documents to demonstrate deterministic prompt rejection, proving RaaS contextual awareness without accessing the Zone 3 Production Ledger.",
+    "timestamp": "2026-04-12T15:24:29.015Z"
+  },
+  {
+    "id": "ADR-084",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-088: Strict Volatile State for Pre-Sales Sessions",
+    "friction": "Browser reloads cause 'ghost sessions' or corrupted state dehydration if the app attempts to reconstruct partial pre-sales data from browser storage, bypassing Intake Gate security.",
+    "ruling": "The `ProspectContext` must be strictly volatile on application mount. No hydration from `localStorage` or `sessionStorage` is permitted for the active tenant state during Phase -1. A browser hard-reload must natively wipe the state.",
+    "boundary": "The global routing layout must evaluate the context on mount and instantly force a redirect to the `[NO ACTIVE SESSION]` Intake Gate if the active tenant object evaluates to null.",
+    "timestamp": "2026-04-12T15:24:28.356Z"
+  },
+  {
+    "id": "ADR-083",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-079 (ARCHIVED): CSS Variable Injection for Ephemeral White-Labeling",
+    "friction": "Architectural shift to Lazy Initialization (ADR-086) renders early-stage white-labeling economically unviable.",
+    "ruling": "ARCHIVED. White-labeling and CSS variable injection will no longer occur ephemerally during the Phase -1 prospect stage. Brand extraction is now deferred to the Phase 0 Architect agent post-contract.",
+    "boundary": "Deprecate all Phase -1 logic attempting to extract or inject brand hex colors.",
+    "timestamp": "2026-04-12T14:04:16.487Z"
+  },
+  {
+    "id": "ADR-082",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-087: Conversational State-Machine Onboarding",
+    "friction": "Relying on manual UI gear icons for setup is high-friction SaaS legacy. Free-form AI chats easily lose track of mandatory configuration steps.",
+    "ruling": "Phase 0 onboarding must be driven by a conversational 'Architect' agent acting as a strict state-machine. The agent must read and write to a persistent `setup_tasks` array linked to the `tenant_id` (e.g., ['map_terminology', 'ingest_compliance_rules']). It must support 'Skip' loops, gracefully deferring skipped tasks while programmatically compiling the final `domain_dictionary.json` payload in the background.",
+    "boundary": "The Phase 0 setup UI must not rely on static web forms for domain mapping. The Architect agent must not loop infinitely; it must query the persistent datastore to resume tasks exactly where the rep or client last left them.",
+    "timestamp": "2026-04-12T14:04:15.936Z"
+  },
+  {
+    "id": "ADR-081",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-086: The Commercial Airgap Protocol (Lazy Initialization)",
+    "friction": "Executing AI-driven domain mapping, PDF ingestion, and UI skinning during Phase -1 pre-sales burns compute and labor on unverified prospects, violating the RaaS economic model.",
+    "ruling": "Enforce a strict 'Lazy Initialization' boundary. The execution of Phase 0 Factory tools (Conversational Dictionary Mapping, Knowledge Base Ingestion, Domain Skinner) is strictly forbidden until the Zone 0 Billing Registry verifies the active `tenant_id` status as 'SIGNED/PAID' (Commercial Airgap crossed). Phase -1 is restricted entirely to SLA generation and the baseline ROI Calculator.",
+    "boundary": "The UI must disable or hide all Onboarding submenus for any session lacking a verified payment/contract state. The frontend must never dispatch Phase 0 AI generation requests for a 'PROSPECT' status.",
+    "timestamp": "2026-04-12T14:04:15.320Z"
+  },
+  {
+    "id": "ADR-080",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "Strict Identity Verification for Production Ingestion",
+    "friction": "High risk of operators accidentally ingesting mock demo data into the production vector database during fast-paced pre-sales workflows.",
+    "ruling": "Implement a hard intercept gate on the Knowledge Ingestion mode selector. Unlocking the 'Production Ledger' strictly requires the operator to manually type the active tenantId into a confirmation modal, reinforced by persistent visual client logo anchors.",
+    "boundary": "Confined to the state management of the Knowledge Ingestion dropzone. Precludes automated or default selection of production ingestion pipelines.",
+    "timestamp": "2026-04-12T12:38:17.672Z"
+  },
+  {
+    "id": "ADR-078",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "Strict Reactive Hydration and UPSERT Mutability",
+    "friction": "Stale component state and database duplication (cloning) when hot-swapping multi-tenant contexts via the sidebar switcher.",
+    "ruling": "Enforce the global ProspectContext as the sovereign source of truth. UI components must utilize strict useEffect bindings for data hydration rather than destructive key-prop remount hacks. Context save operations must utilize strict UPSERT logic bound to the nested tenantId.",
+    "boundary": "Deprecates lazy array appending and local state initializations. Sets the architectural prerequisite for future asynchronous Supabase database migration.",
+    "timestamp": "2026-04-12T12:38:10.106Z"
+  },
+  {
+    "id": "ADR-077",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-085: Sovereign Key Generation and Hierarchical Initialization",
+    "friction": "Pre-sales workflows (Phase -1) lack early cryptographic anchors, risking orphan data creation and failure of the Zone 3 RLS and Zone 0 Master Billing Hook if Commercial Tier (Direct vs Agency) is not established before knowledge ingestion or quoting.",
+    "ruling": "A 'Prospect Intake Gate' must precede all Phase -1 operations. It must explicitly capture the Commercial Tier to automatically mint dual hierarchical keys (tenant_id and agency_id). This data is injected into a global Context API and upserted into a prospect registry, transforming the inception point into a persistent CRM ledger.",
+    "boundary": "No widget in the Phase -1 Demo Toolkit or Phase 0 Pipeline may render interactive inputs or execute API calls without a valid, system-generated tenant_id inherited from the global context. Manual creation of isolated tenant IDs within individual widgets is strictly forbidden.",
+    "timestamp": "2026-04-12T07:08:52.249Z"
+  },
+  {
+    "id": "ADR-076",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "ADR-084: Separation of UI State Variables from Static Helper Typography",
+    "friction": "Injecting live mathematical state variables directly into UI helper subtext creates visual clutter and an unprofessional anti-pattern, while misconfigured absolute positioning causes tooltips to obscure critical data.",
+    "ruling": "Helper text explaining mathematical formulas must use static, clean typography (e.g., 'Ad Spend ÷ Conversions'). Tooltips must explicitly anchor upwards ('bottom-full') relative to a strictly defined ('relative') parent container to prevent data obscuration.",
+    "boundary": "Applies to the ROI Calculator widget and standard data visualization tooltips within the frontend presentation layer.",
+    "timestamp": "2026-04-11T17:12:15.230Z"
+  },
+  {
+    "id": "ADR-075",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "ADR-083: Simulated Streaming and Persistent Focus for Demo Immersion",
+    "friction": "Instantaneous JSON payload resolution breaks the 'live AI' illusion, and dynamic DOM expansion pushes user inputs out of the viewport, hindering rapid follow-up questions.",
+    "ruling": "Implement simulated token streaming (typewriter effect) for client-facing AI messages, paired with an auto-scroll anchor (messagesEndRef) and an auto-focus hook that snaps the cursor back to the input upon payload resolution.",
+    "boundary": "Applies to the Guardrail Sandbox UI widget. Simulated latency should not exceed standard human reading pace (e.g., 15-30ms per character).",
+    "timestamp": "2026-04-11T17:12:14.761Z"
+  },
+  {
+    "id": "ADR-074",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-082: Foundational Enforcement of Institutional Identity",
+    "friction": "The LLM occasionally hallucinates incorrect institutional names (e.g., East Coast University) when identity constraints are only passed via downstream router prompts.",
+    "ruling": "Institutional identity and strict negative constraints must be injected at the base model configuration level using the Gemini API's 'systemInstruction' parameter to guarantee immutability against downstream prompt injection.",
+    "boundary": "Requires Node.js server restart upon configuration change. Applies to all 'generateCommercialValidation' calls in the Refinery API.",
+    "timestamp": "2026-04-11T17:12:14.343Z"
+  },
+  {
+    "id": "ADR-073",
+    "scope": "[INSTANCE_SPECIFIC]",
+    "status": "[ACTIVE]",
+    "title": "ADR-081: Implementation of Manual Theater Mode for Pre-Sales Demo",
+    "friction": "Standard navigation headers and toolkit UI consume critical vertical real estate during live, multi-turn AI 'Trust Exercises', reducing the impact of the chat and telemetry logs.",
+    "ruling": "Deploy a manual 'Theater Mode' UI state that collapses non-essential headers. The toggle trigger must use absolute positioning with high z-index to break out of the collapsing container's hidden overflow.",
+    "boundary": "Applies strictly to the Zone 5 Governance Demo Toolkit presentation layer. Does not alter standard internal operational dashboards.",
+    "timestamp": "2026-04-11T17:12:13.958Z"
+  },
+  {
+    "id": "ADR-072",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-072: Client-Facing UI Sanitization",
+    "friction": "Exposing internal architecture nomenclature (ADR numbers, Zone names, Phase labels) during screen-sharing breaks the fourth wall and diminishes enterprise credibility.",
+    "ruling": "All tools within the Zone 5 Demo Toolkit intended for pre-sales screen-sharing must utilize conversational, Socratic commercial copy (e.g., 'The Cost of Unverified Traffic').",
+    "boundary": "Developer-facing terminology, system state variables, and architectural zone references are strictly prohibited from appearing in the rendered DOM of client-facing pitch tools.",
+    "timestamp": "2026-04-11T09:51:58.084Z"
+  },
+  {
+    "id": "ADR-071",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-071: Global Currency Localization & High-Denomination Formatting",
+    "friction": "Simple prefix swapping (e.g., $ to UGX) destroys mathematical credibility in emerging markets, and high-denomination outputs cause fatal UI container overflow.",
+    "ruling": "Client-facing financial tools must implement a Global Currency Control with an editable exchange rate. The system must dynamically calculate conversions from a USD base state and enforce responsive text scaling or vertical stacking for large integer rendering.",
+    "boundary": "The frontend must never hardcode a static exchange rate or rely on live API calls during a sales pitch. Input fields must keep numeric data separate from currency labels by using absolute-positioned, non-selectable inline indicators.",
+    "timestamp": "2026-04-11T09:51:57.591Z"
+  },
+  {
+    "id": "ADR-070",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-070: Domain-Anchored Commercial Telemetry",
+    "friction": "Agnostic ROI calculators present arbitrary numbers, failing to trigger loss aversion or prove Sovereign Value during pre-sales engagements.",
+    "ruling": "The Phase -1 Commercial Gateway must utilize a 'Black Hole Audit' narrative. It must explicitly calculate the 'Attribution Void' (Traffic - Conversions) and 'Wasted Ad Spend' to establish current pain, using these metrics to justify the Zone 0 pricing floors.",
+    "boundary": "Sales tooling must never assume or present a 100% recovery rate of lost traffic. Tools must mandate a conservative 'Estimated Recovery Rate' input to project realistic net profit and protect rep credibility.",
+    "timestamp": "2026-04-11T09:51:57.078Z"
+  },
+  {
+    "id": "ADR-069",
+    "scope": "[CORE_FRAMEWORK]",
+    "status": "[ACTIVE]",
+    "title": "ADR-069: Performance Kicker & Webhook Measurement Protocol",
+    "friction": "Measuring performance-based kickbacks (e.g., 5% of tuition) without creating deep, fragile integrations into legacy client accounting systems or breaking the agnostic architecture.",
+    "ruling": "Yield Force will utilize a Parameterized Handoff and Webhook Intercept model. Agents must generate conversion URLs containing a unique yf_id. The client is required to fire a webhook back to Zone 1 from their final success page, passing the yf_id and value_captured. Zone 3 will automatically calculate the % kicker and queue it in the Zone 0 Billing Hook.",
+    "boundary": "Yield Force must NEVER scrape, poll, or directly integrate with internal client financial databases (e.g., QuickBooks, legacy ERPs) to calculate the kicker. The loop must be closed strictly via the inbound webhook protocol.",
+    "timestamp": "2026-04-11T08:42:38.144Z"
+  },
+  {
     "id": "ADR-068",
     "scope": "[CORE_FRAMEWORK]",
     "status": "[ACTIVE]",
@@ -22,12 +202,13 @@
   {
     "id": "ADR-066",
     "scope": "[CORE_FRAMEWORK]",
-    "status": "[ACTIVE]",
+    "status": "[ARCHIVED]",
     "title": "Phase Minus One Commercial Gateway",
     "friction": "Need to protect architectural boundaries during the pre-onboarding, sales phase.",
     "ruling": "Yield Force will implement a pre onboarding layer driven by a Commercial Validator agent. This agent must strictly enforce architectural boundaries against client requests and only output the SLA and Quote.",
     "boundary": "Phase Minus One agents must NEVER generate system prompts or technical configurations. Technical instantiation is strictly reserved for Phase Zero after SLA signature.",
-    "timestamp": "2026-04-11T06:37:09.374Z"
+    "timestamp": "2026-04-11T06:37:09.374Z",
+    "updated_at": "2026-04-12T19:02:18.791Z"
   },
   {
     "id": "ADR-065",

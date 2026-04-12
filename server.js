@@ -96,11 +96,16 @@ app.get('/api/:project/get-context', (req, res) => {
     const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
     const targetPath = linkData.targetPath;
     
-    // The find script: gathering content of key files from targeted directories
-    // We target common source folders like src, lib, components, etc.
-    const findScript = `find . -maxdepth 3 -not -path '*/.*' -type f \\( -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.html" -o -name "*.css" -o -name "*.ts" -o -name "*.tsx" \\) -not -name "package-lock.json" -not -path "*/node_modules/*" -exec echo "--- FILE: {} ---" \\; -exec awk '1' {} \\; -exec echo "" \\;`;
+    // 1) Implement path validation
+    if (targetPath.includes('..')) {
+        return res.status(403).send("Security Error: Path traversal detected.");
+    }
+
+    // 2) Update the findScript variable to explicitly ignore build directories
+    const findScript = `find . -maxdepth 3 -not -path '*/.*' -type f \\( -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.html" -o -name "*.css" -o -name "*.ts" -o -name "*.tsx" \\) -not -name "package-lock.json" -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/build/*" -not -path "*/.next/*" -not -path "*/coverage/*" -exec echo "--- FILE: {} ---" \\; -exec awk '1' {} \\; -exec echo "" \\;`;
     
-    const command = `cd "${targetPath}" && git status && git diff && ${findScript}`;
+    // 3) Decouple the execution chain using semicolon after version control checks
+    const command = `cd "${targetPath}" && (git status ; git diff ; ${findScript})`;
     
     exec(command, { maxBuffer: 1024 * 1024 * 20 }, (error, stdout, stderr) => {
         if (error) {
