@@ -10,17 +10,19 @@ const app = express();
 const PORT = 4000;
 
 // Global Workspace Configuration
-const WORKSPACES_DIR = path.join(__dirname, 'workspaces');
-if (!fs.existsSync(WORKSPACES_DIR)) {
-  fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
+const CONTEXT_ROOT = path.join(__dirname, '..', 'context-files');
+if (!fs.existsSync(CONTEXT_ROOT)) {
+  fs.mkdirSync(CONTEXT_ROOT, { recursive: true });
 }
 
-// Helper: Directory Traversal Protection
+// Helper: Directory Traversal Protection & Centralized Storage
 function getProjectDir(project) {
   if (!project || typeof project !== 'string' || project.includes('..') || project.includes('/') || project.includes('\\')) {
     throw new Error('Invalid project name');
   }
-  const projectDir = path.join(WORKSPACES_DIR, project);
+
+  const projectDir = path.join(CONTEXT_ROOT, project);
+
   if (!fs.existsSync(projectDir)) {
     fs.mkdirSync(projectDir, { recursive: true });
     fs.mkdirSync(path.join(projectDir, 'archives'), { recursive: true });
@@ -37,7 +39,8 @@ function getProjectFiles(project) {
     adrs: path.join(projectDir, 'adrs.json'),
     archiveDir: path.join(projectDir, 'archives'),
     prompts: path.join(projectDir, 'system_prompts.json'),
-    link: path.join(projectDir, 'codebase_link.json')
+    link: path.join(projectDir, 'codebase_link.json'),
+    roadmap: path.join(projectDir, 'roadmap.json')
   };
 }
 
@@ -77,6 +80,39 @@ app.post('/api/ops-manual', (req, res) => {
   if (!content) return res.status(400).json({ error: 'Content required' });
   fs.writeFileSync(manualPath, content, 'utf8');
   res.json({ status: 'success' });
+});
+
+app.get('/favicon.ico', (req, res) => {
+  const targetFile = path.join(__dirname, '..', 'assets', 'dev-tools.png');
+  if (fs.existsSync(targetFile)) {
+    res.sendFile(targetFile);
+  } else {
+    res.status(404).send('Not found');
+  }
+});
+
+app.get('/api/:workspace/path', (req, res) => {
+  try {
+    const targetPath = getProjectDir(req.params.workspace);
+    res.json({ path: targetPath });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.get('/api/:workspace/logo', (req, res) => {
+  const assetsDir = path.join(__dirname, '..', 'assets');
+  if (!fs.existsSync(assetsDir)) {
+    fs.mkdirSync(assetsDir, { recursive: true });
+  }
+  const exts = ['.png', '.svg', '.jpg', '.jpeg'];
+  for (let ext of exts) {
+    const targetFile = path.join(assetsDir, req.params.workspace + ext);
+    if (fs.existsSync(targetFile)) {
+      return res.sendFile(targetFile);
+    }
+  }
+  res.status(404).send('No logo found');
 });
 
 app.get('/api/:project/config', (req, res) => {
@@ -128,6 +164,22 @@ app.post('/api/:project/update-state', (req, res) => {
   const files = getProjectFiles(req.params.project);
   archiveFile(files.state, files.archiveDir);
   fs.writeFileSync(files.state, JSON.stringify(req.body, null, 2), 'utf8');
+  res.json({ status: 'success' });
+});
+
+app.get('/api/:project/roadmap', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.roadmap)) {
+    res.json(JSON.parse(fs.readFileSync(files.roadmap, 'utf8')));
+  } else {
+    res.json([]);
+  }
+});
+
+app.post('/api/:project/roadmap', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  archiveFile(files.roadmap, files.archiveDir);
+  fs.writeFileSync(files.roadmap, JSON.stringify(req.body, null, 2), 'utf8');
   res.json({ status: 'success' });
 });
 

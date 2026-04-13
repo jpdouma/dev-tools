@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Context Hub</title>
-    <link rel="icon" href="./yf-avatar.png">
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="/favicon.ico" />
 
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -44,17 +44,23 @@
     <header
         class="bg-white border-b border-slate-200 px-8 py-3 flex justify-between items-center shadow-sm z-40 relative">
         <div class="flex items-center space-x-4">
-            <img src="./yf-logo.png" alt="Hub Logo" class="h-8 w-auto" onerror="this.style.display='none'" />
+            <div class="relative flex items-center justify-center h-10 min-w-[40px] max-w-[200px] w-auto px-1 mr-3 rounded bg-indigo-900/50 border border-indigo-500/30 overflow-hidden shrink-0">
+                <img id="dynamic-logo-img" class="absolute inset-0 w-full h-full object-contain hidden" src="" onerror="this.classList.add('hidden'); document.getElementById('dynamic-logo-text').classList.remove('hidden');" />
+                <span id="dynamic-logo-text" class="text-[11px] font-black text-indigo-300 tracking-tighter uppercase"></span>
+            </div>
             <h1 class="text-sm font-black tracking-widest text-indigo-600 uppercase">Universal Context Hub</h1>
             <div class="h-6 w-px bg-slate-300"></div>
-            <div class="flex items-center space-x-2">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Workspace:</label>
-                <input id="global-project" type="text" value="yield-force"
-                    class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400"
-                    placeholder="Type name..." onchange="initWorkspace()" />
-                <button onclick="initWorkspace()"
-                    class="bg-indigo-50 text-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-indigo-200 hover:bg-indigo-100 transition">Load
-                    / Create</button>
+            <div class="flex flex-col justify-center">
+                <div class="flex items-center space-x-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Workspace: <span title="Best Practice: Run the Hub server one directory level up (e.g., ~/projects/) and type the target folder name here. The Hub will route data to the correct subfolder automatically." class="cursor-help text-slate-500 hover:text-indigo-400 ml-1 text-[10px]">ⓘ</span></label>
+                    <input id="global-project" type="text" value="yield-force"
+                        class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400"
+                        placeholder="Type name..." onchange="initWorkspace()" />
+                    <button onclick="initWorkspace()"
+                        class="bg-indigo-50 text-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase rounded border border-indigo-200 hover:bg-indigo-100 transition">Load
+                        / Create</button>
+                </div>
+                <span id="resolved-path-display" class="mt-1 text-[9px] text-slate-500 font-mono tracking-tighter truncate max-w-xs"></span>
             </div>
         </div>
 
@@ -70,12 +76,9 @@
                 <div id="tools-dropdown"
                     class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-slate-200">
                     <div class="py-1" role="menu">
-                        <button onclick="toggleLinkModal(); toggleToolsMenu();"
-                            class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 border-b border-slate-100 transition">🔗
-                            Link Source Code</button>
                         <button onclick="toggleOpsManual(); toggleToolsMenu();"
-                            class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">[?]
-                            Operations Manual</button>
+                            class="text-left w-full block px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition">
+                            [?] Operations Manual</button>
                     </div>
                 </div>
             </div>
@@ -127,6 +130,8 @@
                 class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Envs</button>
             <button id="tab-btn-adr" onclick="switchTab('adr')"
                 class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">ADRs</button>
+            <button id="tab-btn-roadmap" onclick="switchTab('roadmap')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Roadmap</button>
             <button id="tab-btn-prompts" onclick="switchTab('prompts')"
                 class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompts</button>
         </div>
@@ -204,6 +209,29 @@
                     Advanced: View Raw JSON Data</summary>
                 <textarea id="core-editor" oninput="renderPreviewFromJSON()"
                     class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
+            </details>
+        </div>
+
+        <div id="tab-content-roadmap" class="hidden flex-1 flex-col space-y-2 min-h-0">
+            <div class="flex justify-between items-center shrink-0">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Epic Ledger</h3>
+                <button onclick="commit('roadmap')"
+                    class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1 rounded text-[10px] font-bold uppercase transition">Save
+                    Roadmap</button>
+            </div>
+            
+            <div id="roadmap-visual-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2 pb-4"></div>
+
+            <details class="shrink-0 border-t border-slate-800 pt-2">
+                <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none mb-2">Toggle Raw JSON Editor <span id="editor-workspace-lock" class="ml-2 text-[9px] px-1.5 py-0.5 bg-indigo-900/50 text-indigo-300 rounded border border-indigo-700/50"></span></summary>
+                <textarea id="roadmap-editor" oninput="renderVisualRoadmap()"
+                    class="h-40 w-full bg-black text-amber-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar"
+                    placeholder='[ { "title": "Epic Name", "status": "[ACTIVE]", "description": "Goal...", "sprints": [] } ]'></textarea>
+                <div class="flex justify-end space-x-2 mt-2">
+                    <button onclick="document.getElementById('roadmap-editor').value=''; renderVisualRoadmap();" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-600 transition">Clear</button>
+                    <button onclick="if(confirm(`WARNING: This will completely overwrite the roadmap for workspace: [${ACTIVE_PROJECT.toUpperCase()}]. Proceed?`)) { commit('roadmap'); renderVisualRoadmap(); }" class="px-3 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 text-[10px] font-bold rounded border border-red-600/50 transition">Force Overwrite</button>
+                    <button onclick="const modal = document.getElementById('custom-confirm-modal'); document.getElementById('custom-confirm-message').innerText = 'Merge this JSON into the [' + ACTIVE_PROJECT.toUpperCase() + '] roadmap?'; modal.classList.remove('hidden'); document.getElementById('custom-confirm-cancel').onclick = () => modal.classList.add('hidden'); document.getElementById('custom-confirm-ok').onclick = () => { modal.classList.add('hidden'); executeSmartMerge(); };" class="px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[10px] font-bold rounded border border-indigo-600/50 transition">Smart Merge (Upsert)</button>
+                </div>
             </details>
         </div>
 
@@ -454,6 +482,51 @@
         </div>
     </div>
 
+    <div id="roadmap-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[200]">
+        <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl w-80 shadow-2xl">
+            <h3 id="roadmap-modal-title" class="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider">Node</h3>
+            <input type="text" id="roadmap-modal-input"
+                class="w-full bg-black border border-slate-700 rounded p-2 text-slate-300 text-xs outline-none focus:border-indigo-500 mb-4"
+                onkeydown="if(event.key === 'Enter') submitRoadmapModal()">
+            <div class="flex justify-end space-x-2">
+                <button onclick="document.getElementById('roadmap-modal').classList.add('hidden'); document.getElementById('roadmap-modal').classList.remove('flex');"
+                    class="px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 transition">CANCEL</button>
+                <button onclick="submitRoadmapModal()"
+                    class="px-3 py-1.5 text-[10px] font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-600/50 hover:bg-indigo-600/40 rounded transition">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="fixed inset-0 bg-black/80 hidden z-[200]">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="bg-slate-900 border border-red-900/50 p-4 rounded-xl w-80 shadow-2xl">
+                <h3 class="text-xs font-bold text-red-400 mb-2 uppercase tracking-wider">Confirm Deletion</h3>
+                <p id="delete-modal-text" class="text-slate-400 text-[10px] mb-4">Are you sure you want to delete this node? This action cannot be
+                    undone.</p>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeDeleteModal()"
+                        class="px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-200 transition">CANCEL</button>
+                    <button onclick="executeDeleteNode()"
+                        class="px-3 py-1.5 text-[10px] font-bold bg-red-600/20 text-red-400 border border-red-600/50 hover:bg-red-600/40 rounded transition">DELETE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-6 w-[400px] max-w-full">
+            <h3 class="text-lg font-bold text-slate-100 mb-2">Confirm Merge</h3>
+            <p id="custom-confirm-message" class="text-sm text-slate-300 mb-6"></p>
+            <div class="flex justify-end space-x-3">
+                <button id="custom-confirm-cancel"
+                    class="px-4 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 transition">Cancel</button>
+                <button id="custom-confirm-ok"
+                    class="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition">Confirm
+                    Merge</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
     <script>
@@ -471,6 +544,8 @@
         let ACTIVE_PROJECT = 'yield-force';
         let ACTIVE_CONFIG = {};
         let isEditMode = false;
+        let rmState = null;
+        let pendingDeleteNode = null;
 
         let bulkAdrQueue = [];
         let totalQueued = 0;
@@ -861,14 +936,265 @@
             } catch (err) { showToast("Save Failed", true); }
         }
 
+        async function openRoadmapModal(action, level, title, iIdx, eIdx, sIdx, oIdx) {
+            rmState = { action, level, iIdx, eIdx, sIdx, oIdx };
+            document.getElementById('roadmap-modal-title').innerText = `${action} ${level}`;
+            document.getElementById('roadmap-modal-input').value = action === 'Edit' ? title : '';
+            document.getElementById('roadmap-modal').classList.remove('hidden');
+            document.getElementById('roadmap-modal').classList.add('flex');
+            setTimeout(() => document.getElementById('roadmap-modal-input').focus(), 100);
+        }
+
+        async function submitRoadmapModal() {
+            const val = document.getElementById('roadmap-modal-input').value.trim();
+            if (!val) return;
+
+            const editor = document.getElementById('roadmap-editor');
+            let roadmap = [];
+            try { roadmap = JSON.parse(editor.value); } catch (e) { }
+
+            const { action, level, iIdx, eIdx, sIdx, oIdx } = rmState;
+
+            if (action === 'Add') {
+                if (level === 'initiative') roadmap.push({ title: val, status: '[PENDING]', epics: [] });
+                else if (level === 'epic') roadmap[iIdx].epics.push({ title: val, status: '[PENDING]', sprints: [] });
+                else if (level === 'sprint') roadmap[iIdx].epics[eIdx].sprints.push({ title: val, status: '[PENDING]', objectives: [] });
+                else if (level === 'objective') roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives.push({ title: val, status: '[PENDING]' });
+            } else if (action === 'Edit') {
+                if (level === 'initiative') roadmap[iIdx].title = val;
+                else if (level === 'epic') roadmap[iIdx].epics[eIdx].title = val;
+                else if (level === 'sprint') roadmap[iIdx].epics[eIdx].sprints[sIdx].title = val;
+                else if (level === 'objective') roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives[oIdx].title = val;
+            }
+
+            editor.value = JSON.stringify(roadmap, null, 2);
+            await commit('roadmap', true);
+            renderVisualRoadmap();
+            document.getElementById('roadmap-modal').classList.add('hidden');
+            document.getElementById('roadmap-modal').classList.remove('flex');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            document.getElementById('delete-modal').classList.remove('flex');
+            pendingDeleteNode = null;
+        }
+
+        async function deleteRoadmapNode(level, iIdx, eIdx, sIdx, oIdx) {
+            pendingDeleteNode = { level, iIdx, eIdx, sIdx, oIdx };
+            document.getElementById('delete-modal-text').innerText = `Are you sure you want to delete this ${level} from the [${ACTIVE_PROJECT.toUpperCase()}] workspace?`;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('delete-modal').classList.add('flex');
+        }
+
+        async function executeDeleteNode() {
+            if (!pendingDeleteNode) return;
+            const { level, iIdx, eIdx, sIdx, oIdx } = pendingDeleteNode;
+
+            const editor = document.getElementById('roadmap-editor');
+            let roadmap = [];
+            try { roadmap = JSON.parse(editor.value); } catch (e) { }
+
+            if (level === 'initiative') roadmap.splice(iIdx, 1);
+            else if (level === 'epic') roadmap[iIdx].epics.splice(eIdx, 1);
+            else if (level === 'sprint') roadmap[iIdx].epics[eIdx].sprints.splice(sIdx, 1);
+            else if (level === 'objective') roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives.splice(oIdx, 1);
+
+            editor.value = JSON.stringify(roadmap, null, 2);
+            await commit('roadmap', true);
+            renderVisualRoadmap();
+            closeDeleteModal();
+        }
+
+        async function renderVisualRoadmap() {
+            const container = document.getElementById('roadmap-visual-container');
+            const editor = document.getElementById('roadmap-editor');
+            if (!container || !editor) return;
+
+            let roadmap = [];
+            try { 
+                const val = editor.value.trim();
+                roadmap = val ? JSON.parse(val) : []; 
+            } catch (e) { roadmap = []; }
+            if (!Array.isArray(roadmap)) roadmap = [];
+
+            let html = '';
+            roadmap.forEach((initiative, iIdx) => {
+                const iActive = initiative.status === '[ACTIVE]';
+                const iComp = initiative.status === '[COMPLETED]';
+                const iColor = iActive ? 'text-teal-400 border-teal-500/50' : (iComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300');
+                
+                html += `
+                    <details ${iActive ? 'open' : ''} class="bg-slate-800/40 border ${iActive ? 'border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.1)]' : 'border-slate-700'} p-3 rounded-xl transition-all mb-4">
+                        <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
+                            <div class="flex items-center text-xs font-black uppercase tracking-widest ${iColor}">
+                                ${initiative.title || 'Untitled Initiative'}
+                                <span title="The overarching business or product goal." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
+                                <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'initiative', '${(initiative.title || '').replace(/'/g, "\\'")}', ${iIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
+                                <button onclick="event.preventDefault(); deleteRoadmapNode('initiative', ${iIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
+                            </div>
+                            <button onclick="event.preventDefault(); cycleRoadmapStatus('initiative', ${iIdx})" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/50 border border-slate-700 hover:border-teal-500 transition">${initiative.status || '[PENDING]'}</button>
+                        </summary>
+                        <div class="mt-3 space-y-3 pl-2 border-l border-slate-700 ml-1">
+                            ${(initiative.epics || []).map((epic, eIdx) => {
+                                const eActive = epic.status === '[ACTIVE]';
+                                const eComp = epic.status === '[COMPLETED]';
+                                const eColor = eActive ? 'text-indigo-400 border-indigo-500/50' : (eComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300');
+                                return `
+                                    <details ${eActive ? 'open' : ''} class="bg-slate-900/40 border ${eActive ? 'border-indigo-500/50' : 'border-slate-800'} p-2 rounded-lg transition-all">
+                                        <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
+                                            <div class="flex items-center text-[11px] font-black uppercase tracking-wider text-indigo-400">
+                                                ${epic.title || 'Untitled Epic'}
+                                                <span title="A large technical deliverable." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
+                                                <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'epic', '${(epic.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
+                                                <button onclick="event.preventDefault(); deleteRoadmapNode('epic', ${iIdx}, ${eIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
+                                            </div>
+                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('epic', ${iIdx}, ${eIdx})" class="text-[8px] font-bold px-1 py-0.5 rounded bg-black/50 border border-slate-800 hover:border-indigo-500 transition">${epic.status || '[PENDING]'}</button>
+                                        </summary>
+                                        <div class="mt-2 space-y-2 pl-2 border-l border-slate-800 ml-1">
+                                            ${(epic.sprints || []).map((sprint, sIdx) => {
+                                                const sActive = sprint.status === '[ACTIVE]';
+                                                const sComp = sprint.status === '[COMPLETED]';
+                                                const sColor = sActive ? 'text-amber-400' : (sComp ? 'text-slate-500 line-through' : 'text-slate-400');
+                                                return `
+                                                    <details ${sActive ? 'open' : ''} class="bg-black/30 p-2 rounded-lg border border-slate-800">
+                                                        <summary class="text-[10px] font-bold cursor-pointer hover:text-white transition flex justify-between items-center">
+                                                            <div class="flex items-center ${sColor}">
+                                                                ${sprint.title || 'Untitled Sprint'}
+                                                                <span title="A time-boxed execution cycle." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
+                                                                <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'sprint', '${(sprint.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
+                                                                <button onclick="event.preventDefault(); deleteRoadmapNode('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
+                                                            </div>
+                                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="text-[8px] opacity-60 hover:text-amber-400 transition">${sprint.status || '[PENDING]'}</button>
+                                                        </summary>
+                                                        <div class="mt-2 pl-2">
+                                                            <ul class="space-y-1">
+                                                                ${(sprint.objectives || []).map((obj, oIdx) => `
+                                                                    <li class="flex justify-between items-center group/obj">
+                                                                        <div class="flex items-center text-[10px] ${obj.status === '[COMPLETED]' ? 'text-slate-500 line-through' : 'text-slate-300'}">
+                                                                            ${obj.title}
+                                                                            <span title="The atomic dev task." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
+                                                                            <button onclick="openRoadmapModal('Edit', 'objective', '${(obj.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
+                                                                            <button onclick="deleteRoadmapNode('objective', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
+                                                                        </div>
+                                                                        <button onclick="cycleRoadmapStatus('objective', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="text-[8px] opacity-0 group-hover/obj:opacity-100 px-1 py-0.5 rounded bg-black border border-slate-800 hover:border-emerald-500 transition">${obj.status || '[PENDING]'}</button>
+                                                                    </li>
+                                                                `).join('')}
+                                                            </ul>
+                                                            <button onclick="openRoadmapModal('Add', 'objective', '', ${iIdx}, ${eIdx}, ${sIdx})" class="text-[9px] text-indigo-400 hover:underline font-bold mt-2">+ Add Objective</button>
+                                                        </div>
+                                                    </details>
+                                                `;
+                                            }).join('')}
+                                            <button onclick="openRoadmapModal('Add', 'sprint', '', ${iIdx}, ${eIdx})" class="w-full py-1 text-[9px] font-bold text-slate-500 hover:text-amber-400 border border-dashed border-slate-800 rounded hover:border-amber-400 transition mt-1">+ Add Sprint</button>
+                                        </div>
+                                    </details>
+                                `;
+                            }).join('')}
+                            <button onclick="openRoadmapModal('Add', 'epic', '', ${iIdx})" class="w-full py-1.5 text-[10px] font-bold text-slate-500 hover:text-indigo-400 border border-dashed border-slate-700 rounded-lg hover:border-indigo-400 transition mt-2">+ Add Epic</button>
+                        </div>
+                    </details>
+                `;
+            });
+
+            html += `<button onclick="openRoadmapModal('Add', 'initiative')" class="w-full bg-slate-800/50 hover:bg-slate-800 text-indigo-400 border border-slate-700 border-dashed py-3 rounded-lg text-xs font-bold uppercase transition mt-4">+ Add Initiative</button>`;
+            container.innerHTML = html;
+        }
+
+        async function cycleRoadmapStatus(level, iIdx, eIdx, sIdx, oIdx) {
+            const editor = document.getElementById('roadmap-editor');
+            let roadmap = JSON.parse(editor.value);
+            const statuses = ['[PENDING]', '[ACTIVE]', '[COMPLETED]'];
+
+            const getNextStatus = (current) => {
+                const idx = statuses.indexOf(current);
+                return statuses[(idx + 1) % statuses.length];
+            };
+
+            if (level === 'initiative') {
+                roadmap[iIdx].status = getNextStatus(roadmap[iIdx].status);
+            } else if (level === 'epic') {
+                roadmap[iIdx].epics[eIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].status);
+            } else if (level === 'sprint') {
+                roadmap[iIdx].epics[eIdx].sprints[sIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].sprints[sIdx].status);
+            } else if (level === 'objective') {
+                roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives[oIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives[oIdx].status);
+            }
+
+            editor.value = JSON.stringify(roadmap, null, 2);
+            await commit('roadmap', true);
+            renderVisualRoadmap();
+        }
+
+        async function addRoadmapNode(level, iIdx, eIdx, sIdx) {
+            const title = prompt(`Enter new ${level} title:`);
+            if (!title) return;
+
+            const editor = document.getElementById('roadmap-editor');
+            let roadmap = [];
+            try { roadmap = JSON.parse(editor.value); } catch (e) { }
+
+            if (level === 'initiative') {
+                roadmap.push({ title, status: '[PENDING]', epics: [] });
+            } else if (level === 'epic') {
+                roadmap[iIdx].epics = roadmap[iIdx].epics || [];
+                roadmap[iIdx].epics.push({ title, status: '[PENDING]', sprints: [] });
+            } else if (level === 'sprint') {
+                roadmap[iIdx].epics[eIdx].sprints = roadmap[iIdx].epics[eIdx].sprints || [];
+                roadmap[iIdx].epics[eIdx].sprints.push({ title, status: '[PENDING]', objectives: [] });
+            } else if (level === 'objective') {
+                roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives = roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives || [];
+                roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives.push({ title, status: '[PENDING]' });
+            }
+
+            editor.value = JSON.stringify(roadmap, null, 2);
+            await commit('roadmap', true);
+            renderVisualRoadmap();
+        }
+
+        async function executeSmartMerge() {
+            try {
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/roadmap`);
+                const existing = await res.json();
+                
+                const incomingText = document.getElementById('roadmap-editor').value.trim();
+                const incoming = incomingText ? JSON.parse(incomingText) : [];
+
+                const deepMerge = (ex, inc) => {
+                    inc.forEach(inNode => {
+                        let match = ex.find(e => e.title.toLowerCase().trim() === inNode.title.toLowerCase().trim());
+                        if (match) {
+                            ['epics', 'sprints', 'objectives'].forEach(key => {
+                                if (inNode[key]) {
+                                    match[key] = match[key] || [];
+                                    deepMerge(match[key], inNode[key]);
+                                }
+                            });
+                        } else {
+                            ex.push(inNode);
+                        }
+                    });
+                };
+
+                deepMerge(existing, incoming);
+                document.getElementById('roadmap-editor').value = JSON.stringify(existing, null, 2);
+                await commit('roadmap', true);
+                renderVisualRoadmap();
+                showToast("Smart Merge Complete");
+            } catch (err) {
+                showToast("Merge Failed: Invalid JSON", true);
+            }
+        }
+
         function switchTab(tabName) {
             activeTab = tabName;
-            ['session', 'core', 'tenant', 'adr', 'prompts'].forEach(t => {
+            ['session', 'core', 'tenant', 'adr', 'roadmap', 'prompts'].forEach(t => {
                 const content = document.getElementById('tab-content-' + t); const btn = document.getElementById('tab-btn-' + t);
                 if (content) { content.classList.toggle('hidden', t !== tabName); content.classList.toggle('block', t === tabName && t === 'session'); content.classList.toggle('flex', t === tabName && t !== 'session'); }
                 if (btn) btn.className = t === tabName ? 'px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap' : 'px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap';
             });
             if (tabName === 'adr') fetchAdrs();
+            if (tabName === 'roadmap') renderVisualRoadmap();
         }
 
         function checkContextLoad() {
@@ -880,6 +1206,26 @@
             ACTIVE_PROJECT = document.getElementById('global-project').value.trim();
             if (!ACTIVE_PROJECT) return showToast("Workspace name required", true);
             showToast(`Loading: ${ACTIVE_PROJECT}...`);
+
+            // Persist workspace to memory
+            localStorage.setItem('last_workspace', ACTIVE_PROJECT);
+
+            // Drive Dynamic Avatar
+            const ws = ACTIVE_PROJECT || '?';
+            document.getElementById('dynamic-logo-text').innerText = ws.substring(0, 3);
+            const imgEl = document.getElementById('dynamic-logo-img');
+            const logoUrl = `/api/${ws}/logo?${new Date().getTime()}`;
+            imgEl.src = logoUrl;
+            imgEl.classList.remove('hidden');
+            document.getElementById('dynamic-logo-text').classList.add('hidden');
+            document.getElementById('dynamic-favicon').href = logoUrl;
+
+            // Fetch and display resolved physical path
+            fetch(`/api/${ACTIVE_PROJECT}/path`)
+                .then(r => r.json())
+                .then(data => { document.getElementById('resolved-path-display').innerText = '📁 ' + data.path; })
+                .catch(e => console.error('Path fetch failed', e));
+
             try {
                 try {
                     const cfgRes = await fetch(`/api/${ACTIVE_PROJECT}/config`);
@@ -895,6 +1241,16 @@
                         ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}'
                         : JSON.stringify(coreData, null, 2);
                 }
+
+                const roadRes = await fetch(`/api/${ACTIVE_PROJECT}/roadmap`);
+                const roadData = await roadRes.ok ? await roadRes.json() : [];
+                if (document.getElementById('roadmap-editor')) {
+                    document.getElementById('roadmap-editor').value = roadData.length === 0
+                        ? '[\n  {\n    "title": "Initial Initiative",\n    "status": "[ACTIVE]",\n    "epics": [\n      {\n        "title": "Core Epic",\n        "status": "[ACTIVE]",\n        "sprints": []\n      }\n    ]\n  }\n]'
+                        : JSON.stringify(roadData, null, 2);
+                }
+                document.getElementById('editor-workspace-lock').innerText = 'Target: ' + ACTIVE_PROJECT;
+                renderVisualRoadmap();
 
                 await loadPrompt();
 
@@ -946,6 +1302,9 @@
                 else if (type === 'prompts') {
                     endpoint = `/api/${ACTIVE_PROJECT}/prompts`;
                     try { payload = JSON.parse(promptEditor.value); } catch (e) { payload = { raw_sudolang: promptEditor.value }; }
+                } else if (type === 'roadmap') {
+                    endpoint = `/api/${ACTIVE_PROJECT}/roadmap`;
+                    payload = JSON.parse(document.getElementById('roadmap-editor').value);
                 } else if (type === 'tenant') {
                     const tid = document.getElementById('tenant-selector').value.trim();
                     endpoint = `/api/${ACTIVE_PROJECT}/update-tenant-state/${tid}`; payload = JSON.parse(tenantEditor.value);
@@ -1063,6 +1422,14 @@ Interface UniversalContextHub {
         - Do NOT output JSON.
     }
 
+    /ROADMAP {
+      Task: Analyze the SystemState.ProjectBlueprint and CodebaseContext to autonomously generate a comprehensive 4-tier project roadmap.
+      Rules:
+        - Output ONLY a raw, valid JSON array.
+        - Do not wrap the JSON in Markdown formatting.
+      OutputSchema: [ { "title": "[String]", "status": "[Enum: [PENDING] | [ACTIVE] | [COMPLETED]]", "epics": [ { "title": "[String]", "status": "[Enum]", "sprints": [ { "title": "[String]", "status": "[Enum]", "objectives": [ { "title": "[String]", "status": "[Enum]" } ] } ] } ] } ]
+    }
+
     /WRAPUP {
       State Freeze: Active.
       Task: Generate a lean JSON diff to update the system state via the Smart Session Dropzone for the next session context window.
@@ -1123,12 +1490,25 @@ OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role,
 
                 const stateJsonString = JSON.stringify({ core: coreD, environment: tenD }, null, 2);
 
+                let activeEpicString = "No active milestone defined.";
+                try {
+                    const roadmap = JSON.parse(document.getElementById('roadmap-editor').value);
+                    for (const init of roadmap) {
+                        const activeEpic = (init.epics || []).find(e => e.status === "[ACTIVE]");
+                        if (activeEpic) {
+                            activeEpicString = `Initiative: ${init.title} -> Epic: ${activeEpic.title}`;
+                            break;
+                        }
+                    }
+                } catch (e) { console.warn("Roadmap parse failed during prompt compilation."); }
+
                 let finalPayload = `// [UNIVERSAL CONTEXT HUB: SUDOLANG INITIALIZATION]
 #initWorkspace("${ACTIVE_PROJECT.toUpperCase()}")
 
 SystemState {
   Workspace: "${ACTIVE_PROJECT}"
   Phase: "Active Execution"
+  ActiveMilestone: "${activeEpicString}"
   MachineStateJSON: """
 ${sanitizeForPrompt(stateJsonString)}
   """
@@ -1162,7 +1542,13 @@ ${baseTemplate.replace(/\{\{INJECT_MACRO_PROJECT\}\}/g, ACTIVE_CONFIG.macro_proj
             }
         }
 
-        window.onload = initWorkspace;
+        window.onload = () => {
+            const lastWs = localStorage.getItem('last_workspace');
+            if (lastWs) {
+                document.getElementById('global-project').value = lastWs;
+            }
+            initWorkspace();
+        };
     </script>
 </body>
 
