@@ -124,16 +124,14 @@
         <div class="flex border-b border-slate-700 mb-4 overflow-x-auto custom-scrollbar space-x-2 pb-1 shrink-0">
             <button id="tab-btn-session" onclick="switchTab('session')"
                 class="px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap">Session</button>
-            <button id="tab-btn-core" onclick="switchTab('core')"
-                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Blueprint</button>
-            <button id="tab-btn-tenant" onclick="switchTab('tenant')"
-                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Envs</button>
-            <button id="tab-btn-adr" onclick="switchTab('adr')"
-                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">ADRs</button>
             <button id="tab-btn-roadmap" onclick="switchTab('roadmap')"
                 class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Roadmap</button>
+            <button id="tab-btn-adr" onclick="switchTab('adr')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">ADRs</button>
+            <button id="tab-btn-tenant" onclick="switchTab('tenant')"
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Envs</button>
             <button id="tab-btn-prompts" onclick="switchTab('prompts')"
-                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompts</button>
+                class="px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap">Prompt</button>
         </div>
 
         <div id="tab-content-session" class="block flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
@@ -207,7 +205,7 @@
                 <summary
                     class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none shrink-0 mb-2">
                     Advanced: View Raw JSON Data</summary>
-                <textarea id="core-editor" oninput="renderPreviewFromJSON()"
+                <textarea id="core-editor"
                     class="flex-1 w-full bg-black text-indigo-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"></textarea>
             </details>
         </div>
@@ -332,29 +330,15 @@
     <main class="h-[calc(100vh-57px)] overflow-y-auto bg-slate-50 custom-scrollbar flex relative">
         <div
             class="w-full max-w-5xl p-12 md:p-16 mx-auto bg-white min-h-full shadow-sm border-x border-slate-200 relative">
-            <div class="absolute top-8 right-8 z-30 transition-opacity duration-300">
-                <button id="md-toggle-btn" onclick="toggleMarkdownMode()"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-indigo-200 flex items-center space-x-2 border border-indigo-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                        </path>
-                    </svg>
-                    <span id="md-toggle-text">Edit Blueprint</span>
-                </button>
-            </div>
             <div class="flex h-[calc(100vh-120px)] mt-6 bg-white rounded-xl border-2 border-indigo-100 overflow-hidden shadow-inner relative">
-                <div id="roadmap-toc-sidebar" class="w-64 border-r border-slate-200 p-4 hidden md:block overflow-y-auto text-sm text-slate-600 bg-slate-50/50 custom-scrollbar">
+                <button id="toc-toggle-btn" onclick="toggleToc()" class="absolute top-5 left-64 -ml-4 z-50 bg-white border border-slate-200 shadow-md rounded-full p-1.5 text-slate-500 hover:text-indigo-600 hover:border-indigo-400 transition-all cursor-pointer focus:outline-none"><svg id="toc-arrow-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <div id="roadmap-toc-sidebar" class="w-64 border-r border-slate-200 p-4 overflow-y-auto text-sm text-slate-600 bg-slate-50/50 custom-scrollbar">
                     <div class="animate-pulse text-slate-400 text-xs uppercase font-bold tracking-widest">Loading TOC...</div>
                 </div>
                 <div class="flex-1 flex flex-col min-w-0 relative z-10">
-                    <button id="toc-toggle-btn" onclick="toggleToc()" class="absolute top-5 -left-4 z-50 bg-white border border-slate-200 shadow-md rounded-full p-1.5 text-slate-500 hover:text-indigo-600 hover:border-indigo-400 transition-all cursor-pointer focus:outline-none"><svg id="toc-arrow-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
                     <div id="markdown-container" class="prose prose-slate max-w-none block p-8 pl-14 overflow-y-auto custom-scrollbar flex-1">
                         <div class="animate-pulse text-slate-400">Select workspace and load state...</div>
                     </div>
-                    <textarea id="markdown-editor"
-                        class="hidden w-full h-full bg-slate-50 text-slate-800 font-mono text-sm p-8 pl-14 outline-none focus:ring-4 focus:ring-indigo-500/20 custom-scrollbar resize-none"
-                        placeholder="# Project Title\n\n## Core Architecture\n\n### Overview\nStart typing your Markdown blueprint here..."></textarea>
                 </div>
             </div>
         </div>
@@ -551,7 +535,6 @@
         let adrCache = [];
         let ACTIVE_PROJECT = 'yield-force';
         let ACTIVE_CONFIG = {};
-        let isEditMode = false;
         let rmState = null;
         let pendingDeleteNode = null;
 
@@ -646,105 +629,6 @@
                 commit('core', true); // Auto-save state
             } catch (err) {
                 // Ignore invalid JSON
-            }
-        }
-
-        function generateMarkdownFromJson(state) {
-            try {
-                const gov = state?.governor_state || {};
-                let mdString = "";
-                if (gov.document_title) mdString += "# " + gov.document_title + "\n\n";
-                if (gov.root_content) mdString += gov.root_content.trim() + "\n\n";
-                const partsList = gov.parts || [gov.part_I, gov.part_II, gov.part_III].filter(Boolean);
-                partsList.forEach(part => {
-                    if (part.title) mdString += "## " + part.title + "\n\n";
-                    if (part.description) mdString += part.description.trim() + "\n\n";
-                    if (part.chapters) {
-                        part.chapters.forEach(ch => {
-                            if (ch.title) mdString += "### " + ch.title + "\n\n";
-                            if (ch.content) mdString += ch.content.trim() + "\n\n";
-                        });
-                    }
-                });
-                return mdString.trim() || "Start typing your Markdown blueprint here...";
-            } catch (e) { return "# Blueprint parsing error"; }
-        }
-
-        function generateJsonFromMarkdown(md) {
-            const lines = md.split('\n');
-            let state = { governor_state: { document_title: "", root_content: "", parts: [] } };
-            let currentPart = null;
-            let currentChapter = null;
-
-            lines.forEach(line => {
-                if (line.startsWith('# ')) {
-                    state.governor_state.document_title = line.substring(2).trim();
-                } else if (line.startsWith('## ')) {
-                    currentPart = { title: line.substring(3).trim(), description: "", chapters: [] };
-                    state.governor_state.parts.push(currentPart);
-                    currentChapter = null;
-                } else if (line.startsWith('### ')) {
-                    currentChapter = { title: line.substring(4).trim(), content: "" };
-                    if (!currentPart) {
-                        currentPart = { title: "", description: "", chapters: [] };
-                        state.governor_state.parts.push(currentPart);
-                    }
-                    currentPart.chapters.push(currentChapter);
-                } else {
-                    if (currentChapter) currentChapter.content += line + "\n";
-                    else if (currentPart) currentPart.description += line + "\n";
-                    else state.governor_state.root_content += line + "\n";
-                }
-            });
-
-            state.governor_state.root_content = state.governor_state.root_content.trim();
-            state.governor_state.parts.forEach(p => {
-                if (p.description) p.description = p.description.trim();
-                p.chapters.forEach(c => { c.content = c.content.trim(); });
-            });
-            return state;
-        }
-
-        function renderPreviewFromJSON() {
-            try {
-                if (!coreEditor || !markdownContainer) return;
-                const state = JSON.parse(coreEditor.value);
-                const mdString = generateMarkdownFromJson(state);
-                const parsedMarkdown = typeof marked.parse === 'function' ? marked.parse(mdString) : marked(mdString);
-                markdownContainer.innerHTML = parsedMarkdown;
-                if (window.renderMathInElement) {
-                    renderMathInElement(markdownContainer, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }], throwOnError: false });
-                }
-            } catch (e) { console.log("JSON Parse Error during render."); }
-        }
-
-        async function toggleMarkdownMode() {
-            const btnText = document.getElementById('md-toggle-text');
-            const btnIcon = document.querySelector('#md-toggle-btn svg');
-
-            if (isEditMode) {
-                try {
-                    const newJson = generateJsonFromMarkdown(markdownEditor.value);
-                    coreEditor.value = JSON.stringify(newJson, null, 2);
-                    await commit('core', true);
-                    renderPreviewFromJSON();
-                    markdownEditor.classList.add('hidden');
-                    markdownContainer.classList.remove('hidden');
-                    if (btnText) btnText.innerText = "Edit Blueprint";
-                    if (btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
-                    isEditMode = false;
-                } catch (e) { showToast("Error saving markdown", true); }
-            } else {
-                try {
-                    const state = JSON.parse(coreEditor.value);
-                    markdownEditor.value = generateMarkdownFromJson(state);
-                    markdownContainer.classList.add('hidden');
-                    markdownEditor.classList.remove('hidden');
-                    markdownEditor.focus();
-                    if (btnText) btnText.innerText = "Save & Preview";
-                    if (btnIcon) btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
-                    isEditMode = true;
-                } catch (e) { showToast("Error parsing existing JSON", true); }
             }
         }
 
@@ -1031,63 +915,64 @@
             let html = '';
             roadmap.forEach((initiative, iIdx) => {
                 const iActive = initiative.status === '[ACTIVE]';
+                const iParked = initiative.status === '[PARKED]';
                 const iComp = initiative.status === '[COMPLETED]';
-                const iColor = iActive ? 'text-teal-400 border-teal-500/50' : (iComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300');
+                const iColor = iActive ? 'text-teal-400 border-teal-500/50' : (iParked ? 'text-slate-500 border-slate-600 border-dashed' : (iComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300'));
                 
                 html += `
-                    <details ${iActive ? 'open' : ''} class="bg-slate-800/40 border ${iActive ? 'border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.1)]' : 'border-slate-700'} p-3 rounded-xl transition-all mb-4">
+                    <details ${iActive ? 'open' : ''} class="bg-slate-800/40 border ${iActive ? 'border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.1)]' : (iParked ? 'border-slate-600 border-dashed' : 'border-slate-700')} p-3 rounded-xl transition-all mb-4">
                         <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
-                            <div class="flex items-center text-xs font-black uppercase tracking-widest text-teal-400">
+                            <div class="flex items-center text-xs font-black uppercase tracking-widest ${iActive ? 'text-teal-400' : (iParked ? 'text-slate-500' : 'text-slate-300')}">
                                 ${initiative.title || 'Untitled Initiative'}
                                 <span title="The overarching business or product goal." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'initiative', '${(initiative.title || '').replace(/'/g, "\\'")}', ${iIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                 <button onclick="event.preventDefault(); deleteRoadmapNode('initiative', ${iIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
                             </div>
-                            <button onclick="event.preventDefault(); cycleRoadmapStatus('initiative', ${iIdx})" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/50 border border-slate-700 hover:border-teal-500 transition text-indigo-300">${initiative.status || '[PENDING]'}</button>
+                            <button onclick="event.preventDefault(); cycleRoadmapStatus('initiative', ${iIdx})" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/50 border border-slate-700 hover:border-teal-500 transition ${iActive ? 'text-indigo-300' : (iParked ? 'text-slate-400 border-dashed' : (iComp ? 'text-slate-200' : 'text-slate-500'))}">${initiative.status || '[PENDING]'}</button>
                         </summary>
                         <div class="mt-3 space-y-3 pl-2 border-l border-slate-700 ml-1">
                             ${(initiative.epics || []).map((epic, eIdx) => {
                                 const eActive = epic.status === '[ACTIVE]';
+                                const eParked = epic.status === '[PARKED]';
                                 const eComp = epic.status === '[COMPLETED]';
-                                const eColor = eActive ? 'text-indigo-400 border-indigo-500/50' : (eComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300');
                                 return `
-                                    <details ${eActive ? 'open' : ''} class="bg-slate-900/40 border ${eActive ? 'border-indigo-500/50' : 'border-slate-800'} p-2 rounded-lg transition-all">
+                                    <details ${eActive ? 'open' : ''} class="bg-slate-900/40 border ${eActive ? 'border-indigo-500/50' : (eParked ? 'border-slate-700 border-dashed' : 'border-slate-800')} p-2 rounded-lg transition-all">
                                         <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
-                                            <div class="flex items-center text-[11px] font-black uppercase tracking-wider text-indigo-400">
+                                            <div class="flex items-center text-[11px] font-black uppercase tracking-wider ${eActive ? 'text-indigo-400' : (eParked ? 'text-slate-500' : 'text-slate-300')}">
                                                 ${epic.title || 'Untitled Epic'}
                                                 <span title="A large technical deliverable." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'epic', '${(epic.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                                 <button onclick="event.preventDefault(); deleteRoadmapNode('epic', ${iIdx}, ${eIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
                                             </div>
-                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('epic', ${iIdx}, ${eIdx})" class="text-[8px] font-bold px-1 py-0.5 rounded bg-black/50 border border-slate-800 hover:border-indigo-500 transition ${eActive ? 'text-indigo-300' : (eComp ? 'text-slate-200' : 'text-slate-500')}">${epic.status || '[PENDING]'}</button>
+                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('epic', ${iIdx}, ${eIdx})" class="text-[8px] font-bold px-1 py-0.5 rounded bg-black/50 border border-slate-800 hover:border-indigo-500 transition ${eActive ? 'text-indigo-300' : (eParked ? 'text-slate-400 border-dashed' : (eComp ? 'text-slate-200' : 'text-slate-500'))}">${epic.status || '[PENDING]'}</button>
                                         </summary>
                                         <div class="mt-2 space-y-2 pl-2 border-l border-slate-800 ml-1">
                                             ${(epic.sprints || []).map((sprint, sIdx) => {
                                                 const sActive = sprint.status === '[ACTIVE]';
+                                                const sParked = sprint.status === '[PARKED]';
                                                 const sComp = sprint.status === '[COMPLETED]';
-                                                const sColor = sActive ? 'text-amber-400' : (sComp ? 'text-slate-500 line-through' : 'text-slate-400');
                                                 return `
-                                                    <details ${sActive ? 'open' : ''} class="bg-black/30 p-2 rounded-lg border border-slate-800">
+                                                    <details ${sActive ? 'open' : ''} class="bg-black/30 p-2 rounded-lg border ${sParked ? 'border-slate-800 border-dashed' : 'border-slate-800'}">
                                                         <summary class="text-[10px] font-bold cursor-pointer hover:text-white transition flex justify-between items-center">
-                                                            <div class="flex items-center ${sColor}">
+                                                            <div class="flex items-center ${sActive ? 'text-amber-400' : (sParked ? 'text-slate-500' : (sComp ? 'text-slate-500 line-through' : 'text-slate-400'))}">
                                                                 ${sprint.title || 'Untitled Sprint'}
                                                                 <span title="A time-boxed execution cycle." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'sprint', '${(sprint.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                                                 <button onclick="event.preventDefault(); deleteRoadmapNode('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
                                                             </div>
-                                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="text-[8px] font-bold transition ${sActive ? 'text-indigo-300' : (sComp ? 'text-slate-200' : 'opacity-60')}">${sprint.status || '[PENDING]'}</button>
+                                                            <button onclick="event.preventDefault(); cycleRoadmapStatus('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="text-[8px] font-bold transition ${sActive ? 'text-indigo-300' : (sParked ? 'text-slate-400 border-dashed' : (sComp ? 'text-slate-200' : 'opacity-60'))}">${sprint.status || '[PENDING]'}</button>
                                                         </summary>
                                                         <div class="mt-2 pl-2">
                                                             <ul class="space-y-1">
                                                                 ${(sprint.objectives || []).map((obj, oIdx) => `
                                                                     <li class="flex justify-between items-center group/obj">
-                                                                        <div class="flex items-center text-[10px] ${obj.status === '[COMPLETED]' ? 'text-slate-500 line-through' : 'text-slate-300'}">
+                                                                        <div class="flex items-center text-[10px] ${obj.status === '[COMPLETED]' ? 'text-slate-500 line-through' : (obj.status === '[PARKED]' ? 'text-slate-500 italic' : 'text-slate-300')}">
                                                                             ${obj.title}
                                                                             <span title="The atomic dev task." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                                                             <button onclick="openRoadmapModal('Edit', 'objective', '${(obj.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                                                             <button onclick="deleteRoadmapNode('objective', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
                                                                         </div>
-                                                                        <button onclick="cycleRoadmapStatus('objective', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="text-[8px] opacity-0 group-hover/obj:opacity-100 px-1 py-0.5 rounded bg-black border border-slate-800 hover:border-emerald-500 transition ${obj.status === '[ACTIVE]' ? 'text-indigo-300' : (obj.status === '[COMPLETED]' ? 'text-slate-200' : '')}">${obj.status || '[PENDING]'}</button>
+                                                                        <button onclick="cycleRoadmapStatus('objective', ${iIdx}, ${eIdx}, ${sIdx}, ${oIdx})" class="text-[8px] opacity-0 group-hover/obj:opacity-100 px-1 py-0.5 rounded bg-black border border-slate-800 hover:border-emerald-500 transition ${obj.status === '[ACTIVE]' ? 'text-indigo-300' : (obj.status === '[PARKED]' ? 'text-slate-400 border-dashed' : (obj.status === '[COMPLETED]' ? 'text-slate-200' : ''))}">${obj.status || '[PENDING]'}</button>
                                                                     </li>
                                                                 `).join('')}
                                                             </ul>
@@ -1114,7 +999,7 @@
         async function cycleRoadmapStatus(level, iIdx, eIdx, sIdx, oIdx) {
             const editor = document.getElementById('roadmap-editor');
             let roadmap = JSON.parse(editor.value);
-            const statuses = ['[PENDING]', '[ACTIVE]', '[COMPLETED]'];
+            const statuses = ['[PENDING]', '[ACTIVE]', '[PARKED]', '[COMPLETED]'];
 
             const getNextStatus = (current) => {
                 const idx = statuses.indexOf(current);
@@ -1199,7 +1084,7 @@
 
         function switchTab(tabName) {
             activeTab = tabName;
-            ['session', 'core', 'tenant', 'adr', 'roadmap', 'prompts'].forEach(t => {
+            ['session', 'roadmap', 'adr', 'tenant', 'prompts'].forEach(t => {
                 const content = document.getElementById('tab-content-' + t); const btn = document.getElementById('tab-btn-' + t);
                 if (content) { content.classList.toggle('hidden', t !== tabName); content.classList.toggle('block', t === tabName && t === 'session'); content.classList.toggle('flex', t === tabName && t !== 'session'); }
                 if (btn) btn.className = t === tabName ? 'px-2 py-1 text-xs font-semibold text-white border-b-2 border-indigo-500 whitespace-nowrap' : 'px-2 py-1 text-xs font-semibold text-slate-400 border-b-2 border-transparent whitespace-nowrap';
@@ -1215,9 +1100,11 @@
             sidebar.classList.toggle('hidden');
             icon.classList.toggle('rotate-180');
             if (sidebar.classList.contains('hidden')) {
-                btn.classList.replace('-left-4', 'left-4');
+                btn.classList.replace('left-64', 'left-0');
+                btn.classList.replace('-ml-4', 'ml-4');
             } else {
-                btn.classList.replace('left-4', '-left-4');
+                btn.classList.replace('left-0', 'left-64');
+                btn.classList.replace('ml-4', '-ml-4');
             }
         }
 
@@ -1340,7 +1227,7 @@
                 }
 
                 switchTab('session');
-                renderPreviewFromJSON();
+                try { const bpRes = await fetch('/api/' + ACTIVE_PROJECT + '/blueprint'); const bpData = await bpRes.json(); const parsed = typeof marked.parse === 'function' ? marked.parse(bpData.content) : marked(bpData.content); document.getElementById('markdown-container').innerHTML = parsed; } catch (e) { console.error('Blueprint fetch failed'); }
                 fetchAdrs();
                 showToast(`Workspace Loaded: ${ACTIVE_PROJECT}`);
             } catch (err) {
@@ -1392,7 +1279,6 @@
             try {
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (res.ok) {
-                    if (type === 'core' && !isEditMode) renderPreviewFromJSON();
                     if (!isSilent) showToast("Saved Successfully");
                 } else {
                     if (!isSilent) showToast(`Server Error: ${res.status}`, true);
@@ -1549,8 +1435,12 @@ OperatorActionRequired: "Parse the SystemState and Rules. Acknowledge your Role,
                     if (cr.ok) codebaseOut = await cr.text();
                 } catch (e) { console.error("Failed to fetch codebase context"); }
 
-                // 1. Generate the Markdown string from the JSON FIRST
-                const blueprintMd = generateMarkdownFromJson({ governor_state: coreD.governor_state });
+                let blueprintMd = "None";
+                try {
+                    const bpRes = await fetch(`/api/${ACTIVE_PROJECT}/blueprint`);
+                    const bpData = await bpRes.json();
+                    blueprintMd = bpData.content;
+                } catch (e) { console.error("Failed to fetch blueprint"); }
 
                 // 2. Eradicate the redundant blueprint from the JSON payload to prevent bloat
                 if (coreD.governor_state) {

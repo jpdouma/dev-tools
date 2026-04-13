@@ -1,4 +1,5 @@
 # UNIVERSAL CONTEXT HUB: OPERATIONS MANUAL
+> **[ ⚙️ Features & Commands ](#2-feature--command-reference) | [ 📋 Standard Operating Procedures ](#3-standard-operating-procedures-sops)**
 
 ## 1. The Agnostic Philosophy
 The Universal Context Hub (UCH) is a centralized, local context-management engine designed to govern AI-assisted development sessions. It compiles project blueprints, architectural decisions, and roadmaps into a structured payload, preventing LLM context degradation, scope creep, and architectural hallucinations.
@@ -12,7 +13,7 @@ The Universal Context Hub (UCH) is a centralized, local context-management engin
 **Command: `/UPDATE_BLUEPRINT`**
 * **Usage:** Tell the Architect what architectural logic changed.
 * **Output:** Raw Markdown with strict H1/H2/H3 headers.
-* **Action:** Paste into the "Edit Blueprint" window and click Save & Preview.
+* **Action:** Pass the output to The Coder (gemini-cli) to write directly to `PROJECT_BLUEPRINT.md` on your local file system. The web UI editor is deprecated.
 
 ### B. The Micro-Commit Workflow (Session Tab)
 **Feature:** The "Smart Wrap-Up Import" dropzone. The Hub relies on continuous, bite-sized context updates rather than massive end-of-session summaries.
@@ -77,3 +78,10 @@ The Universal Context Hub (UCH) is a centralized, local context-management engin
 3. PM types: `Let's commit these changes. /git`
 4. Provide `git status` when asked.
 5. Run the generated `git` commands in your terminal.
+
+### Procedure E: CLI-Native Blueprint Updates
+**Purpose:** To safely update the project architecture via the CLI.
+1. PM discusses architectural changes with the Architect.
+2. PM runs: `/UPDATE_BLUEPRINT`
+3. PM passes the raw Markdown output to The Coder (gemini-cli) to overwrite the local file.
+4. PM runs: `/git` to secure the new baseline.

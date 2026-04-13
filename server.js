@@ -160,6 +160,15 @@ app.get('/api/:project/state', (req, res) => {
   }
 });
 
+app.get('/api/:project/blueprint', (req, res) => {
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.blueprint)) {
+    res.json({ content: fs.readFileSync(files.blueprint, 'utf8') });
+  } else {
+    res.json({ content: '# Project Blueprint\n\nNo blueprint found. Use `/UPDATE_BLUEPRINT` to generate one.' });
+  }
+});
+
 app.post('/api/:project/update-state', (req, res) => {
   const files = getProjectFiles(req.params.project);
   archiveFile(files.state, files.archiveDir);
