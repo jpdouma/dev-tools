@@ -40,7 +40,8 @@ function getProjectFiles(project) {
     archiveDir: path.join(projectDir, 'archives'),
     prompts: path.join(projectDir, 'system_prompts.json'),
     link: path.join(projectDir, 'codebase_link.json'),
-    roadmap: path.join(projectDir, 'roadmap.json')
+    roadmap: path.join(projectDir, 'roadmap.json'),
+    config: path.join(projectDir, 'config.json')
   };
 }
 
@@ -116,10 +117,9 @@ app.get('/api/:workspace/logo', (req, res) => {
 });
 
 app.get('/api/:project/config', (req, res) => {
-  const registryPath = path.join(__dirname, 'tenant_registry.json');
-  if (fs.existsSync(registryPath)) {
-    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-    res.json(registry[req.params.project] || {});
+  const files = getProjectFiles(req.params.project);
+  if (fs.existsSync(files.config)) {
+    res.json(JSON.parse(fs.readFileSync(files.config, 'utf8')));
   } else {
     res.json({});
   }
@@ -138,7 +138,7 @@ app.get('/api/:project/get-context', (req, res) => {
     }
 
     // 2) Update the findScript variable to explicitly ignore build directories
-    const findScript = `find . -maxdepth 3 -not -path '*/.*' -type f \\( -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.html" -o -name "*.css" -o -name "*.ts" -o -name "*.tsx" \\) -not -name "package-lock.json" -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/build/*" -not -path "*/.next/*" -not -path "*/coverage/*" -exec echo "--- FILE: {} ---" \\; -exec awk '1' {} \\; -exec echo "" \\;`;
+    const findScript = `find . -maxdepth 3 -not -path '*/.*' -type f \\( -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.html" -o -name "*.css" -o -name "*.ts" -o -name "*.tsx" \\) -not -name "package-lock.json" -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/build/*" -not -path "*/.next/*" -not -path "*/coverage/*" -not -path "*/archives/*" -exec echo "--- FILE: {} ---" \\; -exec awk '1' {} \\; -exec echo "" \\;`;
     
     // 3) Decouple the execution chain using semicolon after version control checks
     const command = `cd "${targetPath}" && (git status ; git diff ; ${findScript})`;

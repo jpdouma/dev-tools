@@ -1,51 +1,79 @@
 # UNIVERSAL CONTEXT HUB: OPERATIONS MANUAL
 
-## 1. The RaaS Philosophy & Architecture
-Yield Force operates on a Compartmentalized Handoff Architecture. The system is decoupled into isolated logical zones (e.g., Zone 1: Explore Cluster for outbound discovery; Zone 2: Processing Unit for inbound governance). This ensures data integrity and strict architectural boundaries.
+## 1. The Agnostic Philosophy
+The Universal Context Hub (UCH) is a centralized, local context-management engine designed to govern AI-assisted development sessions. It compiles project blueprints, architectural decisions, and roadmaps into a structured payload, preventing LLM context degradation, scope creep, and architectural hallucinations.
 
-## 2. System State & Context Management
-The Universal Context Hub is the central nervous system for LLM context. It compiles the `PROJECT_BLUEPRINT.md`, active `core_state.json`, `adrs.json`, and `roadmap.json` into a single SudoLang payload. This prevents the AI from hallucinating or drifting off-topic during development sessions.
-* **Micro-Commits:** The legacy `/WRAPUP` command is deprecated. The AI must now yield bite-sized `[STATE_UPDATE]` payloads continuously to prevent mid-session context degradation.
-* **Smart Dropzone:** Paste AI-generated JSON directly into the UI; the Hub will automatically parse and route it to the correct backend file.
+---
 
-## 3. The ADR Ledger
-Architectural Decision Records (ADRs) are immutable logs of engineering choices. When a friction point is resolved, it is logged in the ADR tab. This ensures the AI understands *why* a system was built a certain way, preventing it from suggesting redundant refactors.
+## 2. Feature & Command Reference
 
-## 4. The Epic Ledger & Roadmap
-The Roadmap is a 4-tier Agile hierarchy that manages the project lifecycle and bounds the AI's cognitive scope.
-* **Tier 1 - Initiative:** The overarching business goal.
-* **Tier 2 - Epic:** A large technical deliverable.
-* **Tier 3 - Sprint:** A time-boxed execution cycle.
-* **Tier 4 - Objective:** The atomic dev task.
+### A. The Project Blueprint (Main Window)
+**Feature:** The technical documentation for the active workspace. This defines the architecture, tech stack, and data flow of the software you are building. It is saved in `core_state.json`.
+**Command: `/UPDATE_BLUEPRINT`**
+* **Usage:** Tell the Architect what architectural logic changed.
+* **Output:** Raw Markdown with strict H1/H2/H3 headers.
+* **Action:** Paste into the "Edit Blueprint" window and click Save & Preview.
 
-### The Cognitive Tether: Active vs. Pending
-* `[PENDING]`: The node is stored safely in the UI backlog but hidden from the AI. This prevents scope creep.
-* `[ACTIVE]`: The current Work-In-Progress. Toggling a node to ACTIVE injects it directly into the AI's SudoLang rules (the `ActiveMilestone`), forcing the LLM to only write code related to this specific task.
+### B. The Micro-Commit Workflow (Session Tab)
+**Feature:** The "Smart Wrap-Up Import" dropzone. The Hub relies on continuous, bite-sized context updates rather than massive end-of-session summaries.
+**Command: `/state`**
+* **Usage:** Run at the end of a logical loop or before switching tasks.
+* **Output:** A JSON diff detailing `completed_steps` and `next_objectives`.
+* **Action:** Paste into the Smart Dropzone to automatically update the Session Queue.
 
-### Raw JSON Controls
-1. **Clear to []**: Resets the local text editor to an empty array, prepping it for new AI paste payloads without deleting backend data.
-2. **Force Overwrite**: The destructive save. It takes the exact contents of the editor and completely overwrites the backend state. Useful for complete structural resets.
-3. **Smart Merge (Upsert)**: The primary safe save. It recursively deep-merges the editor's JSON into the existing backend state, appending new Initiatives, Epics, Sprints, and Objectives without destroying previously saved nodes.
+### C. The ADR Ledger (ADRs Tab)
+**Feature:** Architectural Decision Records (ADRs) are immutable logs of engineering choices defining the Why, What, and strict Boundary of a technical decision.
+**Command: `/ADR [topic]` or `/ADR bulk`**
+* **Usage:** Run after resolving a friction point or architecture debate.
+* **Output:** A JSON object or array representing the ADR.
+* **Action:** Paste into the "+ Quick ADR" smart paste box to add to the ledger. Toggle to `[ARCHIVED]` once fully implemented in code so it stops consuming prompt tokens.
 
-## 5. Onboarding 'Dark' Codebases
-When importing an undocumented codebase, use the Hub and the Architect (AI) to autonomously synthesize the system state:
+### D. The Epic Ledger & Roadmap (Roadmap Tab)
+**Feature:** A 4-tier Agile hierarchy (Initiative > Epic > Sprint > Objective) that bounds the AI's cognitive scope using statuses: `[PENDING]`, `[ACTIVE]`, `[PARKED]`, and `[COMPLETED]`.
+**Command: `/ROADMAP`**
+* **Usage:** Run to auto-generate or deeply restructure the project lifecycle.
+* **Output:** A multi-tiered JSON array.
+* **Action:** Paste into the Raw JSON Editor and click "Smart Merge (Upsert)".
 
-**Phase 1: Ingestion & Blueprinting**
-Drop the raw code into a fresh AI session. Instruct the AI to act as a Principal Engineer and generate a `PROJECT_BLUEPRINT.md` explaining the core philosophy, logical zones, tech stack, and data flow. Do not write new code; just document the existing state. Save this file to your Hub.
+### E. Execution & Version Control Commands
+**Command: `/cli`**
+* **Usage:** The trigger to finalize reasoning and write actual code.
+* **Output:** An isolated JSON script for The Coder (gemini-cli) detailing exact file edits.
 
-**Phase 2: Reverse-Engineering ADRs**
-In the same session, ask the AI to extract the 3-5 most critical architectural decisions made by previous developers, formatted strictly to the Hub's ADR JSON schema. Paste this array into the ADRs tab and click Save.
+**Command: `/git`**
+* **Usage:** Run when ready to commit work to the repository.
+* **Output:** Prompts the PM for `git status`, then provides exact `git add/commit/push` terminal commands.
 
-**Phase 3: Autonomous Roadmapping**
-Execute the `/ROADMAP` command. The AI will analyze the new Blueprint, identify technical debt or missing features, and generate a 4-tier Agile JSON roadmap. Go to the Roadmap tab, clear the editor to `[]`, paste the payload, and click **Smart Merge (Upsert)**.
+---
 
-**Phase 4: The Cognitive Tether**
-Your Hub is now fully populated. Toggle an Objective to `[ACTIVE]` in the Epic Ledger, click 'Copy Prompt', and begin your first development session safely tethered to the newly documented architecture.
+## 3. Standard Operating Procedures (SOPs)
 
-## 6. Directory Management & Centralized Storage
+### Procedure A: Session Initialization
+**Purpose:** To securely tether the AI Architect to the current project state and activate SudoLang constraints.
+1. Update SudoLang rules in the **Prompts** tab if necessary and click "Save Rules".
+2. Click the dark **Copy Prompt** button at the top right of the Hub.
+3. Paste the copied payload into a new AI chat window.
+4. Wait for the AI to acknowledge its Role and the System State.
 
-**The Hub Philosophy:** The Hub is designed to manage multiple projects from a single server instance while maintaining a strict separation of concerns.
+### Procedure B: Architectural Decision Making
+**Purpose:** To resolve a technical debate and permanently log the guardrails so the AI does not deviate in the future.
+1. Discuss the problem with the Architect without generating code.
+2. Reach a consensus on the approach.
+3. PM types: `Please formalize this as an ADR. /ADR`
+4. Copy the JSON output, click **+ Quick ADR** in the Hub, paste it into the Smart Dropzone, and commit to the ledger.
 
-**The Centralized Context Repository:** The Hub does not store meta-data inside your application codebases. Instead, the backend automatically steps up one directory level from the server root and stores all Roadmap, ADR, and Blueprint data inside a peer directory: `~/projects/context-files/<workspace-name>/`. 
+### Procedure C: The Execution Loop
+**Purpose:** To safely convert architecture into codebase changes via The Coder.
+1. Ensure the relevant objective is toggled to `[ACTIVE]` in the Epic Ledger.
+2. PM types: `Draft the execution steps for this feature. /cli`
+3. Copy the isolated JSON block output by the Architect.
+4. Pass the JSON to The Coder (gemini-cli) in your local terminal.
+5. Review the codebase changes.
 
-This architecture enables you to track and version-control your architectural state entirely independently of your source code, preventing repo bloat and ensuring your context files remain secure and centralized.
+### Procedure D: State Wrap-Up & Version Control
+**Purpose:** To save the project state into the Hub and commit code to the repository.
+1. PM types: `Update our session context. /state`
+2. Paste the JSON into the Session Tab's Smart Wrap-Up Import.
+3. PM types: `Let's commit these changes. /git`
+4. Provide `git status` when asked.
+5. Run the generated `git` commands in your terminal.

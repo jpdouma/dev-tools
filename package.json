@@ -1,7 +1,7 @@
 {
-  "name": "yf-documentation-hub",
+  "name": "universal-context-hub",
   "version": "1.0.0",
-  "description": "Yield Force Sovereign Architecture Blueprint & Documentation Hub",
+  "description": "Agnostic Context Management Engine for AI-Assisted Development",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
