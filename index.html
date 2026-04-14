@@ -105,16 +105,10 @@
 
     <div id="state-drawer"
         class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col overflow-hidden">
-        <div class="flex flex-col flex-1 min-w-[450px]">
+        <div class="flex flex-col flex-1 min-w-[450px] min-h-0">
             <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4 shrink-0">
                 <h2 class="text-white font-black text-xs uppercase tracking-widest">Context Engine</h2>
             <div class="flex items-center space-x-4">
-                <button onclick="toggleTerminalModal()"
-                    class="text-slate-400 hover:text-white transition" title="Show Terminal Output">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </button>
                 <button id="drawer-width-btn" onclick="toggleDrawerWidth()"
                     class="text-slate-400 hover:text-white transition" title="Expand Drawer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,14 +147,6 @@
                 <textarea id="smart-session-dropzone" oninput="handleSessionPaste(event)"
                     class="w-full h-12 bg-black text-indigo-300 text-[10px] p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"
                     placeholder="Paste /WRAPUP JSON output here..."></textarea>
-            </div>
-
-            <div class="space-y-2 bg-emerald-950/30 p-3 rounded-lg border border-emerald-900/50">
-                <label class="text-[9px] font-black uppercase tracking-widest text-emerald-400 block mb-1">/CLI EXECUTION DROPZONE
-                    (Paste JSON or Command)</label>
-                <textarea id="cli-dropzone" oninput="handleCliPaste(event)"
-                    class="w-full h-12 bg-black text-emerald-300 text-[10px] p-2 rounded border border-emerald-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar"
-                    placeholder="Paste /CLI JSON or raw command here..."></textarea>
             </div>
 
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
@@ -230,7 +216,7 @@
             </details>
         </div>
 
-        <div id="tab-content-roadmap" class="hidden flex-1 flex-col space-y-2 min-h-0 max-h-[calc(100vh-12rem)] overflow-y-auto pb-24">
+        <div id="tab-content-roadmap" class="hidden flex-1 flex-col space-y-2 min-h-0">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Epic Ledger</h3>
                 <button onclick="commit('roadmap')"
@@ -540,31 +526,6 @@
         </div>
     </div>
 
-    <div id="terminal-modal" class="fixed inset-0 bg-black/90 hidden z-[300] flex-col p-8 backdrop-blur-md">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
-            <h2 class="text-emerald-400 font-mono text-sm font-bold uppercase tracking-widest flex items-center">
-                <span class="mr-2">📟</span> Execution Output (Terminal)
-            </h2>
-            <button onclick="toggleTerminalModal()" class="text-slate-500 hover:text-white transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <div class="flex-1 overflow-hidden flex flex-col space-y-4 font-mono text-xs">
-            <div class="flex-1 flex flex-col min-h-0">
-                <label class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Stdout</label>
-                <div id="terminal-stdout" class="flex-1 bg-black/50 border border-slate-800 rounded p-4 overflow-y-auto custom-scrollbar text-slate-300 whitespace-pre-wrap selection:bg-emerald-500/30 selection:text-emerald-300"></div>
-            </div>
-            <div class="h-32 flex flex-col shrink-0">
-                <label class="text-[9px] font-black uppercase tracking-widest text-red-500/70 mb-1">Stderr / Error</label>
-                <div id="terminal-stderr" class="flex-1 bg-red-950/20 border border-red-900/30 rounded p-4 overflow-y-auto custom-scrollbar text-red-400 whitespace-pre-wrap"></div>
-            </div>
-            <div class="h-32 flex flex-col shrink-0">
-                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-500 mb-1">Git Status (File Deltas)</label>
-                <div id="terminal-git" class="flex-1 bg-indigo-950/20 border border-indigo-900/30 rounded p-4 overflow-y-auto custom-scrollbar text-indigo-300 whitespace-pre-wrap"></div>
-            </div>
-        </div>
-    </div>
-
     <div id="toast-container"></div>
 
     <script>
@@ -583,7 +544,6 @@
         let ACTIVE_CONFIG = {};
         let rmState = null;
         let pendingDeleteNode = null;
-        window.lastExecutionFailed = false;
 
         let bulkAdrQueue = [];
         let totalQueued = 0;
@@ -653,12 +613,6 @@
 
         // --- SESSION DROPZONE LOGIC ---
         async function handleSessionPaste(e) {
-            if (window.lastExecutionFailed) {
-                e.target.value = '';
-                showToast("State Sync Blocked: Resolve execution errors before updating state.", true);
-                toggleTerminalModal();
-                return;
-            }
             const val = e.target.value.trim();
             if (!val) return;
             try {
@@ -1219,67 +1173,6 @@
             if (tabName === 'roadmap') renderVisualRoadmap();
         }
 
-        function toggleTerminalModal() {
-            const m = document.getElementById('terminal-modal');
-            m.classList.toggle('hidden');
-            m.classList.toggle('flex');
-        }
-
-        async function runExecution(command) {
-            if (!command) return;
-            showToast("Executing /CLI Command...");
-            try {
-                const res = await fetch(`/api/${ACTIVE_PROJECT}/execute`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command })
-                });
-                const data = await res.json();
-                
-                document.getElementById('terminal-stdout').innerText = data.stdout || "No output";
-                document.getElementById('terminal-stderr').innerText = data.stderr || "None";
-                document.getElementById('terminal-git').innerText = data.git_status || "No changes";
-
-                if (!data.success || data.stderr) {
-                    window.lastExecutionFailed = true;
-                    const m = document.getElementById('terminal-modal');
-                    m.classList.remove('hidden');
-                    m.classList.add('flex');
-                    showToast("Execution finished with errors", true);
-                } else {
-                    window.lastExecutionFailed = false;
-                    showToast("Execution Successful");
-                }
-            } catch (err) {
-                window.lastExecutionFailed = true;
-                showToast(`Execution Failed: ${err.message}`, true);
-            }
-        }
-
-        async function handleCliPaste(e) {
-            const val = e.target.value.trim();
-            if (!val) return;
-            try {
-                // If it's the standard CLI JSON array from the AI
-                const parsed = JSON.parse(val);
-                if (Array.isArray(parsed)) {
-                    // It's a structured CLI payload, we'll assume for now we're running it
-                    // In a real scenario, we might want to confirm or parse steps.
-                    // For this objective, we'll just show the terminal.
-                    showToast("CLI JSON detected - Opening Terminal");
-                    document.getElementById('terminal-stdout').innerText = JSON.stringify(parsed, null, 2);
-                    toggleTerminalModal();
-                } else {
-                    // It might be a raw command
-                    runExecution(val);
-                }
-            } catch (err) {
-                // Not JSON, assume raw command
-                runExecution(val);
-            }
-            e.target.value = '';
-        }
-
         function toggleToc() {
             const sidebar = document.getElementById('roadmap-toc-sidebar');
             const icon = document.getElementById('toc-arrow-icon');
@@ -1547,12 +1440,16 @@
                 }
                 else if (type === 'prompts') {
                     endpoint = `/api/${ACTIVE_PROJECT}/prompts`;
-                    try { 
-                        // Attempt to parse local input if it's supposed to be JSON
-                        payload = JSON.parse(promptEditor.value); 
-                    } catch (e) { 
-                        // If it's Sudolang or raw text, wrap it securely
-                        payload = { raw_sudolang: promptEditor.value }; 
+                    const content = promptEditor.value.trim();
+                    if (content.startsWith('{') || content.startsWith('[')) {
+                        try { 
+                            payload = JSON.parse(content); 
+                        } catch (e) { 
+                            return showToast('Prompt Syntax Error: Invalid JSON structure', true);
+                        }
+                    } else {
+                        // It's Sudolang or raw text, wrap it securely
+                        payload = { raw_sudolang: content }; 
                     }
                 } else if (type === 'roadmap') {
                     endpoint = `/api/${ACTIVE_PROJECT}/roadmap`;

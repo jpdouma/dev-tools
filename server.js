@@ -6,6 +6,24 @@ const Ajv = require('ajv');
 const { exec } = require('child_process');
 const ajv = new Ajv();
 
+// SCHEMAS
+const stateSchema = { type: "object", required: ["governor_state"] };
+const roadmapSchema = { type: "array", items: { type: "object", required: ["title", "status"] } };
+const promptsSchema = {
+  type: "object",
+  anyOf: [
+    { required: ["raw_sudolang"], properties: { "raw_sudolang": { "type": "string" } } },
+    { type: "object", minProperties: 1 } // Allow generic JSON rulesets
+  ],
+  additionalProperties: true
+};
+const adrSchema = { type: "object", required: ["title", "friction", "ruling"] };
+
+const validateState = ajv.compile(stateSchema);
+const validateRoadmap = ajv.compile(roadmapSchema);
+const validatePrompts = ajv.compile(promptsSchema);
+const validateAdr = ajv.compile(adrSchema);
+
 const app = express();
 const PORT = 4000;
 
@@ -241,6 +259,7 @@ app.get('/api/:project/blueprint', (req, res) => {
 });
 
 app.post('/api/:project/update-state', (req, res) => {
+  if (!validateState(req.body)) return res.status(400).json({ error: 'Schema Validation Failed', details: ajv.errorsText(validateState.errors) });
   const files = getProjectFiles(req.params.project);
   archiveFile(files.state, files.archiveDir);
   fs.writeFileSync(files.state, JSON.stringify(req.body, null, 2), 'utf8');
@@ -258,6 +277,7 @@ app.get('/api/:project/roadmap', (req, res) => {
 
 app.post('/api/:project/roadmap', (req, res) => {
   try {
+    if (!validateRoadmap(req.body)) return res.status(400).json({ error: 'Schema Validation Failed', details: ajv.errorsText(validateRoadmap.errors) });
     const files = getProjectFiles(req.params.project);
     archiveFile(files.roadmap, files.archiveDir);
     fs.writeFileSync(files.roadmap, JSON.stringify(req.body, null, 2), 'utf8');
@@ -299,6 +319,7 @@ app.get('/api/:project/prompts', (req, res) => {
 
 app.post('/api/:project/prompts', (req, res) => {
   try {
+    if (!validatePrompts(req.body)) return res.status(400).json({ error: 'Schema Validation Failed', details: ajv.errorsText(validatePrompts.errors) });
     const files = getProjectFiles(req.params.project);
     
     // VALIDATION: Ensure payload is valid JSON before writing to disk
@@ -324,6 +345,7 @@ app.get('/api/:project/adrs', (req, res) => {
 });
 
 app.post('/api/:project/adrs', (req, res) => {
+  if (!validateAdr(req.body)) return res.status(400).json({ error: 'Schema Validation Failed', details: ajv.errorsText(validateAdr.errors) });
   const files = getProjectFiles(req.params.project);
   archiveFile(files.adrs, files.archiveDir);
   let adrs = [];
@@ -341,6 +363,7 @@ app.post('/api/:project/adrs', (req, res) => {
 });
 
 app.put('/api/:project/adrs/:id', (req, res) => {
+  if (!validateAdr(req.body)) return res.status(400).json({ error: 'Schema Validation Failed', details: ajv.errorsText(validateAdr.errors) });
   const files = getProjectFiles(req.params.project);
   archiveFile(files.adrs, files.archiveDir);
   let adrs = JSON.parse(fs.readFileSync(files.adrs, 'utf8'));
@@ -394,47 +417,6 @@ app.delete('/api/:project/link-codebase', (req, res) => {
         fs.unlinkSync(files.link);
     }
     res.json({ status: 'success' });
-});
-
-app.post('/api/:project/run-context', (req, res) => {
-    const files = getProjectFiles(req.params.project);
-    if (!fs.existsSync(files.link)) return res.json({ output: "No codebase linked." });
-    
-    const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
-    const targetPath = linkData.targetPath;
-    
-    const command = `cd "${targetPath}" && git diff && git status`;
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            return res.json({ output: `Error: ${error.message}\n${stderr}` });
-        }
-        res.json({ output: stdout });
-    });
-});
-
-app.post('/api/:project/execute', (req, res) => {
-    const files = getProjectFiles(req.params.project);
-    if (!fs.existsSync(files.link)) return res.status(400).json({ error: "No codebase linked." });
-    
-    const { command } = req.body;
-    if (!command) return res.status(400).json({ error: "Command required" });
-
-    const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
-    const targetPath = linkData.targetPath;
-
-    // 1. Primary Execution
-    exec(`cd "${targetPath}" && ${command}`, { maxBuffer: 1024 * 1024 * 5 }, (execError, stdout, stderr) => {
-        
-        // 2. Post-Execution Git Status check
-        exec(`cd "${targetPath}" && git status --porcelain`, (gitError, gitStatus) => {
-            res.json({
-                success: !execError,
-                stdout: stdout || "",
-                stderr: stderr || (execError ? execError.message : ""),
-                git_status: gitStatus || ""
-            });
-        });
-    });
 });
 
 app.listen(PORT, () => console.log(`Universal Context Hub API running on port ${PORT}`));
