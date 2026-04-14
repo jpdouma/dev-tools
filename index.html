@@ -58,7 +58,7 @@
             <div class="flex flex-col justify-center">
                 <div class="flex items-center space-x-2">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Workspace: <span title="Best Practice: Run the Hub server one directory level up (e.g., ~/projects/) and type the target folder name here. The Hub will route data to the correct subfolder automatically." class="cursor-help text-slate-500 hover:text-indigo-400 ml-1 text-[10px]">ⓘ</span></label>
-                    <input id="global-project" type="text" value="yield-force"
+                    <input id="global-project" type="text" value=""
                         class="bg-slate-100 text-indigo-700 font-bold text-xs p-1.5 rounded outline-none focus:ring-1 focus:ring-indigo-500 w-40 border border-slate-200 placeholder-slate-400"
                         placeholder="Type name..." onchange="initWorkspace()" />
                     <button onclick="initWorkspace()"
@@ -540,7 +540,7 @@
         let activeTab = 'session';
         let currentEditId = null;
         let adrCache = [];
-        let ACTIVE_PROJECT = 'yield-force';
+        let ACTIVE_PROJECT = '';
         let ACTIVE_CONFIG = {};
         let rmState = null;
         let pendingDeleteNode = null;
