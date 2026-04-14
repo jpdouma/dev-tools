@@ -36,6 +36,11 @@
         .katex-mathml {
             display: none !important;
         }
+        #roadmap-toc-sidebar summary::-webkit-details-marker { display: none; }
+        .toc-arrow { display: inline-block; transition: transform 0.2s ease-in-out; }
+        details[open] > summary > .toc-arrow { transform: rotate(90deg); }
+        summary { list-style: none; }
+        @keyframes slideInFade { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } } .animate-slide-in { animation: slideInFade 0.4s ease-out forwards; }
     </style>
 </head>
 
@@ -99,10 +104,17 @@
     </header>
 
     <div id="state-drawer"
-        class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4 shrink-0">
-            <h2 class="text-white font-black text-xs uppercase tracking-widest">Context Engine</h2>
+        class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-slate-900 transform translate-x-full transition-all duration-300 z-50 p-6 shadow-2xl flex flex-col overflow-hidden">
+        <div class="flex flex-col flex-1 min-w-[450px]">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4 shrink-0">
+                <h2 class="text-white font-black text-xs uppercase tracking-widest">Context Engine</h2>
             <div class="flex items-center space-x-4">
+                <button onclick="toggleTerminalModal()"
+                    class="text-slate-400 hover:text-white transition" title="Show Terminal Output">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
                 <button id="drawer-width-btn" onclick="toggleDrawerWidth()"
                     class="text-slate-400 hover:text-white transition" title="Expand Drawer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,11 +148,19 @@
 
         <div id="tab-content-session" class="block flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
             <div class="space-y-2 bg-indigo-950/30 p-3 rounded-lg border border-indigo-900/50">
-                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-1">Smart Wrap-Up
-                    Import (Paste JSON)</label>
+                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-400 block mb-1">MICRO-COMMIT DROPZONE
+                    (Paste JSON)</label>
                 <textarea id="smart-session-dropzone" oninput="handleSessionPaste(event)"
                     class="w-full h-12 bg-black text-indigo-300 text-[10px] p-2 rounded border border-indigo-800 outline-none focus:ring-1 focus:ring-indigo-500 custom-scrollbar"
                     placeholder="Paste /WRAPUP JSON output here..."></textarea>
+            </div>
+
+            <div class="space-y-2 bg-emerald-950/30 p-3 rounded-lg border border-emerald-900/50">
+                <label class="text-[9px] font-black uppercase tracking-widest text-emerald-400 block mb-1">/CLI EXECUTION DROPZONE
+                    (Paste JSON or Command)</label>
+                <textarea id="cli-dropzone" oninput="handleCliPaste(event)"
+                    class="w-full h-12 bg-black text-emerald-300 text-[10px] p-2 rounded border border-emerald-800 outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar"
+                    placeholder="Paste /CLI JSON or raw command here..."></textarea>
             </div>
 
             <div class="space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-800">
@@ -210,7 +230,7 @@
             </details>
         </div>
 
-        <div id="tab-content-roadmap" class="hidden flex-1 flex-col space-y-2 min-h-0">
+        <div id="tab-content-roadmap" class="hidden flex-1 flex-col space-y-2 min-h-0 max-h-[calc(100vh-12rem)] overflow-y-auto pb-24">
             <div class="flex justify-between items-center shrink-0">
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Epic Ledger</h3>
                 <button onclick="commit('roadmap')"
@@ -223,7 +243,7 @@
             <details class="shrink-0 border-t border-slate-800 pt-2">
                 <summary class="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-slate-300 transition outline-none mb-2">Toggle Raw JSON Editor <span id="editor-workspace-lock" class="ml-2 text-[9px] px-1.5 py-0.5 bg-indigo-900/50 text-indigo-300 rounded border border-indigo-700/50"></span></summary>
                 <textarea id="roadmap-editor" oninput="renderVisualRoadmap()"
-                    class="h-40 w-full bg-black text-amber-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar"
+                    class="h-20 w-full bg-black text-amber-300 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-amber-500 custom-scrollbar"
                     placeholder='[ { "title": "Epic Name", "status": "[ACTIVE]", "description": "Goal...", "sprints": [] } ]'></textarea>
                 <div class="flex justify-end space-x-2 mt-2">
                     <button onclick="document.getElementById('roadmap-editor').value=''; renderVisualRoadmap();" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded border border-slate-600 transition">Clear</button>
@@ -324,6 +344,7 @@
                 </form>
             </details>
             <div id="adr-list" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1 pb-4"></div>
+        </div>
         </div>
     </div>
 
@@ -519,6 +540,31 @@
         </div>
     </div>
 
+    <div id="terminal-modal" class="fixed inset-0 bg-black/90 hidden z-[300] flex-col p-8 backdrop-blur-md">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
+            <h2 class="text-emerald-400 font-mono text-sm font-bold uppercase tracking-widest flex items-center">
+                <span class="mr-2">📟</span> Execution Output (Terminal)
+            </h2>
+            <button onclick="toggleTerminalModal()" class="text-slate-500 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-hidden flex flex-col space-y-4 font-mono text-xs">
+            <div class="flex-1 flex flex-col min-h-0">
+                <label class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Stdout</label>
+                <div id="terminal-stdout" class="flex-1 bg-black/50 border border-slate-800 rounded p-4 overflow-y-auto custom-scrollbar text-slate-300 whitespace-pre-wrap selection:bg-emerald-500/30 selection:text-emerald-300"></div>
+            </div>
+            <div class="h-32 flex flex-col shrink-0">
+                <label class="text-[9px] font-black uppercase tracking-widest text-red-500/70 mb-1">Stderr / Error</label>
+                <div id="terminal-stderr" class="flex-1 bg-red-950/20 border border-red-900/30 rounded p-4 overflow-y-auto custom-scrollbar text-red-400 whitespace-pre-wrap"></div>
+            </div>
+            <div class="h-32 flex flex-col shrink-0">
+                <label class="text-[9px] font-black uppercase tracking-widest text-indigo-500 mb-1">Git Status (File Deltas)</label>
+                <div id="terminal-git" class="flex-1 bg-indigo-950/20 border border-indigo-900/30 rounded p-4 overflow-y-auto custom-scrollbar text-indigo-300 whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
     <script>
@@ -537,6 +583,7 @@
         let ACTIVE_CONFIG = {};
         let rmState = null;
         let pendingDeleteNode = null;
+        window.lastExecutionFailed = false;
 
         let bulkAdrQueue = [];
         let totalQueued = 0;
@@ -605,28 +652,49 @@
         });
 
         // --- SESSION DROPZONE LOGIC ---
-        function handleSessionPaste(e) {
+        async function handleSessionPaste(e) {
+            if (window.lastExecutionFailed) {
+                e.target.value = '';
+                showToast("State Sync Blocked: Resolve execution errors before updating state.", true);
+                toggleTerminalModal();
+                return;
+            }
             const val = e.target.value.trim();
             if (!val) return;
             try {
                 const parsed = JSON.parse(val);
 
-                // Append to Changelog
+                // Overwrite Changelog (Sync)
                 if (parsed.completed_steps && Array.isArray(parsed.completed_steps)) {
-                    const existing = document.getElementById('changelog-editor').value.trim();
-                    const newLog = parsed.completed_steps.map(s => `- ${s}`).join('\n');
-                    document.getElementById('changelog-editor').value = existing ? existing + '\n' + newLog : newLog;
+                    document.getElementById('changelog-editor').value = parsed.completed_steps.map(s => `- ${s}`).join('\n');
                 }
 
-                // Overwrite Next Objectives (FIFO Queue Roll-over)
+                // Overwrite Next Objectives (Sync)
                 if (parsed.next_objectives && Array.isArray(parsed.next_objectives)) {
                     document.getElementById('objectives-editor').value = parsed.next_objectives.map((s, i) => `${i + 1}. ${s}`).join('\n');
                     checkContextLoad();
                 }
 
                 e.target.value = '';
-                showToast("Session Wrap-Up Imported Successfully");
-                commit('core', true); // Auto-save state
+                await commit('core', true); // Silent auto-save
+                showToast("State synchronized", false);
+
+                // Pulse and Scroll logic
+                setTimeout(() => {
+                    const drawerContainer = document.getElementById('tab-content-session');
+                    const clEl = document.getElementById('changelog-editor');
+                    const objEl = document.getElementById('objectives-editor');
+
+                    [clEl, objEl].forEach(el => {
+                        if (el) {
+                            el.classList.add('bg-slate-800', 'transition-colors', 'duration-300');
+                            setTimeout(() => el.classList.remove('bg-slate-800'), 400);
+                        }
+                    });
+
+                    if (clEl) clEl.scrollTop = clEl.scrollHeight;
+                    if (drawerContainer) drawerContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 50);
             } catch (err) {
                 // Ignore invalid JSON
             }
@@ -905,10 +973,40 @@
             const editor = document.getElementById('roadmap-editor');
             if (!container || !editor) return;
 
+            const scrollContainer = container.closest('.overflow-y-auto') || container;
+            const currentScroll = scrollContainer.scrollTop;
+
+            const openIds = Array.from(container.querySelectorAll('details[open]')).map(d => d.id);
+
+            function getObjectiveCounts(node) {
+                let total = 0;
+                let completed = 0;
+
+                if (node.objectives) {
+                    total += node.objectives.length;
+                    completed += node.objectives.filter(o => o.status === '[COMPLETED]').length;
+                }
+                if (node.sprints) {
+                    node.sprints.forEach(s => {
+                        const counts = getObjectiveCounts(s);
+                        total += counts.total;
+                        completed += counts.completed;
+                    });
+                }
+                if (node.epics) {
+                    node.epics.forEach(e => {
+                        const counts = getObjectiveCounts(e);
+                        total += counts.total;
+                        completed += counts.completed;
+                    });
+                }
+                return { total, completed };
+            }
+
             let roadmap = [];
-            try { 
+            try {
                 const val = editor.value.trim();
-                roadmap = val ? JSON.parse(val) : []; 
+                roadmap = val ? JSON.parse(val) : [];
             } catch (e) { roadmap = []; }
             if (!Array.isArray(roadmap)) roadmap = [];
 
@@ -917,13 +1015,14 @@
                 const iActive = initiative.status === '[ACTIVE]';
                 const iParked = initiative.status === '[PARKED]';
                 const iComp = initiative.status === '[COMPLETED]';
-                const iColor = iActive ? 'text-teal-400 border-teal-500/50' : (iParked ? 'text-slate-500 border-slate-600 border-dashed' : (iComp ? 'text-slate-500 line-through opacity-60' : 'text-slate-300'));
-                
+                const iCounts = getObjectiveCounts(initiative);
+
                 html += `
-                    <details ${iActive ? 'open' : ''} class="bg-slate-800/40 border ${iActive ? 'border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.1)]' : (iParked ? 'border-slate-600 border-dashed' : 'border-slate-700')} p-3 rounded-xl transition-all mb-4">
-                        <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
+                    <details id="details-i${iIdx}" ${iActive ? 'open' : ''} class="bg-slate-800/40 border ${iActive ? 'border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.1)]' : (iParked ? 'border-slate-600 border-dashed' : 'border-slate-700')} p-3 rounded-xl transition-all mb-4">
+                        <summary class="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 shadow-sm flex justify-between items-center cursor-pointer outline-none hover:text-white transition list-none p-2 rounded-t-lg">
                             <div class="flex items-center text-xs font-black uppercase tracking-widest ${iActive ? 'text-teal-400' : (iParked ? 'text-slate-500' : 'text-slate-300')}">
                                 ${initiative.title || 'Untitled Initiative'}
+                                <span class="text-[10px] text-slate-500 ml-3 lowercase font-normal italic">(${iCounts.completed}/${iCounts.total} Tasks)</span>
                                 <span title="The overarching business or product goal." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'initiative', '${(initiative.title || '').replace(/'/g, "\\'")}', ${iIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                 <button onclick="event.preventDefault(); deleteRoadmapNode('initiative', ${iIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
@@ -935,11 +1034,13 @@
                                 const eActive = epic.status === '[ACTIVE]';
                                 const eParked = epic.status === '[PARKED]';
                                 const eComp = epic.status === '[COMPLETED]';
+                                const eCounts = getObjectiveCounts(epic);
                                 return `
-                                    <details ${eActive ? 'open' : ''} class="bg-slate-900/40 border ${eActive ? 'border-indigo-500/50' : (eParked ? 'border-slate-700 border-dashed' : 'border-slate-800')} p-2 rounded-lg transition-all">
-                                        <summary class="flex justify-between items-center cursor-pointer outline-none hover:text-white transition">
+                                    <details open id="details-e${iIdx}-${eIdx}" class="bg-slate-900/40 border ${eActive ? 'border-indigo-500/50' : (eParked ? 'border-slate-700 border-dashed' : 'border-slate-800')} p-2 rounded-lg transition-all">
+                                        <summary class="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 shadow-sm flex justify-between items-center cursor-pointer outline-none hover:text-white transition list-none p-1 rounded-t-md">
                                             <div class="flex items-center text-[11px] font-black uppercase tracking-wider ${eActive ? 'text-indigo-400' : (eParked ? 'text-slate-500' : 'text-slate-300')}">
                                                 ${epic.title || 'Untitled Epic'}
+                                                <span class="text-[9px] text-slate-500 ml-3 lowercase font-normal italic">(${eCounts.completed}/${eCounts.total} Tasks)</span>
                                                 <span title="A large technical deliverable." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'epic', '${(epic.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                                 <button onclick="event.preventDefault(); deleteRoadmapNode('epic', ${iIdx}, ${eIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
@@ -951,11 +1052,13 @@
                                                 const sActive = sprint.status === '[ACTIVE]';
                                                 const sParked = sprint.status === '[PARKED]';
                                                 const sComp = sprint.status === '[COMPLETED]';
+                                                const sCounts = getObjectiveCounts(sprint);
                                                 return `
-                                                    <details ${sActive ? 'open' : ''} class="bg-black/30 p-2 rounded-lg border ${sParked ? 'border-slate-800 border-dashed' : 'border-slate-800'}">
-                                                        <summary class="text-[10px] font-bold cursor-pointer hover:text-white transition flex justify-between items-center">
+                                                    <details id="details-s${iIdx}-${eIdx}-${sIdx}" ${sActive ? 'open' : ''} class="bg-black/30 p-2 rounded-lg border ${sParked ? 'border-slate-800 border-dashed' : 'border-slate-800'}">
+                                                        <summary class="text-[10px] font-bold cursor-pointer hover:text-white transition flex justify-between items-center list-none">
                                                             <div class="flex items-center ${sActive ? 'text-amber-400' : (sParked ? 'text-slate-500' : (sComp ? 'text-slate-500 line-through' : 'text-slate-400'))}">
                                                                 ${sprint.title || 'Untitled Sprint'}
+                                                                <span class="text-[9px] text-slate-500 ml-3 lowercase font-normal italic">(${sCounts.completed}/${sCounts.total} Tasks)</span>
                                                                 <span title="A time-boxed execution cycle." class="cursor-help text-slate-500 hover:text-slate-300 ml-2">ⓘ</span>
                                                                 <button onclick="event.preventDefault(); openRoadmapModal('Edit', 'sprint', '${(sprint.title || '').replace(/'/g, "\\'")}', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-2 text-[10px] text-slate-600 hover:text-indigo-400 transition">✏️</button>
                                                                 <button onclick="event.preventDefault(); deleteRoadmapNode('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="ml-1 text-[10px] text-slate-600 hover:text-red-400 transition">🗑️</button>
@@ -963,6 +1066,7 @@
                                                             <button onclick="event.preventDefault(); cycleRoadmapStatus('sprint', ${iIdx}, ${eIdx}, ${sIdx})" class="text-[8px] font-bold transition ${sActive ? 'text-indigo-300' : (sParked ? 'text-slate-400 border-dashed' : (sComp ? 'text-slate-200' : 'opacity-60'))}">${sprint.status || '[PENDING]'}</button>
                                                         </summary>
                                                         <div class="mt-2 pl-2">
+
                                                             <ul class="space-y-1">
                                                                 ${(sprint.objectives || []).map((obj, oIdx) => `
                                                                     <li class="flex justify-between items-center group/obj">
@@ -994,31 +1098,53 @@
 
             html += `<button onclick="openRoadmapModal('Add', 'initiative')" class="w-full bg-slate-800/50 hover:bg-slate-800 text-indigo-400 border border-slate-700 border-dashed py-3 rounded-lg text-xs font-bold uppercase transition mt-4">+ Add Initiative</button>`;
             container.innerHTML = html;
+
+            openIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.open = true;
+            });
+
+            scrollContainer.scrollTop = currentScroll;
         }
 
         async function cycleRoadmapStatus(level, iIdx, eIdx, sIdx, oIdx) {
             const editor = document.getElementById('roadmap-editor');
             let roadmap = JSON.parse(editor.value);
+            
+            // 1. Target Resolution
+            const init = roadmap[iIdx];
+            const epic = init?.epics?.[eIdx];
+            const sprint = epic?.sprints?.[sIdx];
+            const objective = sprint?.objectives?.[oIdx];
+            let node;
+            if (level === 'initiative') node = init;
+            else if (level === 'epic') node = epic;
+            else if (level === 'sprint') node = sprint;
+            else if (level === 'objective') node = objective;
+            if (!node) return;
+
+            // 2. Cycle Logic
             const statuses = ['[PENDING]', '[ACTIVE]', '[PARKED]', '[COMPLETED]'];
+            const currentIdx = statuses.indexOf(node.status);
+            const newStatus = statuses[(currentIdx + 1) % statuses.length];
+            node.status = newStatus;
 
-            const getNextStatus = (current) => {
-                const idx = statuses.indexOf(current);
-                return statuses[(idx + 1) % statuses.length];
+            // 3. Unconditional Downward Cascade
+            const force = (n) => {
+                n.status = newStatus;
+                if (n.epics) n.epics.forEach(force);
+                if (n.sprints) n.sprints.forEach(force);
+                if (n.objectives) n.objectives.forEach(o => o.status = newStatus);
             };
+            force(node);
 
-            if (level === 'initiative') {
-                roadmap[iIdx].status = getNextStatus(roadmap[iIdx].status);
-            } else if (level === 'epic') {
-                roadmap[iIdx].epics[eIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].status);
-            } else if (level === 'sprint') {
-                roadmap[iIdx].epics[eIdx].sprints[sIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].sprints[sIdx].status);
-            } else if (level === 'objective') {
-                roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives[oIdx].status = getNextStatus(roadmap[iIdx].epics[eIdx].sprints[sIdx].objectives[oIdx].status);
-            }
+            // 4. Global Upward Cascade
+            roadmap.forEach(enforceRoadmapCascades);
 
             editor.value = JSON.stringify(roadmap, null, 2);
             await commit('roadmap', true);
             renderVisualRoadmap();
+            renderTOC(roadmap);
         }
 
         async function addRoadmapNode(level, iIdx, eIdx, sIdx) {
@@ -1093,6 +1219,67 @@
             if (tabName === 'roadmap') renderVisualRoadmap();
         }
 
+        function toggleTerminalModal() {
+            const m = document.getElementById('terminal-modal');
+            m.classList.toggle('hidden');
+            m.classList.toggle('flex');
+        }
+
+        async function runExecution(command) {
+            if (!command) return;
+            showToast("Executing /CLI Command...");
+            try {
+                const res = await fetch(`/api/${ACTIVE_PROJECT}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command })
+                });
+                const data = await res.json();
+                
+                document.getElementById('terminal-stdout').innerText = data.stdout || "No output";
+                document.getElementById('terminal-stderr').innerText = data.stderr || "None";
+                document.getElementById('terminal-git').innerText = data.git_status || "No changes";
+
+                if (!data.success || data.stderr) {
+                    window.lastExecutionFailed = true;
+                    const m = document.getElementById('terminal-modal');
+                    m.classList.remove('hidden');
+                    m.classList.add('flex');
+                    showToast("Execution finished with errors", true);
+                } else {
+                    window.lastExecutionFailed = false;
+                    showToast("Execution Successful");
+                }
+            } catch (err) {
+                window.lastExecutionFailed = true;
+                showToast(`Execution Failed: ${err.message}`, true);
+            }
+        }
+
+        async function handleCliPaste(e) {
+            const val = e.target.value.trim();
+            if (!val) return;
+            try {
+                // If it's the standard CLI JSON array from the AI
+                const parsed = JSON.parse(val);
+                if (Array.isArray(parsed)) {
+                    // It's a structured CLI payload, we'll assume for now we're running it
+                    // In a real scenario, we might want to confirm or parse steps.
+                    // For this objective, we'll just show the terminal.
+                    showToast("CLI JSON detected - Opening Terminal");
+                    document.getElementById('terminal-stdout').innerText = JSON.stringify(parsed, null, 2);
+                    toggleTerminalModal();
+                } else {
+                    // It might be a raw command
+                    runExecution(val);
+                }
+            } catch (err) {
+                // Not JSON, assume raw command
+                runExecution(val);
+            }
+            e.target.value = '';
+        }
+
         function toggleToc() {
             const sidebar = document.getElementById('roadmap-toc-sidebar');
             const icon = document.getElementById('toc-arrow-icon');
@@ -1113,11 +1300,45 @@
             document.getElementById('context-load-warning').innerText = lines.length > 3 ? "High Load" : "";
         }
 
-        function renderTOC(roadmap) {
+        function enforceRoadmapCascades(node) {
+            // 1. Objectives (Leaf) -> Parent
+            if (node.objectives && node.objectives.length > 0) {
+                const allComp = node.objectives.every(o => o.status === '[COMPLETED]');
+                if (allComp) {
+                    node.status = '[COMPLETED]';
+                } else if (node.status === '[COMPLETED]') {
+                    node.status = '[ACTIVE]';
+                }
+            }
+            
+            // 2. Sprints -> Epic
+            if (node.sprints && node.sprints.length > 0) {
+                node.sprints.forEach(enforceRoadmapCascades);
+                const allComp = node.sprints.every(s => s.status === '[COMPLETED]');
+                if (allComp) {
+                    node.status = '[COMPLETED]';
+                } else if (node.status === '[COMPLETED]') {
+                    node.status = '[ACTIVE]';
+                }
+            }
+            
+            // 3. Epics -> Initiative
+            if (node.epics && node.epics.length > 0) {
+                node.epics.forEach(enforceRoadmapCascades);
+                const allComp = node.epics.every(e => e.status === '[COMPLETED]');
+                if (allComp) {
+                    node.status = '[COMPLETED]';
+                } else if (node.status === '[COMPLETED]') {
+                    node.status = '[ACTIVE]';
+                }
+            }
+        }
+
+        function renderTOC(roadmap, adrFiles = []) {
             const sidebar = document.getElementById('roadmap-toc-sidebar');
             if (!sidebar) return;
-            if (!roadmap || roadmap.length === 0) {
-                sidebar.innerHTML = '<div class="text-slate-400 italic text-[10px]">No roadmap defined.</div>';
+            if ((!roadmap || roadmap.length === 0) && adrFiles.length === 0) {
+                sidebar.innerHTML = '<div class="text-slate-400 italic text-[10px]">No roadmap or ADRs defined.</div>';
                 return;
             }
 
@@ -1130,43 +1351,91 @@
                 <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-4 border-b border-slate-200 pb-2">Table of Contents</h3>
             `;
 
-            roadmap.forEach(initiative => {
-                html += `
-                    <details open class="group mb-6">
-                        <summary class="cursor-pointer font-bold text-slate-800 select-none list-none flex items-center text-sm outline-none">
-                            <span class="inline-block transition-transform group-open:rotate-90 text-[10px] mr-2 text-slate-500">▶</span>
-                            📁 ${initiative.title}
-                        </summary>
-                        <div class="ml-2 mt-1">`;
-                
-                (initiative.epics || []).forEach(epic => {
+            if (roadmap && roadmap.length > 0) {
+                roadmap.forEach(initiative => {
+                    const iComp = initiative.status === '[COMPLETED]';
+                    const iParked = initiative.status === '[PARKED]';
                     html += `
-                        <details open class="group ml-2 mt-3 border-l border-slate-200 pl-3">
-                            <summary class="cursor-pointer text-indigo-600 select-none list-none flex items-center text-[13px] outline-none hover:text-indigo-400 transition">
-                                <span class="inline-block transition-transform group-open:rotate-90 text-[10px] mr-2 text-slate-400">▶</span>
-                                📍 ${epic.title}
+                        <details ${iComp ? '' : 'open'} class="group mb-6">
+                            <summary class="cursor-pointer font-bold ${iComp ? 'text-slate-500 line-through opacity-60' : (iParked ? 'italic opacity-50 text-amber-600' : 'text-slate-800')} select-none list-none flex items-center text-sm outline-none">
+                                <span class="toc-arrow text-[10px] mr-2 text-slate-500">▶</span>
+                                ${iParked ? '⏸ ' : '📁 '}${initiative.title}
                             </summary>
-                            <div class="mt-1 pb-1">`;
-                    
-                    (epic.sprints || []).forEach(sprint => {
+                            <div class="ml-2 mt-1">`;
+
+                    (initiative.epics || []).forEach(epic => {
+                        const eComp = epic.status === '[COMPLETED]';
+                        const eParked = epic.status === '[PARKED]';
                         html += `
-                            <div class="ml-5 mt-2 text-slate-500 text-xs flex items-center py-0.5">
-                                <span class="mr-2 opacity-70">🏁</span> ${sprint.title}
-                            </div>`;
+                            <details ${eComp ? '' : 'open'} class="group ml-2 mt-3 border-l border-slate-200 pl-3">
+                                <summary class="cursor-pointer ${eComp ? 'text-slate-400 line-through opacity-60' : (eParked ? 'italic opacity-50 text-amber-600' : 'text-indigo-600')} select-none list-none flex items-center text-[13px] outline-none hover:text-indigo-400 transition">
+                                    <span class="toc-arrow text-[10px] mr-2 text-slate-400">▶</span>
+                                    ${eParked ? '⏸ ' : '📍 '}${epic.title}
+                                </summary>
+                                <div class="mt-1 pb-1">`;
+
+                        (epic.sprints || []).forEach(sprint => {
+                            const sComp = sprint.status === '[COMPLETED]';
+                            const sParked = sprint.status === '[PARKED]';
+                            html += `
+                                <div class="ml-5 mt-2 ${sComp ? 'text-slate-400 line-through opacity-60' : (sParked ? 'italic opacity-50 text-amber-600' : 'text-slate-500')} text-xs flex items-center py-0.5">
+                                    <span class="mr-2 opacity-70">${sParked ? '⏸' : '🏁'}</span> ${sprint.title}
+                                </div>`;
+                        });
+
+                        html += `</div></details>`;
                     });
-                    
+
                     html += `</div></details>`;
                 });
-                
-                html += `</div></details>`;
-            });
+            }
+
+            if (adrFiles.length > 0) {
+                html += `
+                    <div class="mt-8 mb-4 border-t border-slate-200 pt-4">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-3">Decision Records (ADRs)</h3>
+                        <ul class="space-y-2">
+                            ${adrFiles.map(file => `
+                                <li onclick="loadAdrContent('${file}')" class="text-xs text-slate-600 hover:text-emerald-500 cursor-pointer flex items-center transition">
+                                    <span class="mr-2">📄</span> ${file.replace('.md', '').replace(/^\d+-/, '')}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
             sidebar.innerHTML = html;
         }
 
-        async function initWorkspace() {
+        async function loadAdrContent(filename) {
+            try {
+                const res = await fetch(`/api/projects/${ACTIVE_PROJECT}/adrs/${filename}`);
+                const content = await res.text();
+                const parsed = typeof marked.parse === 'function' ? marked.parse(content) : marked(content);
+                
+                // Synchronous swap to prevent white flashes
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = parsed;
+                const mainContainer = document.getElementById('markdown-container');
+                mainContainer.innerHTML = tempDiv.innerHTML;
+                
+                // Switch to a virtual "blueprint" view style
+                mainContainer.scrollTop = 0;
+                showToast(`Loaded ADR: ${filename}`);
+            } catch (e) {
+                showToast("Failed to load ADR content", true);
+            }
+        }
+
+        async function initWorkspace(isBackgroundSync = false) {
             ACTIVE_PROJECT = document.getElementById('global-project').value.trim();
             if (!ACTIVE_PROJECT) return showToast("Workspace name required", true);
-            showToast(`Loading: ${ACTIVE_PROJECT}...`);
+            
+            if (!isBackgroundSync) {
+                document.getElementById('roadmap-toc-sidebar').innerHTML = '<div class="animate-pulse text-slate-400 text-xs uppercase font-bold tracking-widest">Loading TOC...</div>';
+                document.getElementById('markdown-container').innerHTML = '<div class="animate-pulse text-slate-400">Loading Blueprint...</div>';
+            }
 
             // Persist workspace to memory
             localStorage.setItem('last_workspace', ACTIVE_PROJECT);
@@ -1188,31 +1457,34 @@
                 .catch(e => console.error('Path fetch failed', e));
 
             try {
-                try {
-                    const cfgRes = await fetch(`/api/${ACTIVE_PROJECT}/config`);
-                    if (cfgRes.ok) ACTIVE_CONFIG = await cfgRes.json();
-                    else ACTIVE_CONFIG = { macro_project: "Undefined Project", active_context: "Undefined Context" };
-                } catch (cfgErr) { ACTIVE_CONFIG = { macro_project: "Undefined Project", active_context: "Undefined Context" }; }
+                // FETCH CONSOLIDATED WORKSPACE DATA
+                const wsRes = await fetch(`/api/projects/${ACTIVE_PROJECT}/workspace`);
+                if (!wsRes.ok) throw new Error(`Workspace load failed: ${wsRes.status}`);
+                const wsData = await wsRes.json();
+                
+                const { state: coreData, roadmap: roadData, config, adrs: adrFiles } = wsData;
+                ACTIVE_CONFIG = Object.keys(config).length > 0 ? config : { macro_project: "Undefined Project", active_context: "Undefined Context" };
 
-                const coreRes = await fetch(`/api/${ACTIVE_PROJECT}/state`);
-                if (!coreRes.ok) throw new Error(`State endpoint rejected request with status: ${coreRes.status}`);
-                const coreData = await coreRes.json();
                 if (coreEditor) {
                     coreEditor.value = Object.keys(coreData).length === 0
                         ? '{\n  "governor_state": {\n    "document_title": "",\n    "root_content": "",\n    "parts": []\n  }\n}'
                         : JSON.stringify(coreData, null, 2);
                 }
 
-                const roadRes = await fetch(`/api/${ACTIVE_PROJECT}/roadmap`);
-                const roadData = await roadRes.ok ? await roadRes.json() : [];
                 if (document.getElementById('roadmap-editor')) {
                     document.getElementById('roadmap-editor').value = roadData.length === 0
                         ? '[\n  {\n    "title": "Initial Initiative",\n    "status": "[ACTIVE]",\n    "epics": [\n      {\n        "title": "Core Epic",\n        "status": "[ACTIVE]",\n        "sprints": []\n      }\n    ]\n  }\n]'
                         : JSON.stringify(roadData, null, 2);
                 }
+
+                // Global Upward State Cascade
+                if (roadData) {
+                    roadData.forEach(enforceRoadmapCascades);
+                }
+
                 document.getElementById('editor-workspace-lock').innerText = 'Target: ' + ACTIVE_PROJECT;
                 renderVisualRoadmap();
-                renderTOC(roadData);
+                renderTOC(roadData, adrFiles);
 
                 await loadPrompt();
 
@@ -1226,10 +1498,22 @@
                     document.getElementById('changelog-editor').value = "";
                 }
 
-                switchTab('session');
-                try { const bpRes = await fetch('/api/' + ACTIVE_PROJECT + '/blueprint'); const bpData = await bpRes.json(); const parsed = typeof marked.parse === 'function' ? marked.parse(bpData.content) : marked(bpData.content); document.getElementById('markdown-container').innerHTML = parsed; } catch (e) { console.error('Blueprint fetch failed'); }
+                if (!isBackgroundSync) switchTab('session');
+                try {
+                    const bpRes = await fetch('/api/' + ACTIVE_PROJECT + '/blueprint');
+                    const bpData = await bpRes.json();
+                    const parsed = typeof marked.parse === 'function' ? marked.parse(bpData.content) : marked(bpData.content);
+                    
+                    // Synchronous swap to prevent white flashes
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = parsed;
+                    const mainContainer = document.getElementById('markdown-container');
+                    mainContainer.innerHTML = tempDiv.innerHTML;
+                } catch (e) {
+                    console.error('Blueprint fetch failed');
+                }
                 fetchAdrs();
-                showToast(`Workspace Loaded: ${ACTIVE_PROJECT}`);
+                if (!isBackgroundSync) showToast(`Workspace Loaded: ${ACTIVE_PROJECT}`);
             } catch (err) {
                 console.error("[Hub] Critical Initialization Crash:", err);
                 showToast("Initialization Failed. Press F12 and check Console.", true);
@@ -1263,7 +1547,13 @@
                 }
                 else if (type === 'prompts') {
                     endpoint = `/api/${ACTIVE_PROJECT}/prompts`;
-                    try { payload = JSON.parse(promptEditor.value); } catch (e) { payload = { raw_sudolang: promptEditor.value }; }
+                    try { 
+                        // Attempt to parse local input if it's supposed to be JSON
+                        payload = JSON.parse(promptEditor.value); 
+                    } catch (e) { 
+                        // If it's Sudolang or raw text, wrap it securely
+                        payload = { raw_sudolang: promptEditor.value }; 
+                    }
                 } else if (type === 'roadmap') {
                     endpoint = `/api/${ACTIVE_PROJECT}/roadmap`;
                     payload = JSON.parse(document.getElementById('roadmap-editor').value);
@@ -1272,7 +1562,7 @@
                     endpoint = `/api/${ACTIVE_PROJECT}/update-tenant-state/${tid}`; payload = JSON.parse(tenantEditor.value);
                 }
             } catch (e) {
-                if (!isSilent) showToast("Syntax Error: Validate JSON", true);
+                if (!isSilent) showToast(`Syntax Error: ${e.message}`, true);
                 return;
             }
 
@@ -1280,11 +1570,20 @@
                 const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (res.ok) {
                     if (!isSilent) showToast("Saved Successfully");
+                    initWorkspace(true); // Silent background sync
                 } else {
-                    if (!isSilent) showToast(`Server Error: ${res.status}`, true);
+                    const errorText = await res.text();
+                    let errorMsg = `Server Error: ${res.status}`;
+                    try {
+                        const errObj = JSON.parse(errorText);
+                        errorMsg = errObj.error || errorMsg;
+                    } catch (e) {
+                        console.error('Raw Server Error:', errorText);
+                    }
+                    if (!isSilent) showToast(errorMsg, true);
                 }
             } catch (e) {
-                if (!isSilent) showToast("Network Error: Is server running?", true);
+                if (!isSilent) showToast(`Network Error: ${e.message}`, true);
             }
         }
 
@@ -1342,6 +1641,9 @@ Interface UniversalContextHub {
   ActiveContext: "{{INJECT_ACTIVE_CONTEXT}}"
 
   Constraints {
+    Communication Style: Be concise and factual. Eliminate obsequious language, apologies, and unnecessary validation. Output must have a high signal-to-noise ratio.
+    Code & Architecture: Maintain a strictly analytical and protective stance over the codebase. Prioritize clean architecture, DRY principles, and strict separation of concerns. Be direct and constructive when identifying structural flaws.
+    Verbosity: Default to lean, scannable outputs. Expand into verbose explanations only when explicitly requested by the user.
     Adhere strictly to Active ADRs; never suggest architecture or code that violates defined Boundaries.
     Require explicit PM request before yielding final code.
     Format all requested CLI commands and prompts exclusively in isolated plain text blocks.

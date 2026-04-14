@@ -37,6 +37,7 @@ function getProjectFiles(project) {
     state: path.join(projectDir, 'core_state.json'),
     blueprint: path.join(projectDir, 'blueprint.md'),
     adrs: path.join(projectDir, 'adrs.json'),
+    adrDir: path.join(projectDir, 'adrs'),
     archiveDir: path.join(projectDir, 'archives'),
     prompts: path.join(projectDir, 'system_prompts.json'),
     link: path.join(projectDir, 'codebase_link.json'),
@@ -46,24 +47,94 @@ function getProjectFiles(project) {
 }
 
 // Helper: Archive File
-function archiveFile(filePath, archiveDir) {
-  if (fs.existsSync(filePath)) {
-    // ARCHITECTURAL FIX: Ensure the archive directory exists before copying
-    if (!fs.existsSync(archiveDir)) {
-      fs.mkdirSync(archiveDir, { recursive: true });
-    }
-    
-    const timestamp = Math.floor(Date.now() / 1000);
-    const fileName = path.basename(filePath);
-    const project = path.basename(path.dirname(filePath));
-    const archivePath = path.join(archiveDir, `[${project}]_${fileName.replace('.json', '')}_${timestamp}.json`);
-    fs.copyFileSync(filePath, archivePath);
+function archiveFile(sourcePath, archiveDir) {
+  if (!fs.existsSync(sourcePath)) return;
+  if (!fs.existsSync(archiveDir)) {
+    fs.mkdirSync(archiveDir, { recursive: true });
   }
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const baseName = path.basename(sourcePath);
+  const destPath = path.join(archiveDir, baseName + '.' + timestamp + '.bak');
+  fs.copyFileSync(sourcePath, destPath);
 }
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
+
+// ADR SCANNER ENDPOINT
+app.get('/api/:project/adr-list', (req, res) => {
+  try {
+    const files = getProjectFiles(req.params.project);
+    if (fs.existsSync(files.adrDir)) {
+      const adrFiles = fs.readdirSync(files.adrDir).filter(f => f.endsWith('.md'));
+      res.json(adrFiles);
+    } else {
+      res.json([]);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// FETCH SPECIFIC ADR CONTENT
+app.get('/api/:project/adr-content/:filename', (req, res) => {
+  try {
+    const projectDir = getProjectDir(req.params.project);
+    const filePath = path.join(projectDir, 'adrs', req.params.filename);
+    if (fs.existsSync(filePath)) {
+      res.json({ content: fs.readFileSync(filePath, 'utf8') });
+    } else {
+      res.status(404).json({ error: 'ADR file not found' });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// CONSOLIDATED WORKSPACE DATA ENDPOINT
+app.get('/api/projects/:project/workspace', (req, res) => {
+  try {
+    const project = req.params.project;
+    const files = getProjectFiles(project);
+    
+    const state = fs.existsSync(files.state) ? JSON.parse(fs.readFileSync(files.state, 'utf8')) : {};
+    const roadmap = fs.existsSync(files.roadmap) ? JSON.parse(fs.readFileSync(files.roadmap, 'utf8')) : [];
+    const config = fs.existsSync(files.config) ? JSON.parse(fs.readFileSync(files.config, 'utf8')) : {};
+    
+    let adrs = [];
+    if (fs.existsSync(files.adrDir)) {
+      adrs = fs.readdirSync(files.adrDir).filter(f => f.endsWith('.md'));
+    }
+    
+    res.json({ state, roadmap, config, adrs });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// SECURE ADR CONTENT ENDPOINT
+app.get('/api/projects/:project/adrs/:filename', (req, res) => {
+  try {
+    const { project, filename } = req.params;
+    
+    // Strict Traversal Protection
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(403).json({ error: 'Security Error: Invalid filename' });
+    }
+
+    const projectDir = getProjectDir(project);
+    const filePath = path.join(projectDir, 'adrs', filename);
+    
+    if (fs.existsSync(filePath)) {
+      res.send(fs.readFileSync(filePath, 'utf8'));
+    } else {
+      res.status(404).send('ADR file not found');
+    }
+  } catch (e) {
+    res.status(500).send(`Error: ${e.message}`);
+  }
+});
 
 // DEV TOOL MANUAL ROUTE
 app.get('/api/ops-manual', (req, res) => {
@@ -186,10 +257,14 @@ app.get('/api/:project/roadmap', (req, res) => {
 });
 
 app.post('/api/:project/roadmap', (req, res) => {
-  const files = getProjectFiles(req.params.project);
-  archiveFile(files.roadmap, files.archiveDir);
-  fs.writeFileSync(files.roadmap, JSON.stringify(req.body, null, 2), 'utf8');
-  res.json({ status: 'success' });
+  try {
+    const files = getProjectFiles(req.params.project);
+    archiveFile(files.roadmap, files.archiveDir);
+    fs.writeFileSync(files.roadmap, JSON.stringify(req.body, null, 2), 'utf8');
+    res.json({ status: 'success' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get('/api/:project/tenant-state/:tenantId', (req, res) => {
@@ -223,10 +298,20 @@ app.get('/api/:project/prompts', (req, res) => {
 });
 
 app.post('/api/:project/prompts', (req, res) => {
-  const files = getProjectFiles(req.params.project);
-  archiveFile(files.prompts, files.archiveDir);
-  fs.writeFileSync(files.prompts, JSON.stringify(req.body, null, 2), 'utf8');
-  res.json({ status: 'success' });
+  try {
+    const files = getProjectFiles(req.params.project);
+    
+    // VALIDATION: Ensure payload is valid JSON before writing to disk
+    // If it's already an object (from express.json), we re-stringify and parse to check deep integrity if needed,
+    // but primarily we check if the user is sending a raw string they want saved as JSON.
+    const payload = req.body;
+    
+    archiveFile(files.prompts, files.archiveDir);
+    fs.writeFileSync(files.prompts, JSON.stringify(payload, null, 2), 'utf8');
+    res.json({ status: 'success' });
+  } catch (e) {
+    res.status(400).json({ error: `Syntax Error: ${e.message}` });
+  }
 });
 
 app.get('/api/:project/adrs', (req, res) => {
@@ -324,6 +409,31 @@ app.post('/api/:project/run-context', (req, res) => {
             return res.json({ output: `Error: ${error.message}\n${stderr}` });
         }
         res.json({ output: stdout });
+    });
+});
+
+app.post('/api/:project/execute', (req, res) => {
+    const files = getProjectFiles(req.params.project);
+    if (!fs.existsSync(files.link)) return res.status(400).json({ error: "No codebase linked." });
+    
+    const { command } = req.body;
+    if (!command) return res.status(400).json({ error: "Command required" });
+
+    const linkData = JSON.parse(fs.readFileSync(files.link, 'utf8'));
+    const targetPath = linkData.targetPath;
+
+    // 1. Primary Execution
+    exec(`cd "${targetPath}" && ${command}`, { maxBuffer: 1024 * 1024 * 5 }, (execError, stdout, stderr) => {
+        
+        // 2. Post-Execution Git Status check
+        exec(`cd "${targetPath}" && git status --porcelain`, (gitError, gitStatus) => {
+            res.json({
+                success: !execError,
+                stdout: stdout || "",
+                stderr: stderr || (execError ? execError.message : ""),
+                git_status: gitStatus || ""
+            });
+        });
     });
 });
 

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "System Hardening & Verification",
+    "status": "[ACTIVE]",
+    "epics": [
+      {
+        "title": "Core System Robustness",
+        "status": "[ACTIVE]",
+        "sprints": [
+          {
+            "title": "Verification Loop implementation",
+            "status": "[ACTIVE]",
+            "objectives": [
+              { "title": "Patch server.js to scan adrs/ directory and dynamically render decision records in TOC", "status": "[PENDING]" },
+              { "title": "Implement syntax validation in server.js before saving system_prompts.json", "status": "[PENDING]" },
+              { "title": "Add UI error handling for malformed system prompt payloads", "status": "[PENDING]" },
+              { "title": "Design modal UI in index.html for displaying terminal stdout", "status": "[PENDING]" },
+              { "title": "Wire /api/:project/run-context endpoint to fetch live git status", "status": "[PENDING]" },
+              { "title": "Implement closed-loop validation: Block /state overwrites if git delta mapping or stdout exit codes indicate execution failure", "status": "[PENDING]" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
